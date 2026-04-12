@@ -2,6 +2,7 @@ package com.f1rsters.tech_challenge_mecanica.service;
 
 import com.f1rsters.tech_challenge_mecanica.domain.*;
 import com.f1rsters.tech_challenge_mecanica.dto.CriarOrdemServicoDTO;
+import com.f1rsters.tech_challenge_mecanica.dto.OrdemServicoPublicDTO;
 import com.f1rsters.tech_challenge_mecanica.repository.*;
 
 import org.springframework.stereotype.Service;
@@ -77,5 +78,19 @@ public class OrdemServicoService {
 
     public OrdemServico detalhar(Long id) {
         return repo.findById(id).orElseThrow(() -> new RuntimeException("OS não encontrada"));
+    }
+
+    public OrdemServicoPublicDTO getPublicInfo(Long id) {
+        OrdemServico os = repo.findById(id).orElseThrow(() -> new RuntimeException("Ordem de Serviço não encontrada"));
+        return new OrdemServicoPublicDTO(
+                os.getId(),
+                os.getStatus(),
+                os.getCriadoEm(),
+                os.getCliente().getNome(),
+                os.getVeiculo().getPlaca(),
+                os.getServicos().stream().map(s -> s.getDescricao()).toList(),
+                os.getPecas() != null ? os.getPecas().stream().map(p -> p.getDescricao()).toList() : List.of(),
+                os.getValorTotal()
+        );
     }
 }
