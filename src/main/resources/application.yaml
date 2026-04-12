@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: tech-challenge-mecanica
+  datasource:
+    url: jdbc:postgresql://db:5432/oficina
+    username: oficinauser
+    password: oficinapassword
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    generate-ddl: true
+
+# Para acessar o Swagger na mesma porta:
+server:
+  port: 8080
