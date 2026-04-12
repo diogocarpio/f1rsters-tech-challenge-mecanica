@@ -81,7 +81,8 @@ public class OrdemServicoService {
     }
 
     public OrdemServicoPublicDTO getPublicInfo(Long id) {
-        OrdemServico os = repo.findById(id).orElseThrow(() -> new RuntimeException("Ordem de Serviço não encontrada"));
+        OrdemServico os = repo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Ordem de Serviço não encontrada"));
         return new OrdemServicoPublicDTO(
                 os.getId(),
                 os.getStatus(),
