@@ -1,0 +1,10 @@
+package com.f1rsters.tech_challenge_mecanica.dto;
+
+import jakarta.validation.constraints.NotBlank;
+
+public class ClienteDTO {
+    @NotBlank
+    public String nome;
+    @NotBlank
+    public String cpfCnpj;
+}
