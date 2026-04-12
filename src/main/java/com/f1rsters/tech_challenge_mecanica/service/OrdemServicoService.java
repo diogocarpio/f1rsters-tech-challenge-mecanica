@@ -38,22 +38,32 @@ public class OrdemServicoService {
         Cliente cliente = clienteRepo.findByCpfCnpj(dto.cpfCnpjCliente)
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
 
-        // 2. Buscar ou criar veículo por placa
+        // 2. Buscar veículo por placa
         Veiculo veiculo = veiculoRepo.findByPlaca(dto.placaVeiculo)
                 .orElseThrow(() -> new RuntimeException("Veículo não encontrado"));
 
         // 3. Buscar serviços
         List<Servico> servicos = servicoRepo.findAllById(dto.servicos);
 
-        // 4. Buscar peças (opcional)
+        // 4. Buscar peças
         List<Peca> pecas = dto.pecas != null ? pecaRepo.findAllById(dto.pecas) : List.of();
 
-        // 5. Calcular valor total
+        // 5. Validar e descontar estoque das peças
+        for (Peca pecaEmUso : pecas) {
+            if (pecaEmUso.getQuantidadeEstoque() < 1) {
+                throw new RuntimeException("Sem estoque suficiente da peça: " + pecaEmUso.getDescricao());
+            }
+            // Desconta 1 unidade
+            pecaEmUso.setQuantidadeEstoque(pecaEmUso.getQuantidadeEstoque() - 1);
+            pecaRepo.save(pecaEmUso);
+        }
+
+        // 6. Calcular valor total
         BigDecimal totalServicos = servicos.stream().map(Servico::getValor).reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal totalPecas = pecas.stream().map(Peca::getValorUnitario).reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal valorTotal = totalServicos.add(totalPecas);
 
-        // 6. Construir OS
+        // 7. Construir OS
         OrdemServico os = new OrdemServico();
         os.setCliente(cliente);
         os.setVeiculo(veiculo);

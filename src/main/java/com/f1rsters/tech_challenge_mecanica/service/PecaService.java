@@ -42,4 +42,13 @@ public class PecaService {
     public Peca get(Long id) {
         return repo.findById(id).orElseThrow();
     }
+
+    public Peca baixarEstoque(Long id, int quantidade) {
+        Peca peca = repo.findById(id).orElseThrow(() -> new RuntimeException("Peça não encontrada"));
+        if (peca.getQuantidadeEstoque() < quantidade) {
+            throw new RuntimeException("Estoque insuficiente para a peça: " + peca.getDescricao());
+        }
+        peca.setQuantidadeEstoque(peca.getQuantidadeEstoque() - quantidade);
+        return repo.save(peca);
+    }
 }

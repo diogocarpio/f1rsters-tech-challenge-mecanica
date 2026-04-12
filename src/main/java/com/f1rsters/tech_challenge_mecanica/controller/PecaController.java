@@ -1,5 +1,6 @@
 package com.f1rsters.tech_challenge_mecanica.controller;
 
+import com.f1rsters.tech_challenge_mecanica.dto.BaixaEstoqueDTO;
 import com.f1rsters.tech_challenge_mecanica.service.PecaService;
 import com.f1rsters.tech_challenge_mecanica.dto.PecaDTO;
 import com.f1rsters.tech_challenge_mecanica.domain.Peca;
@@ -41,5 +42,15 @@ public class PecaController {
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         service.delete(id);
+    }
+
+    @GetMapping("/estoque")
+    public List<Peca> listarEstoque() {
+        return service.listAll();
+    }
+
+    @PostMapping("/baixa")
+    public ResponseEntity<Peca> baixarEstoque(@RequestBody @Valid BaixaEstoqueDTO dto) {
+        return ResponseEntity.ok(service.baixarEstoque(dto.pecaId, dto.quantidade));
     }
 }
