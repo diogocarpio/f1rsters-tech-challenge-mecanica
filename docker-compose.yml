@@ -27,6 +27,12 @@ services:
       - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
+      - JWT_SECRET_BASE64=QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVo0NTY3ODkwQUJDREVG
+      - JWT_ACCESS_TOKEN_MINUTES=15
+      - JWT_ISSUER=tech-challenge-mecanica-api
+      - SECURITY_SEED_ENABLED=true
+      - SECURITY_SEED_ADMIN_EMAIL=admin@oficina.local
+      - SECURITY_SEED_ADMIN_PASSWORD=admin123
     # Se preferir, pode passar configs do Spring aqui por env também
 
 volumes:

@@ -4,9 +4,13 @@ import com.f1rsters.tech_challenge_mecanica.domain.*;
 import com.f1rsters.tech_challenge_mecanica.dto.CriarOrdemServicoDTO;
 import com.f1rsters.tech_challenge_mecanica.dto.OrdemServicoPublicDTO;
 import com.f1rsters.tech_challenge_mecanica.repository.*;
+import com.f1rsters.tech_challenge_mecanica.util.InputNormalizer;
+import com.f1rsters.tech_challenge_mecanica.util.SensitiveDataMasker;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -34,12 +38,15 @@ public class OrdemServicoService {
 
     @Transactional
     public OrdemServico criarOrdem(CriarOrdemServicoDTO dto) {
+        String cpfCnpjNormalizado = InputNormalizer.normalizeCpfCnpj(dto.cpfCnpjCliente);
+        String placaNormalizada = InputNormalizer.normalizePlaca(dto.placaVeiculo);
+
         // 1. Buscar cliente por CPF/CNPJ
-        Cliente cliente = clienteRepo.findByCpfCnpj(dto.cpfCnpjCliente)
+        Cliente cliente = clienteRepo.findByCpfCnpj(cpfCnpjNormalizado)
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
 
         // 2. Buscar veículo por placa
-        Veiculo veiculo = veiculoRepo.findByPlaca(dto.placaVeiculo)
+        Veiculo veiculo = veiculoRepo.findByPlaca(placaNormalizada)
                 .orElseThrow(() -> new RuntimeException("Veículo não encontrado"));
 
         // 3. Buscar serviços
@@ -92,15 +99,15 @@ public class OrdemServicoService {
 
     public OrdemServicoPublicDTO getPublicInfo(Long id) {
         OrdemServico os = repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Ordem de Serviço não encontrada"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ordem de Servico nao encontrada"));
         return new OrdemServicoPublicDTO(
                 os.getId(),
                 os.getStatus(),
                 os.getCriadoEm(),
                 os.getCliente().getNome(),
-                os.getVeiculo().getPlaca(),
-                os.getServicos().stream().map(s -> s.getDescricao()).toList(),
-                os.getPecas() != null ? os.getPecas().stream().map(p -> p.getDescricao()).toList() : List.of(),
+                SensitiveDataMasker.maskPlaca(os.getVeiculo().getPlaca()),
+                os.getServicos().stream().map(Servico::getDescricao).toList(),
+                os.getPecas() != null ? os.getPecas().stream().map(Peca::getDescricao).toList() : List.of(),
                 os.getValorTotal()
         );
     }

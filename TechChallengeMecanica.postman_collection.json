@@ -1,0 +1,367 @@
+{
+  "info": {
+    "name": "Tech Challenge Mecanica API",
+    "_postman_id": "1f540f8b-c3ff-4ea7-b398-c92817f3d1f4",
+    "description": "Colecao organizada por controller da API da oficina mecanica.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "accessToken", "value": "" },
+    { "key": "adminEmail", "value": "admin@oficina.local" },
+    { "key": "adminPassword", "value": "admin123" },
+    { "key": "clienteId", "value": "1" },
+    { "key": "veiculoId", "value": "1" },
+    { "key": "servicoId", "value": "1" },
+    { "key": "pecaId", "value": "1" },
+    { "key": "ordemServicoId", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "AuthController",
+      "item": [
+        {
+          "name": "POST /api/auth/login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  var data = pm.response.json();",
+                  "  if (data && data.token) {",
+                  "    pm.collectionVariables.set('accessToken', data.token);",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"senha\": \"{{adminPassword}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "ClienteController",
+      "auth": {
+        "type": "bearer",
+        "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+      },
+      "item": [
+        {
+          "name": "POST /api/admin/clientes",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Cliente Exemplo\",\n  \"cpfCnpj\": \"12345678901\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/api/admin/clientes", "host": ["{{baseUrl}}"], "path": ["api", "admin", "clientes"] }
+          }
+        },
+        {
+          "name": "GET /api/admin/clientes",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/admin/clientes", "host": ["{{baseUrl}}"], "path": ["api", "admin", "clientes"] }
+          }
+        },
+        {
+          "name": "GET /api/admin/clientes/{id}",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/admin/clientes/{{clienteId}}", "host": ["{{baseUrl}}"], "path": ["api", "admin", "clientes", "{{clienteId}}"] }
+          }
+        },
+        {
+          "name": "PUT /api/admin/clientes/{id}",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Cliente Atualizado\",\n  \"cpfCnpj\": \"12345678901\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/api/admin/clientes/{{clienteId}}", "host": ["{{baseUrl}}"], "path": ["api", "admin", "clientes", "{{clienteId}}"] }
+          }
+        },
+        {
+          "name": "DELETE /api/admin/clientes/{id}",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/admin/clientes/{{clienteId}}", "host": ["{{baseUrl}}"], "path": ["api", "admin", "clientes", "{{clienteId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "VeiculoController",
+      "auth": {
+        "type": "bearer",
+        "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+      },
+      "item": [
+        {
+          "name": "POST /api/admin/veiculos",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clienteId\": {{clienteId}},\n  \"placa\": \"ABC1D23\",\n  \"marca\": \"Toyota\",\n  \"modelo\": \"Corolla\",\n  \"ano\": 2020\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/api/admin/veiculos", "host": ["{{baseUrl}}"], "path": ["api", "admin", "veiculos"] }
+          }
+        },
+        {
+          "name": "GET /api/admin/veiculos",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/admin/veiculos", "host": ["{{baseUrl}}"], "path": ["api", "admin", "veiculos"] }
+          }
+        },
+        {
+          "name": "GET /api/admin/veiculos/{id}",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/admin/veiculos/{{veiculoId}}", "host": ["{{baseUrl}}"], "path": ["api", "admin", "veiculos", "{{veiculoId}}"] }
+          }
+        },
+        {
+          "name": "PUT /api/admin/veiculos/{id}",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clienteId\": {{clienteId}},\n  \"placa\": \"ABC1D23\",\n  \"marca\": \"Toyota\",\n  \"modelo\": \"Corolla XEi\",\n  \"ano\": 2021\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/api/admin/veiculos/{{veiculoId}}", "host": ["{{baseUrl}}"], "path": ["api", "admin", "veiculos", "{{veiculoId}}"] }
+          }
+        },
+        {
+          "name": "DELETE /api/admin/veiculos/{id}",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/admin/veiculos/{{veiculoId}}", "host": ["{{baseUrl}}"], "path": ["api", "admin", "veiculos", "{{veiculoId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "ServicoController",
+      "auth": {
+        "type": "bearer",
+        "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+      },
+      "item": [
+        {
+          "name": "POST /api/admin/servicos",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descricao\": \"Troca de oleo\",\n  \"valor\": 150.00\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/api/admin/servicos", "host": ["{{baseUrl}}"], "path": ["api", "admin", "servicos"] }
+          }
+        },
+        {
+          "name": "GET /api/admin/servicos",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/admin/servicos", "host": ["{{baseUrl}}"], "path": ["api", "admin", "servicos"] }
+          }
+        },
+        {
+          "name": "GET /api/admin/servicos/{id}",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/admin/servicos/{{servicoId}}", "host": ["{{baseUrl}}"], "path": ["api", "admin", "servicos", "{{servicoId}}"] }
+          }
+        },
+        {
+          "name": "PUT /api/admin/servicos/{id}",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descricao\": \"Alinhamento\",\n  \"valor\": 200.00\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/api/admin/servicos/{{servicoId}}", "host": ["{{baseUrl}}"], "path": ["api", "admin", "servicos", "{{servicoId}}"] }
+          }
+        },
+        {
+          "name": "DELETE /api/admin/servicos/{id}",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/admin/servicos/{{servicoId}}", "host": ["{{baseUrl}}"], "path": ["api", "admin", "servicos", "{{servicoId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "PecaController",
+      "auth": {
+        "type": "bearer",
+        "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+      },
+      "item": [
+        {
+          "name": "POST /api/admin/pecas",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descricao\": \"Filtro de oleo\",\n  \"quantidadeEstoque\": 20,\n  \"valorUnitario\": 35.90\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/api/admin/pecas", "host": ["{{baseUrl}}"], "path": ["api", "admin", "pecas"] }
+          }
+        },
+        {
+          "name": "GET /api/admin/pecas",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/admin/pecas", "host": ["{{baseUrl}}"], "path": ["api", "admin", "pecas"] }
+          }
+        },
+        {
+          "name": "GET /api/admin/pecas/{id}",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/admin/pecas/{{pecaId}}", "host": ["{{baseUrl}}"], "path": ["api", "admin", "pecas", "{{pecaId}}"] }
+          }
+        },
+        {
+          "name": "PUT /api/admin/pecas/{id}",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descricao\": \"Filtro de ar\",\n  \"quantidadeEstoque\": 10,\n  \"valorUnitario\": 49.90\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/api/admin/pecas/{{pecaId}}", "host": ["{{baseUrl}}"], "path": ["api", "admin", "pecas", "{{pecaId}}"] }
+          }
+        },
+        {
+          "name": "DELETE /api/admin/pecas/{id}",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/admin/pecas/{{pecaId}}", "host": ["{{baseUrl}}"], "path": ["api", "admin", "pecas", "{{pecaId}}"] }
+          }
+        },
+        {
+          "name": "GET /api/admin/pecas/estoque",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/admin/pecas/estoque", "host": ["{{baseUrl}}"], "path": ["api", "admin", "pecas", "estoque"] }
+          }
+        },
+        {
+          "name": "POST /api/admin/pecas/baixa",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pecaId\": {{pecaId}},\n  \"quantidade\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/api/admin/pecas/baixa", "host": ["{{baseUrl}}"], "path": ["api", "admin", "pecas", "baixa"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "OrdemServicoController",
+      "auth": {
+        "type": "bearer",
+        "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+      },
+      "item": [
+        {
+          "name": "POST /api/admin/ordens-servico",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cpfCnpjCliente\": \"12345678901\",\n  \"placaVeiculo\": \"ABC1D23\",\n  \"servicos\": [{{servicoId}}],\n  \"pecas\": [{{pecaId}}]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/api/admin/ordens-servico", "host": ["{{baseUrl}}"], "path": ["api", "admin", "ordens-servico"] }
+          }
+        },
+        {
+          "name": "PATCH /api/admin/ordens-servico/{id}/status",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"novoStatus\": \"EM_EXECUCAO\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/api/admin/ordens-servico/{{ordemServicoId}}/status", "host": ["{{baseUrl}}"], "path": ["api", "admin", "ordens-servico", "{{ordemServicoId}}", "status"] }
+          }
+        },
+        {
+          "name": "GET /api/admin/ordens-servico",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/admin/ordens-servico", "host": ["{{baseUrl}}"], "path": ["api", "admin", "ordens-servico"] }
+          }
+        },
+        {
+          "name": "GET /api/admin/ordens-servico/{id}",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/admin/ordens-servico/{{ordemServicoId}}", "host": ["{{baseUrl}}"], "path": ["api", "admin", "ordens-servico", "{{ordemServicoId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "OrdemServicoPublicController",
+      "item": [
+        {
+          "name": "GET /api/public/ordens-servico/{id}",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/public/ordens-servico/{{ordemServicoId}}", "host": ["{{baseUrl}}"], "path": ["api", "public", "ordens-servico", "{{ordemServicoId}}"] }
+          }
+        }
+      ]
+    }
+  ]
+}
+

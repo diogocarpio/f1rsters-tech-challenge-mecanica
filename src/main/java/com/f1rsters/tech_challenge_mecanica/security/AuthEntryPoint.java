@@ -1,0 +1,30 @@
+package com.f1rsters.tech_challenge_mecanica.security;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.time.Instant;
+
+@Component
+public class AuthEntryPoint implements AuthenticationEntryPoint {
+
+    @Override
+    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
+            throws IOException, ServletException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json");
+        response.getWriter().write("{" +
+                "\"timestamp\":\"" + Instant.now() + "\"," +
+                "\"status\":" + HttpServletResponse.SC_UNAUTHORIZED + "," +
+                "\"error\":\"Unauthorized\"," +
+                "\"message\":\"Autenticacao necessaria para acessar este recurso\"," +
+                "\"path\":\"" + request.getRequestURI() + "\"" +
+                "}");
+    }
+}
+
