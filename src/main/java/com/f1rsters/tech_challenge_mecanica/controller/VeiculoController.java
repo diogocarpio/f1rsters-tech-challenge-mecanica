@@ -1,8 +1,9 @@
 package com.f1rsters.tech_challenge_mecanica.controller;
 
-import com.f1rsters.tech_challenge_mecanica.service.VeiculoService;
 import com.f1rsters.tech_challenge_mecanica.dto.VeiculoDTO;
-import com.f1rsters.tech_challenge_mecanica.domain.Veiculo;
+import com.f1rsters.tech_challenge_mecanica.dto.VeiculoResponseDTO;
+import com.f1rsters.tech_challenge_mecanica.mapper.VeiculoMapper;
+import com.f1rsters.tech_challenge_mecanica.service.VeiculoService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,23 +20,23 @@ public class VeiculoController {
     }
 
     @PostMapping
-    public ResponseEntity<Veiculo> create(@RequestBody @Valid VeiculoDTO dto) {
-        return ResponseEntity.ok(service.save(dto));
+    public ResponseEntity<VeiculoResponseDTO> create(@RequestBody @Valid VeiculoDTO dto) {
+        return ResponseEntity.ok(VeiculoMapper.toResponse(service.save(dto)));
     }
 
     @GetMapping
-    public List<Veiculo> listAll() {
-        return service.listAll();
+    public List<VeiculoResponseDTO> listAll() {
+        return service.listAll().stream().map(VeiculoMapper::toResponse).toList();
     }
 
     @GetMapping("/{id}")
-    public Veiculo get(@PathVariable Long id) {
-        return service.get(id);
+    public VeiculoResponseDTO get(@PathVariable Long id) {
+        return VeiculoMapper.toResponse(service.get(id));
     }
 
     @PutMapping("/{id}")
-    public Veiculo update(@PathVariable Long id, @RequestBody @Valid VeiculoDTO dto) {
-        return service.update(id, dto);
+    public VeiculoResponseDTO update(@PathVariable Long id, @RequestBody @Valid VeiculoDTO dto) {
+        return VeiculoMapper.toResponse(service.update(id, dto));
     }
 
     @DeleteMapping("/{id}")

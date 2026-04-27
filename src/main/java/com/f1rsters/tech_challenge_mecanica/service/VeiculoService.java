@@ -5,6 +5,7 @@ import com.f1rsters.tech_challenge_mecanica.domain.Cliente;
 import com.f1rsters.tech_challenge_mecanica.dto.VeiculoDTO;
 import com.f1rsters.tech_challenge_mecanica.repository.VeiculoRepository;
 import com.f1rsters.tech_challenge_mecanica.repository.ClienteRepository;
+import com.f1rsters.tech_challenge_mecanica.util.InputNormalizer;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,7 +22,7 @@ public class VeiculoService {
 
     public Veiculo save(VeiculoDTO dto) {
         Veiculo v = new Veiculo();
-        v.setPlaca(dto.placa);
+        v.setPlaca(InputNormalizer.normalizePlaca(dto.placa));
         v.setMarca(dto.marca);
         v.setModelo(dto.modelo);
         v.setAno(dto.ano);
@@ -36,7 +37,7 @@ public class VeiculoService {
 
     public Veiculo update(Long id, VeiculoDTO dto) {
         Veiculo v = repo.findById(id).orElseThrow();
-        v.setPlaca(dto.placa);
+        v.setPlaca(InputNormalizer.normalizePlaca(dto.placa));
         v.setMarca(dto.marca);
         v.setModelo(dto.modelo);
         v.setAno(dto.ano);

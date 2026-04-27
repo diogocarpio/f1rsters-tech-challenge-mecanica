@@ -4,6 +4,7 @@ import com.f1rsters.tech_challenge_mecanica.dto.AtualizarStatusOSDTO;
 import com.f1rsters.tech_challenge_mecanica.dto.CriarOrdemServicoDTO;
 import com.f1rsters.tech_challenge_mecanica.domain.OrdemServico;
 import com.f1rsters.tech_challenge_mecanica.service.OrdemServicoService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,12 +20,12 @@ public class OrdemServicoController {
     }
 
     @PostMapping
-    public ResponseEntity<OrdemServico> criar(@RequestBody @jakarta.validation.Valid CriarOrdemServicoDTO dto) {
+    public ResponseEntity<OrdemServico> criar(@RequestBody @Valid CriarOrdemServicoDTO dto) {
         return ResponseEntity.ok(service.criarOrdem(dto));
     }
 
     @PatchMapping("/{id}/status")
-    public ResponseEntity<OrdemServico> atualizarStatus(@PathVariable Long id, @RequestBody @jakarta.validation.Valid AtualizarStatusOSDTO dto) {
+    public ResponseEntity<OrdemServico> atualizarStatus(@PathVariable Long id, @RequestBody @Valid AtualizarStatusOSDTO dto) {
         return ResponseEntity.ok(service.atualizarStatus(id, dto.novoStatus));
     }
 
