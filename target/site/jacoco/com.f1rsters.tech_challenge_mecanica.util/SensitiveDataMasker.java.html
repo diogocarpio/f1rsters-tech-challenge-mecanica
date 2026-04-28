@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SensitiveDataMasker.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">com.f1rsters.tech_challenge_mecanica.util</a> &gt; <span class="el_source">SensitiveDataMasker.java</span></div><h1>SensitiveDataMasker.java</h1><pre class="source lang-java linenums">package com.f1rsters.tech_challenge_mecanica.util;
+
+public final class SensitiveDataMasker {
+
+    private SensitiveDataMasker() {
+    }
+
+    public static String maskCpfCnpj(String rawValue) {
+<span class="fc" id="L9">        String value = InputNormalizer.normalizeCpfCnpj(rawValue);</span>
+<span class="fc bfc" id="L10" title="All 2 branches covered.">        if (value == null) {</span>
+<span class="fc" id="L11">            return null;</span>
+        }
+
+<span class="fc bfc" id="L14" title="All 2 branches covered.">        if (value.length() == 11) {</span>
+<span class="fc" id="L15">            return &quot;***.&quot; + value.substring(3, 5) + &quot;.***-&quot; + value.substring(9, 11);</span>
+        }
+
+<span class="fc bfc" id="L18" title="All 2 branches covered.">        if (value.length() == 14) {</span>
+<span class="fc" id="L19">            return &quot;**.***.&quot; + value.substring(5, 8) + &quot;/****-&quot; + value.substring(12, 14);</span>
+        }
+
+<span class="fc" id="L22">        return &quot;***&quot;;</span>
+    }
+
+    public static String maskPlaca(String rawValue) {
+<span class="fc" id="L26">        String value = InputNormalizer.normalizePlaca(rawValue);</span>
+<span class="fc bfc" id="L27" title="All 4 branches covered.">        if (value == null || value.length() &lt; 3) {</span>
+<span class="fc" id="L28">            return &quot;***&quot;;</span>
+        }
+
+<span class="fc" id="L31">        return value.substring(0, 3) + &quot;****&quot;;</span>
+    }
+
+    public static String maskEmail(String rawValue) {
+<span class="fc" id="L35">        String email = InputNormalizer.normalizeEmail(rawValue);</span>
+<span class="fc bfc" id="L36" title="All 6 branches covered.">        if (email == null || email.isBlank() || !email.contains(&quot;@&quot;)) {</span>
+<span class="fc" id="L37">            return &quot;***&quot;;</span>
+        }
+
+<span class="fc" id="L40">        String[] parts = email.split(&quot;@&quot;, 2);</span>
+<span class="fc bfc" id="L41" title="All 2 branches covered.">        if (parts[0].isBlank()) {</span>
+<span class="fc" id="L42">            return &quot;***@&quot; + parts[1];</span>
+        }
+<span class="fc" id="L44">        return parts[0].charAt(0) + &quot;***@&quot; + parts[1];</span>
+    }
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

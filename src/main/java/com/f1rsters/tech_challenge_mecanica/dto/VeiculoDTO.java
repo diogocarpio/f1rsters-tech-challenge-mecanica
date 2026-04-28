@@ -2,7 +2,9 @@ package com.f1rsters.tech_challenge_mecanica.dto;
 
 import com.f1rsters.tech_challenge_mecanica.validation.PlacaValida;
 import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
 
+@Data
 public class VeiculoDTO {
     public Long clienteId;
     @NotBlank
