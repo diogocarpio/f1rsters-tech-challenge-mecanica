@@ -41,6 +41,7 @@ com/f1rsters/tech_challenge_mecanica/controller/VeiculoController.class
 com/f1rsters/tech_challenge_mecanica/util/PlacaValidator.class
 com/f1rsters/tech_challenge_mecanica/config/SecuritySeedConfig.class
 com/f1rsters/tech_challenge_mecanica/service/ClienteService.class
+com/f1rsters/tech_challenge_mecanica/exception/ApiExceptionHandler.class
 com/f1rsters/tech_challenge_mecanica/service/ServicoService.class
 com/f1rsters/tech_challenge_mecanica/dto/BaixaEstoqueDTO.class
 com/f1rsters/tech_challenge_mecanica/service/OrdemServicoService.class
@@ -49,7 +50,6 @@ com/f1rsters/tech_challenge_mecanica/controller/ClienteController.class
 com/f1rsters/tech_challenge_mecanica/validation/PlacaConstraintValidator.class
 com/f1rsters/tech_challenge_mecanica/dto/ServicoDTO.class
 com/f1rsters/tech_challenge_mecanica/dto/LoginRequestDTO.class
-com/f1rsters/tech_challenge_mecanica/controller/ApiExceptionHandler.class
 com/f1rsters/tech_challenge_mecanica/domain/StatusOrdemServico.class
 com/f1rsters/tech_challenge_mecanica/controller/AuthController.class
 com/f1rsters/tech_challenge_mecanica/controller/ServicoController.class

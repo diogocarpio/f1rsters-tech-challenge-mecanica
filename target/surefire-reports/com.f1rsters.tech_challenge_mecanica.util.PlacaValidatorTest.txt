@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.f1rsters.tech_challenge_mecanica.util.PlacaValidatorTest
+-------------------------------------------------------------------------------
+Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in com.f1rsters.tech_challenge_mecanica.util.PlacaValidatorTest

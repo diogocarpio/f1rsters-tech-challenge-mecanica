@@ -1,7 +1,6 @@
 /Users/cocao/Documents/developer/f1rsters-tech-challenge-mecanica/src/main/java/com/f1rsters/tech_challenge_mecanica/TechChallengeMecanicaApplication.java
 /Users/cocao/Documents/developer/f1rsters-tech-challenge-mecanica/src/main/java/com/f1rsters/tech_challenge_mecanica/config/SecurityConfig.java
 /Users/cocao/Documents/developer/f1rsters-tech-challenge-mecanica/src/main/java/com/f1rsters/tech_challenge_mecanica/config/SecuritySeedConfig.java
-/Users/cocao/Documents/developer/f1rsters-tech-challenge-mecanica/src/main/java/com/f1rsters/tech_challenge_mecanica/controller/ApiExceptionHandler.java
 /Users/cocao/Documents/developer/f1rsters-tech-challenge-mecanica/src/main/java/com/f1rsters/tech_challenge_mecanica/controller/AuthController.java
 /Users/cocao/Documents/developer/f1rsters-tech-challenge-mecanica/src/main/java/com/f1rsters/tech_challenge_mecanica/controller/ClienteController.java
 /Users/cocao/Documents/developer/f1rsters-tech-challenge-mecanica/src/main/java/com/f1rsters/tech_challenge_mecanica/controller/OrdemServicoController.java
@@ -29,6 +28,7 @@
 /Users/cocao/Documents/developer/f1rsters-tech-challenge-mecanica/src/main/java/com/f1rsters/tech_challenge_mecanica/dto/ServicoDTO.java
 /Users/cocao/Documents/developer/f1rsters-tech-challenge-mecanica/src/main/java/com/f1rsters/tech_challenge_mecanica/dto/VeiculoDTO.java
 /Users/cocao/Documents/developer/f1rsters-tech-challenge-mecanica/src/main/java/com/f1rsters/tech_challenge_mecanica/dto/VeiculoResponseDTO.java
+/Users/cocao/Documents/developer/f1rsters-tech-challenge-mecanica/src/main/java/com/f1rsters/tech_challenge_mecanica/exception/ApiExceptionHandler.java
 /Users/cocao/Documents/developer/f1rsters-tech-challenge-mecanica/src/main/java/com/f1rsters/tech_challenge_mecanica/mapper/ClienteMapper.java
 /Users/cocao/Documents/developer/f1rsters-tech-challenge-mecanica/src/main/java/com/f1rsters/tech_challenge_mecanica/mapper/VeiculoMapper.java
 /Users/cocao/Documents/developer/f1rsters-tech-challenge-mecanica/src/main/java/com/f1rsters/tech_challenge_mecanica/repository/ClienteRepository.java

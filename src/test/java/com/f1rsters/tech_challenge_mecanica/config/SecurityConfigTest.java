@@ -6,8 +6,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -18,8 +21,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class SecurityConfigTest {
 
     @Autowired
@@ -30,6 +35,9 @@ class SecurityConfigTest {
 
     @Autowired
     private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private UserDetailsService userDetailsService;
 
     // =========================
     // BEANS
@@ -52,7 +60,7 @@ class SecurityConfigTest {
 
     @Test
     void shouldCreateAuthenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(null);
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder);
         assertThat(provider).isNotNull();
     }
@@ -72,7 +80,7 @@ class SecurityConfigTest {
     void shouldAllowAuthEndpoints() throws Exception {
 
         mockMvc.perform(get("/api/auth/login"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isMethodNotAllowed());
     }
 
     // =========================
@@ -95,7 +103,7 @@ class SecurityConfigTest {
     void adminShouldAccessAdminEndpoints() throws Exception {
 
         mockMvc.perform(get("/api/admin/clientes"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isOk());
     }
 
     // =========================
@@ -109,7 +117,7 @@ class SecurityConfigTest {
         mockMvc.perform(
                 patch("/api/admin/ordens-servico/1/status")
                         .with(csrf())
-        ).andExpect(status().isNotFound());
+        ).andExpect(status().isBadRequest());
     }
 
     // =========================
@@ -121,7 +129,7 @@ class SecurityConfigTest {
     void estoquistaShouldAccessPecas() throws Exception {
 
         mockMvc.perform(get("/api/admin/pecas"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -131,7 +139,7 @@ class SecurityConfigTest {
         mockMvc.perform(
                 post("/api/admin/pecas")
                         .with(csrf())
-        ).andExpect(status().isNotFound());
+        ).andExpect(status().isBadRequest());
     }
 
     // =========================
@@ -143,7 +151,7 @@ class SecurityConfigTest {
     void atendenteShouldAccessClientes() throws Exception {
 
         mockMvc.perform(get("/api/admin/clientes"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -153,7 +161,7 @@ class SecurityConfigTest {
         mockMvc.perform(
                 post("/api/admin/clientes")
                         .with(csrf())
-        ).andExpect(status().isNotFound());
+        ).andExpect(status().isBadRequest());
     }
 
     // =========================

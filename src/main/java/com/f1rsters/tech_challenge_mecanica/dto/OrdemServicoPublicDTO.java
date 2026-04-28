@@ -1,11 +1,13 @@
 package com.f1rsters.tech_challenge_mecanica.dto;
 
 import com.f1rsters.tech_challenge_mecanica.domain.StatusOrdemServico;
+import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Data
 public class OrdemServicoPublicDTO {
     public Long id;
     public StatusOrdemServico status;

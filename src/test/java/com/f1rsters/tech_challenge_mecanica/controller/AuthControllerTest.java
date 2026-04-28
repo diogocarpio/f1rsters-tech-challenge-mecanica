@@ -9,6 +9,7 @@ import com.f1rsters.tech_challenge_mecanica.security.JwtAuthenticationFilter;
 import com.f1rsters.tech_challenge_mecanica.security.JwtService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,7 +20,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
-import java.util.Objects;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -27,6 +27,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(AuthController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class AuthControllerTest {
 
     @Autowired
@@ -68,7 +69,7 @@ class AuthControllerTest {
         Authentication authentication = org.mockito.Mockito.mock(Authentication.class);
 
         when(authenticationManager.authenticate(any())).thenReturn(authentication);
-        when(Objects.requireNonNull(authentication.getPrincipal())).thenReturn(user);
+        when(authentication.getPrincipal()).thenReturn(user);
         when(jwtService.generateToken(user)).thenReturn("fake-jwt-token");
         when(jwtService.getExpirationInSeconds()).thenReturn(3600L);
 
@@ -78,8 +79,8 @@ class AuthControllerTest {
                                 .content(objectMapper.writeValueAsString(request))
                 )
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").value("fake-jwt-token"))
-                .andExpect(jsonPath("$.expiresIn").value(3600))
+                .andExpect(jsonPath("$.accessToken").value("fake-jwt-token"))
+                .andExpect(jsonPath("$.expiresInSeconds").value(3600))
                 .andExpect(jsonPath("$.roles[0]").value("ROLE_ADMIN"));
     }
 }

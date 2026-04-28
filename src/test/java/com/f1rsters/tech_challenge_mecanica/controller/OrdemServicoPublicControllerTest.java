@@ -10,15 +10,18 @@ import com.f1rsters.tech_challenge_mecanica.security.JwtAuthenticationFilter;
 import com.f1rsters.tech_challenge_mecanica.service.OrdemServicoService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(OrdemServicoPublicController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class OrdemServicoPublicControllerTest {
 
     @Autowired
@@ -42,10 +45,16 @@ class OrdemServicoPublicControllerTest {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private OrdemServicoPublicDTO createDTO() {
-        OrdemServicoPublicDTO dto = new OrdemServicoPublicDTO();
-        dto.id = 1L;
-        dto.status = StatusOrdemServico.valueOf("EM_ANDAMENTO");
-        return dto;
+        return new OrdemServicoPublicDTO(
+                1L,
+                StatusOrdemServico.EM_EXECUCAO,
+                null,
+                "Cliente Teste",
+                "ABC1234",
+                java.util.List.of("Servico 1"),
+                java.util.List.of("Peca 1"),
+                java.math.BigDecimal.ZERO
+        );
     }
 
     @Test
@@ -55,6 +64,8 @@ class OrdemServicoPublicControllerTest {
                 .thenReturn(createDTO());
 
         mockMvc.perform(get("/api/public/ordens-servico/1"))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.status").value("EM_EXECUCAO"));
     }
 }

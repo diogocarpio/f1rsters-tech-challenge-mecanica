@@ -12,9 +12,9 @@ import com.f1rsters.tech_challenge_mecanica.security.JwtAuthenticationFilter;
 import com.f1rsters.tech_challenge_mecanica.service.OrdemServicoService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -29,7 +29,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(OrdemServicoController.class)
-@WithMockUser(roles = "ADMIN")
+@AutoConfigureMockMvc(addFilters = false)
 class OrdemServicoControllerTest {
 
     @Autowired
@@ -60,17 +60,19 @@ class OrdemServicoControllerTest {
 
     private CriarOrdemServicoDTO createCriarDTO() {
         CriarOrdemServicoDTO dto = new CriarOrdemServicoDTO();
+        dto.cpfCnpjCliente = "52998224725";
+        dto.placaVeiculo = "ABC1234";
+        dto.servicos = List.of(1L);
         return dto;
     }
 
     private AtualizarStatusOSDTO createStatusDTO() {
         AtualizarStatusOSDTO dto = new AtualizarStatusOSDTO();
-        dto.novoStatus = StatusOrdemServico.valueOf("EM_ANDAMENTO");
+        dto.novoStatus = StatusOrdemServico.EM_EXECUCAO;
         return dto;
     }
 
     @Test
-    @WithMockUser(roles = {"ADMIN"})
     void shouldCreateOrdemServico() throws Exception {
 
         when(ordemServicoService.criarOrdem(any())).thenReturn(createOS());
@@ -83,7 +85,6 @@ class OrdemServicoControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = {"ADMIN","MECANICO"})
     void shouldUpdateStatus() throws Exception {
 
         when(ordemServicoService.atualizarStatus(eq(1L), any()))
@@ -97,7 +98,6 @@ class OrdemServicoControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = {"ADMIN"})
     void shouldListOrdensServico() throws Exception {
 
         when(ordemServicoService.listarTodas())
@@ -108,7 +108,6 @@ class OrdemServicoControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = {"ADMIN"})
     void shouldGetOrdemServicoById() throws Exception {
 
         when(ordemServicoService.detalhar(1L))

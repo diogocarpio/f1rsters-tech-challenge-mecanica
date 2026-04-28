@@ -10,12 +10,13 @@ import com.f1rsters.tech_challenge_mecanica.security.JwtAuthenticationFilter;
 import com.f1rsters.tech_challenge_mecanica.service.ServicoService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -29,7 +30,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ServicoController.class)
-@WithMockUser(roles = "ADMIN")
+@AutoConfigureMockMvc(addFilters = false)
 class ServicoControllerTest {
 
     @Autowired
@@ -62,6 +63,7 @@ class ServicoControllerTest {
     private ServicoDTO createDTO() {
         ServicoDTO dto = new ServicoDTO();
         dto.descricao = "Troca de óleo";
+        dto.valor = new BigDecimal("150.00");
         return dto;
     }
 
