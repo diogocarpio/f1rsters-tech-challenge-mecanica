@@ -4,12 +4,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.f1rsters.tech_challenge_mecanica.dto.VeiculoDTO;
 import com.f1rsters.tech_challenge_mecanica.domain.Veiculo;
 import com.f1rsters.tech_challenge_mecanica.domain.Cliente;
+import com.f1rsters.tech_challenge_mecanica.security.AccessDeniedHandlerImpl;
+import com.f1rsters.tech_challenge_mecanica.security.AuthEntryPoint;
+import com.f1rsters.tech_challenge_mecanica.security.CustomUserDetailsService;
+import com.f1rsters.tech_challenge_mecanica.security.JwtAuthenticationFilter;
 import com.f1rsters.tech_challenge_mecanica.service.VeiculoService;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
@@ -25,16 +30,28 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(VeiculoController.class)
+@WithMockUser(roles = "ADMIN")
 class VeiculoControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @Mock
+    @MockitoBean
     private VeiculoService veiculoService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @MockitoBean
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @MockitoBean
+    private CustomUserDetailsService customUserDetailsService;
+
+    @MockitoBean
+    private AuthEntryPoint authEntryPoint;
+
+    @MockitoBean
+    private AccessDeniedHandlerImpl accessDeniedHandler;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private Veiculo createVeiculo() {
         Veiculo veiculo = new Veiculo();

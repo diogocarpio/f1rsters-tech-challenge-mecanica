@@ -16,7 +16,7 @@ class SensitiveDataMaskerTest {
     @Test
     void shouldMaskCNPJ() {
         assertEquals("**.***.789/****-34", SensitiveDataMasker.maskCpfCnpj("12.345.789/9012-34"));
-        assertEquals("**.***.789/****-34", SensitiveDataMasker.maskCpfCnpj("12345678901234"));
+        assertEquals("**.***.789/****-34", SensitiveDataMasker.maskCpfCnpj("12345789901234"));
     }
 
     @Test

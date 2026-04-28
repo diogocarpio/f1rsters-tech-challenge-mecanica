@@ -5,13 +5,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.f1rsters.tech_challenge_mecanica.domain.OrdemServico;
 import com.f1rsters.tech_challenge_mecanica.dto.AtualizarStatusOSDTO;
 import com.f1rsters.tech_challenge_mecanica.dto.CriarOrdemServicoDTO;
+import com.f1rsters.tech_challenge_mecanica.security.AccessDeniedHandlerImpl;
+import com.f1rsters.tech_challenge_mecanica.security.AuthEntryPoint;
+import com.f1rsters.tech_challenge_mecanica.security.CustomUserDetailsService;
+import com.f1rsters.tech_challenge_mecanica.security.JwtAuthenticationFilter;
 import com.f1rsters.tech_challenge_mecanica.service.OrdemServicoService;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
@@ -25,16 +29,28 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(OrdemServicoController.class)
+@WithMockUser(roles = "ADMIN")
 class OrdemServicoControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @Mock
+    @MockitoBean
     private OrdemServicoService ordemServicoService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @MockitoBean
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @MockitoBean
+    private CustomUserDetailsService customUserDetailsService;
+
+    @MockitoBean
+    private AuthEntryPoint authEntryPoint;
+
+    @MockitoBean
+    private AccessDeniedHandlerImpl accessDeniedHandler;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private OrdemServico createOS() {
         OrdemServico os = new OrdemServico();

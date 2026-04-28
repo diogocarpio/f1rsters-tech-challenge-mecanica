@@ -2,9 +2,12 @@ package com.f1rsters.tech_challenge_mecanica.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.f1rsters.tech_challenge_mecanica.dto.LoginRequestDTO;
+import com.f1rsters.tech_challenge_mecanica.security.AccessDeniedHandlerImpl;
+import com.f1rsters.tech_challenge_mecanica.security.AuthEntryPoint;
+import com.f1rsters.tech_challenge_mecanica.security.CustomUserDetailsService;
+import com.f1rsters.tech_challenge_mecanica.security.JwtAuthenticationFilter;
 import com.f1rsters.tech_challenge_mecanica.security.JwtService;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -12,6 +15,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
@@ -28,14 +32,25 @@ class AuthControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Mock
+    @MockitoBean
     private AuthenticationManager authenticationManager;
 
-    @Mock
+    @MockitoBean
     private JwtService jwtService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @MockitoBean
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @MockitoBean
+    private CustomUserDetailsService customUserDetailsService;
+
+    @MockitoBean
+    private AuthEntryPoint authEntryPoint;
+
+    @MockitoBean
+    private AccessDeniedHandlerImpl accessDeniedHandler;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     void shouldLoginSuccessfully() throws Exception {

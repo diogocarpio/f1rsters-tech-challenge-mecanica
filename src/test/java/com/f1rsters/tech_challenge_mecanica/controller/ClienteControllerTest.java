@@ -3,12 +3,17 @@ package com.f1rsters.tech_challenge_mecanica.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.f1rsters.tech_challenge_mecanica.dto.ClienteDTO;
 import com.f1rsters.tech_challenge_mecanica.domain.Cliente;
+import com.f1rsters.tech_challenge_mecanica.security.AccessDeniedHandlerImpl;
+import com.f1rsters.tech_challenge_mecanica.security.AuthEntryPoint;
+import com.f1rsters.tech_challenge_mecanica.security.CustomUserDetailsService;
+import com.f1rsters.tech_challenge_mecanica.security.JwtAuthenticationFilter;
 import com.f1rsters.tech_challenge_mecanica.service.ClienteService;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
@@ -24,27 +29,41 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ClienteController.class)
+@WithMockUser(roles = "ADMIN")
 class ClienteControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @Mock
+    @MockitoBean
     private ClienteService clienteService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @MockitoBean
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @MockitoBean
+    private CustomUserDetailsService customUserDetailsService;
+
+    @MockitoBean
+    private AuthEntryPoint authEntryPoint;
+
+    @MockitoBean
+    private AccessDeniedHandlerImpl accessDeniedHandler;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private Cliente createCliente() {
         Cliente cliente = new Cliente();
         cliente.setId(1L);
         cliente.setNome("João Silva");
+        cliente.setCpfCnpj("52998224725");
         return cliente;
     }
 
     private ClienteDTO createDTO() {
         ClienteDTO dto = new ClienteDTO();
         dto.nome = "João Silva";
+        dto.cpfCnpj = "52998224725";
         return dto;
     }
 

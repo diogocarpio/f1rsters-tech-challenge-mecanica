@@ -4,12 +4,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.f1rsters.tech_challenge_mecanica.domain.Peca;
 import com.f1rsters.tech_challenge_mecanica.dto.BaixaEstoqueDTO;
 import com.f1rsters.tech_challenge_mecanica.dto.PecaDTO;
+import com.f1rsters.tech_challenge_mecanica.security.AccessDeniedHandlerImpl;
+import com.f1rsters.tech_challenge_mecanica.security.AuthEntryPoint;
+import com.f1rsters.tech_challenge_mecanica.security.CustomUserDetailsService;
+import com.f1rsters.tech_challenge_mecanica.security.JwtAuthenticationFilter;
 import com.f1rsters.tech_challenge_mecanica.service.PecaService;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
@@ -28,16 +33,28 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(PecaController.class)
+@WithMockUser(roles = "ADMIN")
 class PecaControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @Mock
+    @MockitoBean
     private PecaService service;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @MockitoBean
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @MockitoBean
+    private CustomUserDetailsService customUserDetailsService;
+
+    @MockitoBean
+    private AuthEntryPoint authEntryPoint;
+
+    @MockitoBean
+    private AccessDeniedHandlerImpl accessDeniedHandler;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     void deveCriarPeca() throws Exception {
