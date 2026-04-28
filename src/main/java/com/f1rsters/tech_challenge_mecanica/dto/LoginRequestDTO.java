@@ -2,7 +2,9 @@ package com.f1rsters.tech_challenge_mecanica.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
 
+@Data
 public class LoginRequestDTO {
     @Email(message = "email invalido")
     @NotBlank

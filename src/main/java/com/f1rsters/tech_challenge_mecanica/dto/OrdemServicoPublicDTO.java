@@ -27,4 +27,8 @@ public class OrdemServicoPublicDTO {
         this.pecas = pecas;
         this.valorTotal = valorTotal;
     }
+
+    public OrdemServicoPublicDTO() {
+
+    }
 }

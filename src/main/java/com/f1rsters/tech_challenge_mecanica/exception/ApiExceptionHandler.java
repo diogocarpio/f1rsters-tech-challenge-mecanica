@@ -1,4 +1,4 @@
-package com.f1rsters.tech_challenge_mecanica.controller;
+package com.f1rsters.tech_challenge_mecanica.exception;
 
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;

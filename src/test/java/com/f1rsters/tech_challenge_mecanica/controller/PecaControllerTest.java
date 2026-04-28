@@ -5,16 +5,12 @@ import com.f1rsters.tech_challenge_mecanica.domain.Peca;
 import com.f1rsters.tech_challenge_mecanica.dto.BaixaEstoqueDTO;
 import com.f1rsters.tech_challenge_mecanica.dto.PecaDTO;
 import com.f1rsters.tech_challenge_mecanica.service.PecaService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -31,28 +27,17 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(PecaController.class)
 class PecaControllerTest {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    @Autowired
+    private MockMvc mockMvc;
 
     @Mock
     private PecaService service;
 
-    @InjectMocks
-    private PecaController controller;
-
-    private MockMvc mockMvc;
-
-    @BeforeEach
-    void setUp() {
-        LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
-        validator.afterPropertiesSet();
-
-        mockMvc = MockMvcBuilders.standaloneSetup(controller)
-                .setValidator(validator)
-                .build();
-    }
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Test
     void deveCriarPeca() throws Exception {

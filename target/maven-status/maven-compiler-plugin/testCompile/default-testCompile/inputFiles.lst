@@ -1,0 +1,12 @@
+/Users/cocao/Documents/developer/f1rsters-tech-challenge-mecanica/src/test/java/com/f1rsters/tech_challenge_mecanica/SecurityIntegrationTests.java
+/Users/cocao/Documents/developer/f1rsters-tech-challenge-mecanica/src/test/java/com/f1rsters/tech_challenge_mecanica/TechChallengeMecanicaApplicationTests.java
+/Users/cocao/Documents/developer/f1rsters-tech-challenge-mecanica/src/test/java/com/f1rsters/tech_challenge_mecanica/config/SecurityConfigTest.java
+/Users/cocao/Documents/developer/f1rsters-tech-challenge-mecanica/src/test/java/com/f1rsters/tech_challenge_mecanica/config/SecuritySeedConfigTest.java
+/Users/cocao/Documents/developer/f1rsters-tech-challenge-mecanica/src/test/java/com/f1rsters/tech_challenge_mecanica/controller/PecaControllerTest.java
+/Users/cocao/Documents/developer/f1rsters-tech-challenge-mecanica/src/test/java/com/f1rsters/tech_challenge_mecanica/integration/ClienteApiIntegrationTest.java
+/Users/cocao/Documents/developer/f1rsters-tech-challenge-mecanica/src/test/java/com/f1rsters/tech_challenge_mecanica/integration/OrdemServicoApiIntegrationTest.java
+/Users/cocao/Documents/developer/f1rsters-tech-challenge-mecanica/src/test/java/com/f1rsters/tech_challenge_mecanica/service/ClienteServiceTest.java
+/Users/cocao/Documents/developer/f1rsters-tech-challenge-mecanica/src/test/java/com/f1rsters/tech_challenge_mecanica/service/OrdemServicoServiceTest.java
+/Users/cocao/Documents/developer/f1rsters-tech-challenge-mecanica/src/test/java/com/f1rsters/tech_challenge_mecanica/service/PecaServiceTest.java
+/Users/cocao/Documents/developer/f1rsters-tech-challenge-mecanica/src/test/java/com/f1rsters/tech_challenge_mecanica/service/ServicoServiceTest.java
+/Users/cocao/Documents/developer/f1rsters-tech-challenge-mecanica/src/test/java/com/f1rsters/tech_challenge_mecanica/service/VeiculoServiceTest.java
