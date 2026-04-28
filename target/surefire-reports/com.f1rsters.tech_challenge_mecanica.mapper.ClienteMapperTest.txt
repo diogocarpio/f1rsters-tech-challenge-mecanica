@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.f1rsters.tech_challenge_mecanica.mapper.ClienteMapperTest
+-------------------------------------------------------------------------------
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in com.f1rsters.tech_challenge_mecanica.mapper.ClienteMapperTest

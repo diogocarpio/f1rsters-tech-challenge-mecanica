@@ -15,3 +15,15 @@ spring:
 # Para acessar o Swagger na mesma porta:
 server:
   port: 8080
+
+security:
+  jwt:
+    # Chave Base64 com no minimo 256 bits; em producao use somente variavel de ambiente.
+    secret: ${JWT_SECRET_BASE64:QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVo0NTY3ODkwQUJDREVG}
+    access-token-minutes: ${JWT_ACCESS_TOKEN_MINUTES:15}
+    issuer: ${JWT_ISSUER:tech-challenge-mecanica-api}
+  seed:
+    enabled: ${SECURITY_SEED_ENABLED:true}
+    admin:
+      email: ${SECURITY_SEED_ADMIN_EMAIL:admin@oficina.local}
+      password: ${SECURITY_SEED_ADMIN_PASSWORD:admin123}

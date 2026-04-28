@@ -5,7 +5,9 @@ import com.f1rsters.tech_challenge_mecanica.validation.PlacaValida;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import java.util.List;
+import lombok.Data;
 
+@Data
 public class CriarOrdemServicoDTO {
     @NotBlank
     @CpfCnpjValido
