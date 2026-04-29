@@ -675,6 +675,35 @@ A documentacao interativa da API esta disponivel via Swagger UI:
 - **URL:** `http://localhost:8080/swagger-ui/index.html`
 - **OpenAPI JSON:** `http://localhost:8080/v3/api-docs`
 
+O projeto tambem configura (via `application.yaml`) um atalho para o Swagger UI em:
+
+- **URL alternativa:** `http://localhost:8080/swagger-ui.html`
+
+### Configuracao do OpenAPI (classe `OpenApiConfig`)
+
+Foi adicionada a classe `com.f1rsters.tech_challenge_mecanica.config.OpenApiConfig`, responsavel por configurar metadados do OpenAPI e o esquema de seguranca JWT para o Swagger:
+
+- **Info da API**
+  - **Title:** `Tech Challenge Mecanica API`
+  - **Version:** `v1`
+  - **Description:** `API de gerenciamento da oficina mecanica`
+- **Autenticacao no Swagger (JWT)**
+  - Registra o `SecurityScheme` do tipo HTTP Bearer com `bearerFormat` JWT
+  - Nome do esquema: `bearerAuth`
+  - Com isso, ao clicar em **Authorize** no Swagger UI, voce pode informar `Bearer <seu_token>` e testar endpoints protegidos
+
+### Organizacao por controllers (Swagger)
+
+Alguns controllers foram atualizados com anotacoes do Swagger para melhorar a navegacao no Swagger UI, agrupando endpoints por dominio usando `@Tag`, por exemplo:
+
+- `AuthController` (tag **Auth**)
+- `ClienteController` (tag **Clientes**)
+- `VeiculoController` (tag **Veiculos**)
+- `ServicoController` (tag **Servicos**)
+- `PecaController` (tag **Pecas**)
+- `OrdemServicoController` (tag **Ordens de Servico**)
+- `OrdemServicoPublicController` (tag **Ordens de Servico Publico**)
+
 No Swagger UI voce pode:
 1. Visualizar todos os endpoints disponiveis
 2. Testar requisicoes diretamente pelo navegador

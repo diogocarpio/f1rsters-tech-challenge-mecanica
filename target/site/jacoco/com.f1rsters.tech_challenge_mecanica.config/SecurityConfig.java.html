@@ -47,7 +47,7 @@ public class SecurityConfig {
 <span class="fc" id="L47">                        .accessDeniedHandler(accessDeniedHandler))</span>
 <span class="fc" id="L48">                .authenticationProvider(authenticationProvider())</span>
 <span class="fc" id="L49">                .authorizeHttpRequests(auth -&gt; auth</span>
-<span class="fc" id="L50">                        .requestMatchers(&quot;/api/auth/**&quot;, &quot;/api/public/**&quot;, &quot;/swagger-ui/**&quot;, &quot;/v3/api-docs/**&quot;).permitAll()</span>
+<span class="fc" id="L50">                        .requestMatchers(&quot;/api/auth/**&quot;, &quot;/api/public/**&quot;, &quot;/swagger-ui/**&quot;, &quot;/swagger-ui.html&quot;, &quot;/v3/api-docs/**&quot;).permitAll()</span>
 <span class="fc" id="L51">                        .requestMatchers(HttpMethod.PATCH, &quot;/api/admin/ordens-servico/*/status&quot;).hasAnyRole(&quot;ADMIN&quot;, &quot;MECANICO&quot;)</span>
 <span class="fc" id="L52">                        .requestMatchers(HttpMethod.GET, &quot;/api/admin/pecas&quot;, &quot;/api/admin/pecas/estoque&quot;, &quot;/api/admin/pecas/**&quot;).hasAnyRole(&quot;ADMIN&quot;, &quot;ESTOQUISTA&quot;, &quot;MECANICO&quot;)</span>
 <span class="fc" id="L53">                        .requestMatchers(HttpMethod.POST, &quot;/api/admin/pecas&quot;).hasAnyRole(&quot;ADMIN&quot;, &quot;ESTOQUISTA&quot;)</span>

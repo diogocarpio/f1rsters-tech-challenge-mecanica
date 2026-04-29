@@ -4,6 +4,7 @@ import com.f1rsters.tech_challenge_mecanica.dto.LoginRequestDTO;
 import com.f1rsters.tech_challenge_mecanica.dto.LoginResponseDTO;
 import com.f1rsters.tech_challenge_mecanica.security.JwtService;
 import com.f1rsters.tech_challenge_mecanica.util.InputNormalizer;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,31 +21,31 @@ import java.util.List;
 
 @RestController
 @RequestMapping(&quot;/api/auth&quot;)
+@Tag(name = &quot;Auth&quot;, description = &quot;Endpoints de autenticacao&quot;)
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
 
-<span class="fc" id="L28">    public AuthController(AuthenticationManager authenticationManager, JwtService jwtService) {</span>
-<span class="fc" id="L29">        this.authenticationManager = authenticationManager;</span>
-<span class="fc" id="L30">        this.jwtService = jwtService;</span>
-<span class="fc" id="L31">    }</span>
+<span class="fc" id="L30">    public AuthController(AuthenticationManager authenticationManager, JwtService jwtService) {</span>
+<span class="fc" id="L31">        this.authenticationManager = authenticationManager;</span>
+<span class="fc" id="L32">        this.jwtService = jwtService;</span>
+<span class="fc" id="L33">    }</span>
 
     @PostMapping(&quot;/login&quot;)
     public ResponseEntity&lt;LoginResponseDTO&gt; login(@RequestBody @Valid LoginRequestDTO dto) {
-<span class="fc" id="L35">        String normalizedEmail = InputNormalizer.normalizeEmail(dto.email);</span>
-<span class="fc" id="L36">        Authentication authentication = authenticationManager.authenticate(</span>
+<span class="fc" id="L37">        String normalizedEmail = InputNormalizer.normalizeEmail(dto.email);</span>
+<span class="fc" id="L38">        Authentication authentication = authenticationManager.authenticate(</span>
                 new UsernamePasswordAuthenticationToken(normalizedEmail, dto.senha)
         );
 
-<span class="fc" id="L40">        UserDetails userDetails = (UserDetails) authentication.getPrincipal();</span>
-<span class="fc" id="L41">        String token = jwtService.generateToken(userDetails);</span>
-<span class="fc" id="L42">        List&lt;String&gt; roles = userDetails.getAuthorities().stream()</span>
-<span class="fc" id="L43">                .map(GrantedAuthority::getAuthority)</span>
-<span class="fc" id="L44">                .toList();</span>
+<span class="fc" id="L42">        UserDetails userDetails = (UserDetails) authentication.getPrincipal();</span>
+<span class="fc" id="L43">        String token = jwtService.generateToken(userDetails);</span>
+<span class="fc" id="L44">        List&lt;String&gt; roles = userDetails.getAuthorities().stream()</span>
+<span class="fc" id="L45">                .map(GrantedAuthority::getAuthority)</span>
+<span class="fc" id="L46">                .toList();</span>
 
-<span class="fc" id="L46">        return ResponseEntity.ok(new LoginResponseDTO(token, jwtService.getExpirationInSeconds(), roles));</span>
+<span class="fc" id="L48">        return ResponseEntity.ok(new LoginResponseDTO(token, jwtService.getExpirationInSeconds(), roles));</span>
     }
 }
-
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
