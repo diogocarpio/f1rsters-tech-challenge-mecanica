@@ -4,6 +4,7 @@ import com.f1rsters.tech_challenge_mecanica.dto.LoginRequestDTO;
 import com.f1rsters.tech_challenge_mecanica.dto.LoginResponseDTO;
 import com.f1rsters.tech_challenge_mecanica.security.JwtService;
 import com.f1rsters.tech_challenge_mecanica.util.InputNormalizer;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,6 +21,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/auth")
+@Tag(name = "Auth", description = "Endpoints de autenticacao")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
@@ -46,4 +48,3 @@ public class AuthController {
         return ResponseEntity.ok(new LoginResponseDTO(token, jwtService.getExpirationInSeconds(), roles));
     }
 }
-

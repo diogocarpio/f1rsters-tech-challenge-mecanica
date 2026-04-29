@@ -4,6 +4,7 @@ import com.f1rsters.tech_challenge_mecanica.dto.ClienteDTO;
 import com.f1rsters.tech_challenge_mecanica.dto.ClienteResponseDTO;
 import com.f1rsters.tech_challenge_mecanica.mapper.ClienteMapper;
 import com.f1rsters.tech_challenge_mecanica.service.ClienteService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/clientes")
+@Tag(name = "Clientes", description = "Endpoints de clientes")
 public class ClienteController {
     private final ClienteService service;
 

@@ -4,6 +4,7 @@ import com.f1rsters.tech_challenge_mecanica.dto.VeiculoDTO;
 import com.f1rsters.tech_challenge_mecanica.dto.VeiculoResponseDTO;
 import com.f1rsters.tech_challenge_mecanica.mapper.VeiculoMapper;
 import com.f1rsters.tech_challenge_mecanica.service.VeiculoService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/veiculos")
+@Tag(name = "Veiculos", description = "Endpoints de veiculos")
 public class VeiculoController {
     private final VeiculoService service;
 
