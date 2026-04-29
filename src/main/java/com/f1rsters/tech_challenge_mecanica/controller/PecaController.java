@@ -4,6 +4,7 @@ import com.f1rsters.tech_challenge_mecanica.dto.BaixaEstoqueDTO;
 import com.f1rsters.tech_challenge_mecanica.service.PecaService;
 import com.f1rsters.tech_challenge_mecanica.dto.PecaDTO;
 import com.f1rsters.tech_challenge_mecanica.domain.Peca;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/pecas")
+@Tag(name = "Pecas", description = "Endpoints de pecas")
 public class PecaController {
     private final PecaService service;
 
