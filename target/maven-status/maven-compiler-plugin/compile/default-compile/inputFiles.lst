@@ -1,4 +1,5 @@
 /Users/cocao/Documents/developer/f1rsters-tech-challenge-mecanica/src/main/java/com/f1rsters/tech_challenge_mecanica/TechChallengeMecanicaApplication.java
+/Users/cocao/Documents/developer/f1rsters-tech-challenge-mecanica/src/main/java/com/f1rsters/tech_challenge_mecanica/config/OpenApiConfig.java
 /Users/cocao/Documents/developer/f1rsters-tech-challenge-mecanica/src/main/java/com/f1rsters/tech_challenge_mecanica/config/SecurityConfig.java
 /Users/cocao/Documents/developer/f1rsters-tech-challenge-mecanica/src/main/java/com/f1rsters/tech_challenge_mecanica/config/SecuritySeedConfig.java
 /Users/cocao/Documents/developer/f1rsters-tech-challenge-mecanica/src/main/java/com/f1rsters/tech_challenge_mecanica/controller/AuthController.java

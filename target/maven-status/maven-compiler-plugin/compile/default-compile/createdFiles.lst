@@ -4,6 +4,7 @@ com/f1rsters/tech_challenge_mecanica/validation/CpfCnpjValido.class
 com/f1rsters/tech_challenge_mecanica/validation/CpfCnpjConstraintValidator.class
 com/f1rsters/tech_challenge_mecanica/repository/PecaRepository.class
 com/f1rsters/tech_challenge_mecanica/domain/OrdemServico.class
+com/f1rsters/tech_challenge_mecanica/config/OpenApiConfig.class
 com/f1rsters/tech_challenge_mecanica/domain/Role.class
 com/f1rsters/tech_challenge_mecanica/security/JwtService.class
 com/f1rsters/tech_challenge_mecanica/controller/OrdemServicoPublicController.class

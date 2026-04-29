@@ -3,6 +3,7 @@
 import com.f1rsters.tech_challenge_mecanica.service.ServicoService;
 import com.f1rsters.tech_challenge_mecanica.dto.ServicoDTO;
 import com.f1rsters.tech_challenge_mecanica.domain.Servico;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,36 +12,37 @@ import java.util.List;
 
 @RestController
 @RequestMapping(&quot;/api/admin/servicos&quot;)
+@Tag(name = &quot;Servicos&quot;, description = &quot;Endpoints de servicos&quot;)
 public class ServicoController {
     private final ServicoService service;
 
-<span class="fc" id="L17">    public ServicoController(ServicoService service) {</span>
-<span class="fc" id="L18">        this.service = service;</span>
-<span class="fc" id="L19">    }</span>
+<span class="fc" id="L19">    public ServicoController(ServicoService service) {</span>
+<span class="fc" id="L20">        this.service = service;</span>
+<span class="fc" id="L21">    }</span>
 
     @PostMapping
     public ResponseEntity&lt;Servico&gt; create(@RequestBody @Valid ServicoDTO dto) {
-<span class="fc" id="L23">        return ResponseEntity.ok(service.save(dto));</span>
+<span class="fc" id="L25">        return ResponseEntity.ok(service.save(dto));</span>
     }
 
     @GetMapping
     public List&lt;Servico&gt; listAll() {
-<span class="fc" id="L28">        return service.listAll();</span>
+<span class="fc" id="L30">        return service.listAll();</span>
     }
 
     @GetMapping(&quot;/{id}&quot;)
     public Servico get(@PathVariable Long id) {
-<span class="fc" id="L33">        return service.get(id);</span>
+<span class="fc" id="L35">        return service.get(id);</span>
     }
 
     @PutMapping(&quot;/{id}&quot;)
     public Servico update(@PathVariable Long id, @RequestBody @Valid ServicoDTO dto) {
-<span class="fc" id="L38">        return service.update(id, dto);</span>
+<span class="fc" id="L40">        return service.update(id, dto);</span>
     }
 
     @DeleteMapping(&quot;/{id}&quot;)
     public void delete(@PathVariable Long id) {
-<span class="fc" id="L43">        service.delete(id);</span>
-<span class="fc" id="L44">    }</span>
+<span class="fc" id="L45">        service.delete(id);</span>
+<span class="fc" id="L46">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

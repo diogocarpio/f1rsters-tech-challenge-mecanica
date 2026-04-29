@@ -21,6 +21,7 @@ com/f1rsters/tech_challenge_mecanica/controller/PecaControllerTest.class
 com/f1rsters/tech_challenge_mecanica/util/PlacaValidatorTest.class
 com/f1rsters/tech_challenge_mecanica/service/PecaServiceTest.class
 com/f1rsters/tech_challenge_mecanica/service/OrdemServicoServiceTest.class
+com/f1rsters/tech_challenge_mecanica/config/OpenApiConfigTest.class
 com/f1rsters/tech_challenge_mecanica/service/ClienteServiceTest.class
 com/f1rsters/tech_challenge_mecanica/controller/ServicoControllerTest.class
 com/f1rsters/tech_challenge_mecanica/util/InputNormalizerTest.class

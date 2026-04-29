@@ -2,22 +2,24 @@
 
 import com.f1rsters.tech_challenge_mecanica.dto.OrdemServicoPublicDTO;
 import com.f1rsters.tech_challenge_mecanica.service.OrdemServicoService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(&quot;/api/public/ordens-servico&quot;)
+@Tag(name = &quot;Ordens de Servico Publico&quot;, description = &quot;Endpoints publicos de ordens de servico&quot;)
 public class OrdemServicoPublicController {
     private final OrdemServicoService service;
 
-<span class="fc" id="L13">    public OrdemServicoPublicController(OrdemServicoService service) {</span>
-<span class="fc" id="L14">        this.service = service;</span>
-<span class="fc" id="L15">    }</span>
+<span class="fc" id="L15">    public OrdemServicoPublicController(OrdemServicoService service) {</span>
+<span class="fc" id="L16">        this.service = service;</span>
+<span class="fc" id="L17">    }</span>
 
     @GetMapping(&quot;/{id}&quot;)
     public ResponseEntity&lt;OrdemServicoPublicDTO&gt; visualizar(@PathVariable Long id) {
-<span class="fc" id="L19">        OrdemServicoPublicDTO dto = service.getPublicInfo(id);</span>
-<span class="fc" id="L20">        return ResponseEntity.ok(dto);</span>
+<span class="fc" id="L21">        OrdemServicoPublicDTO dto = service.getPublicInfo(id);</span>
+<span class="fc" id="L22">        return ResponseEntity.ok(dto);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

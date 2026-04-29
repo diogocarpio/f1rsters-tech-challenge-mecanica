@@ -4,6 +4,7 @@ import com.f1rsters.tech_challenge_mecanica.dto.AtualizarStatusOSDTO;
 import com.f1rsters.tech_challenge_mecanica.dto.CriarOrdemServicoDTO;
 import com.f1rsters.tech_challenge_mecanica.domain.OrdemServico;
 import com.f1rsters.tech_challenge_mecanica.service.OrdemServicoService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,27 +13,28 @@ import java.util.List;
 
 @RestController
 @RequestMapping(&quot;/api/admin/ordens-servico&quot;)
+@Tag(name = &quot;Ordens de Servico&quot;, description = &quot;Endpoints de ordens de servico (admin)&quot;)
 public class OrdemServicoController {
     private final OrdemServicoService service;
 
-<span class="fc" id="L18">    public OrdemServicoController(OrdemServicoService service) {</span>
-<span class="fc" id="L19">        this.service = service;</span>
-<span class="fc" id="L20">    }</span>
+<span class="fc" id="L20">    public OrdemServicoController(OrdemServicoService service) {</span>
+<span class="fc" id="L21">        this.service = service;</span>
+<span class="fc" id="L22">    }</span>
 
     @PostMapping
     public ResponseEntity&lt;OrdemServico&gt; criar(@RequestBody @Valid CriarOrdemServicoDTO dto) {
-<span class="fc" id="L24">        return ResponseEntity.ok(service.criarOrdem(dto));</span>
+<span class="fc" id="L26">        return ResponseEntity.ok(service.criarOrdem(dto));</span>
     }
 
     @PatchMapping(&quot;/{id}/status&quot;)
     public ResponseEntity&lt;OrdemServico&gt; atualizarStatus(@PathVariable Long id, @RequestBody @Valid AtualizarStatusOSDTO dto) {
-<span class="fc" id="L29">        return ResponseEntity.ok(service.atualizarStatus(id, dto.novoStatus));</span>
+<span class="fc" id="L31">        return ResponseEntity.ok(service.atualizarStatus(id, dto.novoStatus));</span>
     }
 
     @GetMapping
-<span class="fc" id="L33">    public List&lt;OrdemServico&gt; listar() { return service.listarTodas(); }</span>
+<span class="fc" id="L35">    public List&lt;OrdemServico&gt; listar() { return service.listarTodas(); }</span>
 
     @GetMapping(&quot;/{id}&quot;)
-<span class="fc" id="L36">    public OrdemServico detalhar(@PathVariable Long id) { return service.detalhar(id); }</span>
+<span class="fc" id="L38">    public OrdemServico detalhar(@PathVariable Long id) { return service.detalhar(id); }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
