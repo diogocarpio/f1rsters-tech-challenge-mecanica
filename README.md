@@ -13,6 +13,8 @@ API REST para gestao de uma oficina mecanica de medio porte, especializada em ma
 - [Configuracao e Execucao](#configuracao-e-execucao)
     - [Opcao 1 - Docker Compose (Recomendado)](#opcao-1---docker-compose-recomendado)
     - [Opcao 2 - Execucao Local (sem Docker)](#opcao-2---execucao-local-sem-docker)
+    - [Opcao 3 - Kubernetes](#opcao-3---kubernetes)
+    - [Opcao 4 - Terraform (Infraestrutura como Codigo)](#opcao-4---terraform-infraestrutura-como-codigo)
 - [Variaveis de Ambiente](#variaveis-de-ambiente)
 - [Autenticacao e Seguranca](#autenticacao-e-seguranca)
     - [Perfis de Acesso (Roles)](#perfis-de-acesso-roles)
@@ -45,6 +47,7 @@ API REST para gestao de uma oficina mecanica de medio porte, especializada em ma
 | **Spring Boot** | 4.0.5 | Framework para construcao da API REST |
 | **Spring Security** | - | Autenticacao e autorizacao |
 | **Spring Data JPA** | - | Persistencia de dados com Hibernate |
+| **Spring Boot Actuator** | - | Health checks e monitoramento |
 | **PostgreSQL** | 15 | Banco de dados em producao |
 | **H2 Database** | - | Banco de dados em memoria para testes |
 | **JWT (jjwt)** | 0.12.7 | Tokens de autenticacao |
@@ -53,6 +56,8 @@ API REST para gestao de uma oficina mecanica de medio porte, especializada em ma
 | **JaCoCo** | 0.8.12 | Cobertura de testes |
 | **Maven** | - | Gerenciamento de dependencias e build |
 | **Docker / Docker Compose** | - | Containerizacao da aplicacao |
+| **Kubernetes** | - | Orquestracao de containers |
+| **Terraform** | >= 1.0 | Infraestrutura como codigo |
 | **Bean Validation** | - | Validacoes customizadas (CPF/CNPJ, Placa) |
 
 ---
@@ -91,7 +96,8 @@ f1rsters-tech-challenge-mecanica/
 │   │   │   ├── TechChallengeMecanicaApplication.java  # Classe principal
 │   │   │   ├── config/
 │   │   │   │   ├── SecurityConfig.java                # Configuracao Spring Security
-│   │   │   │   └── SecuritySeedConfig.java            # Seed do usuario admin
+│   │   │   │   ├── SecuritySeedConfig.java            # Seed do usuario admin
+│   │   │   │   └── OpenApiConfig.java                 # Configuracao Swagger/OpenAPI
 │   │   │   ├── controller/
 │   │   │   │   ├── AuthController.java                # Login / Autenticacao
 │   │   │   │   ├── ClienteController.java             # CRUD de Clientes
@@ -162,7 +168,23 @@ f1rsters-tech-challenge-mecanica/
 │       ├── java/com/f1rsters/tech_challenge_mecanica/ # Testes unitarios e de integracao
 │       └── resources/
 │           └── application-test.yaml                  # Configuracao para testes (H2)
-├── Dockerfile                                         # Imagem Docker da aplicacao
+├── k8s/                                               # Manifestos Kubernetes
+│   ├── namespace.yaml                                 # Namespace da aplicacao
+│   ├── app-configmap.yaml                              # ConfigMap da aplicacao
+│   ├── app-secret.yaml                                 # Secret da aplicacao (JWT)
+│   ├── app-deployment.yaml                             # Deployment da aplicacao
+│   ├── app-service.yaml                               # Service da aplicacao (NodePort)
+│   ├── app-hpa.yaml                                   # Horizontal Pod Autoscaler
+│   ├── db-secret.yaml                                 # Secret do banco de dados
+│   ├── db-deployment.yaml                             # Deployment do PostgreSQL
+│   ├── db-service.yaml                               # Service do PostgreSQL
+│   └── db-pvc.yaml                                    # PersistentVolumeClaim para PostgreSQL
+├── infra/                                             # Infraestrutura como codigo (Terraform)
+│   ├── main.tf                                        # Configuracao principal Terraform
+│   ├── variables.tf                                   # Variaveis Terraform
+│   ├── outputs.tf                                     # Outputs Terraform
+│   └── README.md                                      # Documentacao da infraestrutura
+├── Dockerfile                                         # Imagem Docker da aplicacao (multi-stage)
 ├── docker-compose.yml                                 # Orquestracao (PostgreSQL + App)
 ├── TechChallengeMecanica.postman_collection.json      # Colecao Postman pronta
 ├── pom.xml                                            # Dependencias Maven
@@ -184,6 +206,14 @@ f1rsters-tech-challenge-mecanica/
 - [PostgreSQL 15](https://www.postgresql.org/download/)
 - [Git](https://git-scm.com/downloads)
 
+### Para Kubernetes
+- [kubectl](https://kubernetes.io/docs/tasks/tools/) - CLI do Kubernetes
+- Cluster Kubernetes local (Kind, Minikube ou K3d)
+
+### Para Terraform
+- [Terraform](https://developer.hashicorp.com/terraform/downloads) >= 1.0
+- Cluster Kubernetes local (Kind, Minikube ou K3d)
+
 ### Ferramentas opcionais
 - [Postman](https://www.postman.com/downloads/) - Para testar os endpoints (colecao inclusa)
 - [cURL](https://curl.se/) - Para testar via terminal
@@ -204,46 +234,36 @@ cd f1rsters-tech-challenge-mecanica
 git checkout feature/diogo
 ```
 
-**2. Faca o build da aplicacao (gerar o .jar):**
-
-```bash
-# Linux / macOS
-./mvnw clean package -DskipTests
-
-# Windows
-mvnw.cmd clean package -DskipTests
-```
-
-> **Nota:** O Dockerfile espera o arquivo `.jar` em `target/`. Por isso e necessario fazer o build antes de subir os containers.
-
-**3. Suba os containers:**
+**2. Suba os containers:**
 
 ```bash
 docker-compose up --build -d
 ```
+
+> **Nota:** O Dockerfile utiliza multi-stage build e faz o build Maven automaticamente durante o processo de build da imagem.
 
 Isso ira:
 - Subir um container PostgreSQL 15 na porta `5432`
 - Subir a aplicacao Spring Boot na porta `8080`
 - Criar automaticamente um usuario admin (seed)
 
-**4. Verifique se os containers estao rodando:**
+**3. Verifique se os containers estao rodando:**
 
 ```bash
 docker-compose ps
 ```
 
-**5. Acesse a API:**
+**4. Acesse a API:**
 - API: `http://localhost:8080`
 - Swagger UI: `http://localhost:8080/swagger-ui/index.html`
 
-**6. Para parar os containers:**
+**5. Para parar os containers:**
 
 ```bash
 docker-compose down
 ```
 
-**7. Para parar e remover os dados do banco:**
+**6. Para parar e remover os dados do banco:**
 
 ```bash
 docker-compose down -v
@@ -288,6 +308,110 @@ A aplicacao ira iniciar na porta `8080` e o Hibernate criara as tabelas automati
 **4. Acesse a API:**
 - API: `http://localhost:8080`
 - Swagger UI: `http://localhost:8080/swagger-ui/index.html`
+
+---
+
+### Opcao 3 - Kubernetes
+
+Para executar a aplicacao em um cluster Kubernetes local (Kind, Minikube ou K3d).
+
+**1. Build da imagem Docker:**
+
+```bash
+docker build -t oficina-app:latest .
+```
+
+**2. Carregar a imagem no cluster (se usando Kind):**
+
+```bash
+kind load docker-image oficina-app:latest
+```
+
+**3. Aplicar os manifestos Kubernetes:**
+
+```bash
+kubectl apply -f k8s/namespace.yaml
+kubectl apply -f k8s/app-configmap.yaml
+kubectl apply -f k8s/app-secret.yaml
+kubectl apply -f k8s/db-secret.yaml
+kubectl apply -f k8s/db-pvc.yaml
+kubectl apply -f k8s/db-deployment.yaml
+kubectl apply -f k8s/db-service.yaml
+kubectl apply -f k8s/app-deployment.yaml
+kubectl apply -f k8s/app-service.yaml
+kubectl apply -f k8s/app-hpa.yaml
+```
+
+**4. Verificar os recursos:**
+
+```bash
+kubectl get pods -n oficina
+kubectl get svc -n oficina
+kubectl get hpa -n oficina
+```
+
+**5. Acessar a aplicacao:**
+
+```bash
+# Obter a porta do NodePort
+kubectl get svc oficina-app -n oficina
+
+# Acessar via NodePort
+http://localhost:<NODEPORT>
+```
+
+**6. Remover os recursos:**
+
+```bash
+kubectl delete -f k8s/
+```
+
+---
+
+### Opcao 4 - Terraform (Infraestrutura como Codigo)
+
+Para provisionar a infraestrutura Kubernetes usando Terraform.
+
+**1. Inicializar o Terraform:**
+
+```bash
+cd infra
+terraform init
+```
+
+**2. Validar a configuracao:**
+
+```bash
+terraform validate
+```
+
+**3. Planejar as mudancas:**
+
+```bash
+terraform plan
+```
+
+**4. Aplicar a infraestrutura:**
+
+```bash
+terraform apply
+```
+
+**5. Verificar os recursos criados:**
+
+```bash
+kubectl get pods -n oficina
+kubectl get svc -n oficina
+kubectl get hpa -n oficina
+```
+
+**6. Destruir a infraestrutura:**
+
+```bash
+terraform destroy
+```
+
+Para mais detalhes, consulte o `infra/README.md`.
 
 ---
 
