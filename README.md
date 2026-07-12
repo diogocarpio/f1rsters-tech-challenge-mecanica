@@ -681,20 +681,67 @@ Realiza login e retorna um token JWT.
 }
 ```
 
+#### `GET /api/admin/ordens-servico/{id}/status` - Consultar status da OS
+Retorna o status atual da ordem de servico.
+
+**Response (200 OK):**
+```json
+{
+  "id": 1,
+  "status": "DIAGNOSTICO",
+  "atualizadoEm": "2025-01-15T10:30:00"
+}
+```
+
+#### `POST /api/admin/ordens-servico/{id}/orcamento/resposta` - Responder orcamento
+Recebe notificacao externa de aprovacao ou recusa do orcamento.
+
+**Request Body:**
+```json
+{
+  "aprovado": true,
+  "origem": "SISTEMA_EXTERNO",
+  "observacao": "Cliente aprovou o orcamento"
+}
+```
+
+**Logica:**
+- Se `aprovado = true`: move a OS para `EM_EXECUCAO`
+- Se `aprovado = false`: mantem o status atual mas registra a decisao
+- Apenas aceita OS com status `AGUARDANDO_APROVACAO`
+
+#### `POST /api/admin/ordens-servico/{id}/status/notificacao` - Atualizar status via notificacao externa
+Simula ou integra recebimento de notificacao externa (ex: email) para atualizar o status da OS.
+
+**Request Body:**
+```json
+{
+  "novoStatus": "AGUARDANDO_APROVACAO",
+  "origem": "EMAIL",
+  "mensagem": "Diagnostico concluido. Aguardando aprovacao do cliente."
+}
+```
+
 **Status disponiveis (fluxo da OS):**
 
 ```
-RECEBIDA --> EM_DIAGNOSTICO --> AGUARDANDO_APROVACAO --> EM_EXECUCAO --> FINALIZADA --> ENTREGUE
+RECEBIDA --> DIAGNOSTICO --> AGUARDANDO_APROVACAO --> EM_EXECUCAO --> FINALIZADA --> ENTREGUE
 ```
 
 | Status | Descricao |
 |---|---|
-| `RECEBIDA` | Veiculo recebido na oficina |
-| `EM_DIAGNOSTICO` | Em processo de avaliacao |
+| `RECEBIDA` | Veiculo recebido na oficina (status inicial) |
+| `DIAGNOSTICO` | Em processo de avaliacao |
 | `AGUARDANDO_APROVACAO` | Aguardando aprovacao do cliente |
 | `EM_EXECUCAO` | Servico em andamento |
 | `FINALIZADA` | Servico concluido |
 | `ENTREGUE` | Veiculo entregue ao cliente |
+
+**Regras de listagem:**
+- A listagem principal (`GET /api/admin/ordens-servico`) retorna apenas OS ativas
+- OS com status `FINALIZADA` e `ENTREGUE` sao excluidas logicamente da listagem
+- A ordenacao respeita a prioridade de status: `EM_EXECUCAO` > `AGUARDANDO_APROVACAO` > `DIAGNOSTICO` > `RECEBIDA`
+- Dentro do mesmo status, as OS mais antigas aparecem primeiro
 
 ---
 

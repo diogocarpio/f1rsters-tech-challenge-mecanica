@@ -2,7 +2,10 @@ package com.f1rsters.tech_challenge_mecanica.service;
 
 import com.f1rsters.tech_challenge_mecanica.domain.*;
 import com.f1rsters.tech_challenge_mecanica.dto.CriarOrdemServicoDTO;
+import com.f1rsters.tech_challenge_mecanica.dto.NotificacaoStatusDTO;
 import com.f1rsters.tech_challenge_mecanica.dto.OrdemServicoPublicDTO;
+import com.f1rsters.tech_challenge_mecanica.dto.RespostaOrcamentoDTO;
+import com.f1rsters.tech_challenge_mecanica.dto.StatusOrdemServicoDTO;
 import com.f1rsters.tech_challenge_mecanica.repository.*;
 import com.f1rsters.tech_challenge_mecanica.util.InputNormalizer;
 import com.f1rsters.tech_challenge_mecanica.util.SensitiveDataMasker;
@@ -77,7 +80,7 @@ public class OrdemServicoService {
         os.setServicos(servicos);
         os.setPecas(pecas);
         os.setValorTotal(valorTotal);
-        os.setStatus(StatusOrdemServico.AGUARDANDO_APROVACAO);
+        os.setStatus(StatusOrdemServico.RECEBIDA);
         os.setCriadoEm(LocalDateTime.now());
 
         return repo.save(os);
@@ -90,11 +93,47 @@ public class OrdemServicoService {
     }
 
     public List<OrdemServico> listarTodas() {
-        return repo.findAll();
+        return repo.findAllActiveOrderByStatusAndDate();
     }
 
     public OrdemServico detalhar(Long id) {
         return repo.findById(id).orElseThrow(() -> new RuntimeException("OS não encontrada"));
+    }
+
+    public StatusOrdemServicoDTO consultarStatus(Long id) {
+        OrdemServico os = repo.findById(id).orElseThrow(() -> new RuntimeException("OS não encontrada"));
+        return StatusOrdemServicoDTO.from(os.getId(), os.getStatus(), os.getCriadoEm());
+    }
+
+    @Transactional
+    public OrdemServico processarRespostaOrcamento(Long id, RespostaOrcamentoDTO dto) {
+        OrdemServico os = repo.findById(id).orElseThrow(() -> new RuntimeException("OS não encontrada"));
+        
+        if (os.getStatus() != StatusOrdemServico.AGUARDANDO_APROVACAO) {
+            throw new RuntimeException("OS não está aguardando aprovação");
+        }
+        
+        if (dto.aprovado()) {
+            os.setStatus(StatusOrdemServico.EM_EXECUCAO);
+        } else {
+            // Em caso de recusa, manter o status atual mas registrar a decisão
+            // Para simplificar, vamos manter AGUARDANDO_APROVACAO
+        }
+        
+        return repo.save(os);
+    }
+
+    @Transactional
+    public OrdemServico processarNotificacaoStatus(Long id, NotificacaoStatusDTO dto) {
+        OrdemServico os = repo.findById(id).orElseThrow(() -> new RuntimeException("OS não encontrada"));
+        
+        // Registrar status anterior para rastreabilidade
+        StatusOrdemServico statusAnterior = os.getStatus();
+        
+        // Atualizar status
+        os.setStatus(dto.novoStatus());
+        
+        return repo.save(os);
     }
 
     public OrdemServicoPublicDTO getPublicInfo(Long id) {

@@ -347,6 +347,39 @@
             "method": "GET",
             "url": { "raw": "{{baseUrl}}/api/admin/ordens-servico/{{ordemServicoId}}", "host": ["{{baseUrl}}"], "path": ["api", "admin", "ordens-servico", "{{ordemServicoId}}"] }
           }
+        },
+        {
+          "name": "GET /api/admin/ordens-servico/{id}/status",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/admin/ordens-servico/{{ordemServicoId}}/status", "host": ["{{baseUrl}}"], "path": ["api", "admin", "ordens-servico", "{{ordemServicoId}}", "status"] }
+          }
+        },
+        {
+          "name": "POST /api/admin/ordens-servico/{id}/orcamento/resposta",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"aprovado\": true,\n  \"origem\": \"SISTEMA_EXTERNO\",\n  \"observacao\": \"Cliente aprovou o orcamento\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/api/admin/ordens-servico/{{ordemServicoId}}/orcamento/resposta", "host": ["{{baseUrl}}"], "path": ["api", "admin", "ordens-servico", "{{ordemServicoId}}", "orcamento", "resposta"] }
+          }
+        },
+        {
+          "name": "POST /api/admin/ordens-servico/{id}/status/notificacao",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"novoStatus\": \"AGUARDANDO_APROVACAO\",\n  \"origem\": \"EMAIL\",\n  \"mensagem\": \"Diagnostico concluido. Aguardando aprovacao do cliente.\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/api/admin/ordens-servico/{{ordemServicoId}}/status/notificacao", "host": ["{{baseUrl}}"], "path": ["api", "admin", "ordens-servico", "{{ordemServicoId}}", "status", "notificacao"] }
+          }
         }
       ]
     },
