@@ -2,6 +2,27 @@
 
 API REST para gestao de uma oficina mecanica de medio porte, especializada em manutencao de veiculos. O sistema permite o gerenciamento completo de **clientes**, **veiculos**, **servicos**, **pecas** e **ordens de servico**, com autenticacao JWT, controle de acesso por perfis (roles) e mascaramento de dados sensiveis.
 
+# Tech Challenge Fase 2
+Descrição da Solução
+Nesta segunda fase do Tech Challenge, a solução desenvolvida na Fase 2 foi evoluída para atender aos requisitos de qualidade, escalabilidade, resiliência e automação necessários para um ambiente de produção. O foco desta etapa foi modernizar a arquitetura da aplicação e sua infraestrutura, garantindo que o sistema seja capaz de suportar o crescimento da oficina mecânica, a expansão para novas unidades e o aumento no volume de ordens de serviço.
+A aplicação passou por um processo de refatoração utilizando boas práticas de desenvolvimento, como Clean Code e uma arquitetura baseada em Clean Architecture (ou Arquitetura Hexagonal), promovendo melhor organização do código, separação de responsabilidades, baixo acoplamento e maior facilidade de manutenção e evolução.
+Também foram implementados testes automatizados para validar os fluxos críticos da aplicação, aumentando a confiabilidade das entregas e reduzindo o risco de regressões durante futuras evoluções.
+No contexto funcional, as APIs foram ampliadas para suportar o ciclo completo de gerenciamento das ordens de serviço. Entre as funcionalidades implementadas estão a abertura de ordens de serviço, consulta de status, aprovação de orçamento por integração externa, listagem das ordens conforme regras de negócio e atualização automática do status por meio de notificações.
+Para garantir portabilidade e padronização do ambiente, a aplicação foi containerizada utilizando Docker, permitindo sua execução de forma consistente em diferentes ambientes de desenvolvimento e produção.
+A orquestração da aplicação foi realizada com Kubernetes, utilizando manifestos para Deployments, Services, ConfigMaps, Secrets e Horizontal Pod Autoscaler (HPA), possibilitando alta disponibilidade e escalabilidade automática de acordo com a carga de utilização.
+A infraestrutura foi provisionada utilizando Terraform, adotando o conceito de Infraestrutura como Código (Infrastructure as Code - IaC), tornando o ambiente reproduzível, versionado e automatizado.
+Por fim, foi implementada uma pipeline de Integração Contínua e Entrega Contínua (CI/CD), responsável por automatizar o processo de build da aplicação, execução dos testes, criação da imagem Docker, provisionamento da infraestrutura, implantação do banco de dados e publicação da aplicação no cluster Kubernetes, reduzindo a intervenção manual e aumentando a confiabilidade do processo de deploy.
+# Objetivos da Fase
+Os principais objetivos desta fase foram:
+Evoluir a aplicação desenvolvida na Fase 1 utilizando boas práticas de arquitetura e desenvolvimento de software.
+Melhorar a qualidade, organização e manutenibilidade do código por meio de Clean Code e Clean Architecture.
+Garantir a confiabilidade da aplicação através da implementação de testes automatizados.
+Expandir as funcionalidades da API para atender ao fluxo completo de gerenciamento das ordens de serviço.
+Containerizar a aplicação utilizando Docker para padronizar sua execução.
+Implantar a aplicação em um ambiente orquestrado com Kubernetes, garantindo alta disponibilidade e escalabilidade automática.
+Automatizar o provisionamento da infraestrutura utilizando Terraform.
+Implementar um pipeline de CI/CD para automatizar o processo de integração, testes e implantação da aplicação.
+Preparar o sistema para suportar crescimento, novas unidades da oficina e maior volume de requisições com segurança, disponibilidade e eficiência.
 ---
 
 ## Indice
@@ -886,6 +907,7 @@ No Swagger UI voce pode:
 
 O projeto inclui uma colecao Postman pronta para uso:
 
+**URL:** https://github.com/diogocarpio/f1rsters-tech-challenge-mecanica/blob/main/TechChallengeMecanica.postman_collection.json
 **Arquivo:** `TechChallengeMecanica.postman_collection.json`
 
 ### Como importar no Postman:
