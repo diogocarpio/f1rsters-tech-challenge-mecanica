@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.f1rsters.tech_challenge_mecanica.domain.OrdemServico;
 import com.f1rsters.tech_challenge_mecanica.dto.AtualizarStatusOSDTO;
 import com.f1rsters.tech_challenge_mecanica.dto.CriarOrdemServicoDTO;
+import com.f1rsters.tech_challenge_mecanica.dto.NotificacaoStatusDTO;
+import com.f1rsters.tech_challenge_mecanica.dto.RespostaOrcamentoDTO;
+import com.f1rsters.tech_challenge_mecanica.dto.StatusOrdemServicoDTO;
 import com.f1rsters.tech_challenge_mecanica.security.AccessDeniedHandlerImpl;
 import com.f1rsters.tech_challenge_mecanica.security.AuthEntryPoint;
 import com.f1rsters.tech_challenge_mecanica.security.CustomUserDetailsService;
@@ -18,6 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -115,5 +119,44 @@ class OrdemServicoControllerTest {
 
         mockMvc.perform(get("/api/admin/ordens-servico/1"))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void shouldGetOrdemServicoStatus() throws Exception {
+        StatusOrdemServicoDTO statusDTO = new StatusOrdemServicoDTO(1L, StatusOrdemServico.DIAGNOSTICO, LocalDateTime.now());
+
+        when(ordemServicoService.consultarStatus(1L))
+                .thenReturn(statusDTO);
+
+        mockMvc.perform(get("/api/admin/ordens-servico/1/status"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void shouldResponderOrcamento() throws Exception {
+        RespostaOrcamentoDTO respostaDTO = new RespostaOrcamentoDTO(true, "SISTEMA_EXTERNO", "Cliente aprovou");
+
+        when(ordemServicoService.processarRespostaOrcamento(eq(1L), any()))
+                .thenReturn(createOS());
+
+        mockMvc.perform(
+                post("/api/admin/ordens-servico/1/orcamento/resposta")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(respostaDTO))
+        ).andExpect(status().isOk());
+    }
+
+    @Test
+    void shouldNotificarStatus() throws Exception {
+        NotificacaoStatusDTO notificacaoDTO = new NotificacaoStatusDTO(StatusOrdemServico.DIAGNOSTICO, "EMAIL", "Diagnóstico concluído");
+
+        when(ordemServicoService.processarNotificacaoStatus(eq(1L), any()))
+                .thenReturn(createOS());
+
+        mockMvc.perform(
+                post("/api/admin/ordens-servico/1/status/notificacao")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(notificacaoDTO))
+        ).andExpect(status().isOk());
     }
 }

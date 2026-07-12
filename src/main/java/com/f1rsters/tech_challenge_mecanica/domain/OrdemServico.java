@@ -27,4 +27,5 @@ public class OrdemServico {
     @Enumerated(EnumType.STRING)
     private StatusOrdemServico status;
     private LocalDateTime criadoEm;
+    private LocalDateTime deletedAt;
 }
