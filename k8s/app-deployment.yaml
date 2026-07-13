@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oficina-app
+  namespace: oficina
+  labels:
+    app: oficina-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: oficina-app
+  template:
+    metadata:
+      labels:
+        app: oficina-app
+    spec:
+      containers:
+      - name: oficina-app
+        image: oficina-app:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        env:
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:postgresql://postgres-db:5432/oficina"
+        - name: SPRING_DATASOURCE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: POSTGRES_USER
+        - name: SPRING_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: POSTGRES_PASSWORD
+        - name: SPRING_PROFILES_ACTIVE
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: SPRING_PROFILES_ACTIVE
+        - name: APP_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: APP_ENV
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: LOG_LEVEL
+        - name: JWT_ISSUER
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: JWT_ISSUER
+        - name: JWT_ACCESS_TOKEN_MINUTES
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: JWT_ACCESS_TOKEN_MINUTES
+        - name: JWT_SECRET_BASE64
+          valueFrom:
+            secretKeyRef:
+              name: app-secret
+              key: JWT_SECRET_BASE64
+        - name: SECURITY_SEED_ENABLED
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: SECURITY_SEED_ENABLED
+        - name: SECURITY_SEED_ADMIN_EMAIL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: SECURITY_SEED_ADMIN_EMAIL
+        - name: SECURITY_SEED_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secret
+              key: SECURITY_SEED_ADMIN_PASSWORD
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3

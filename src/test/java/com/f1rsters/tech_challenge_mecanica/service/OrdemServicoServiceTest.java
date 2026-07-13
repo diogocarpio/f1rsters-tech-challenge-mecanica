@@ -7,7 +7,10 @@ import com.f1rsters.tech_challenge_mecanica.domain.Servico;
 import com.f1rsters.tech_challenge_mecanica.domain.StatusOrdemServico;
 import com.f1rsters.tech_challenge_mecanica.domain.Veiculo;
 import com.f1rsters.tech_challenge_mecanica.dto.CriarOrdemServicoDTO;
+import com.f1rsters.tech_challenge_mecanica.dto.NotificacaoStatusDTO;
 import com.f1rsters.tech_challenge_mecanica.dto.OrdemServicoPublicDTO;
+import com.f1rsters.tech_challenge_mecanica.dto.RespostaOrcamentoDTO;
+import com.f1rsters.tech_challenge_mecanica.dto.StatusOrdemServicoDTO;
 import com.f1rsters.tech_challenge_mecanica.repository.ClienteRepository;
 import com.f1rsters.tech_challenge_mecanica.repository.OrdemServicoRepository;
 import com.f1rsters.tech_challenge_mecanica.repository.PecaRepository;
@@ -21,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -93,7 +97,7 @@ class OrdemServicoServiceTest {
 
         OrdemServico os = service.criarOrdem(dto);
 
-        assertEquals(StatusOrdemServico.AGUARDANDO_APROVACAO, os.getStatus());
+        assertEquals(StatusOrdemServico.RECEBIDA, os.getStatus());
         assertEquals(new BigDecimal("150.00"), os.getValorTotal());
         assertEquals(1, peca.getQuantidadeEstoque());
         assertNotNull(os.getCriadoEm());
@@ -286,7 +290,7 @@ class OrdemServicoServiceTest {
 
     @Test
     void deveListarTodasAsOrdens() {
-        when(repo.findAll()).thenReturn(List.of(new OrdemServico(), new OrdemServico()));
+        when(repo.findAllActiveOrderByStatusAndDate()).thenReturn(List.of(new OrdemServico(), new OrdemServico()));
 
         List<OrdemServico> ordens = service.listarTodas();
 
@@ -306,6 +310,102 @@ class OrdemServicoServiceTest {
         when(repo.findById(20L)).thenReturn(Optional.empty());
 
         RuntimeException ex = assertThrows(RuntimeException.class, () -> service.detalhar(20L));
+        assertTrue(ex.getMessage().contains("OS não encontrada"));
+    }
+
+    @Test
+    void deveConsultarStatusDaOS() {
+        OrdemServico os = new OrdemServico();
+        os.setId(1L);
+        os.setStatus(StatusOrdemServico.DIAGNOSTICO);
+        os.setCriadoEm(LocalDateTime.now());
+
+        when(repo.findById(1L)).thenReturn(Optional.of(os));
+
+        StatusOrdemServicoDTO dto = service.consultarStatus(1L);
+
+        assertEquals(1L, dto.id());
+        assertEquals(StatusOrdemServico.DIAGNOSTICO, dto.status());
+        assertNotNull(dto.atualizadoEm());
+    }
+
+    @Test
+    void deveFalharAoConsultarStatusQuandoOSNaoExiste() {
+        when(repo.findById(999L)).thenReturn(Optional.empty());
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> service.consultarStatus(999L));
+        assertTrue(ex.getMessage().contains("OS não encontrada"));
+    }
+
+    @Test
+    void deveAprovarOrcamentoEMoverParaEmExecucao() {
+        OrdemServico os = new OrdemServico();
+        os.setId(1L);
+        os.setStatus(StatusOrdemServico.AGUARDANDO_APROVACAO);
+
+        RespostaOrcamentoDTO dto = new RespostaOrcamentoDTO(true, "SISTEMA_EXTERNO", "Cliente aprovou");
+
+        when(repo.findById(1L)).thenReturn(Optional.of(os));
+        when(repo.save(os)).thenReturn(os);
+
+        OrdemServico resultado = service.processarRespostaOrcamento(1L, dto);
+
+        assertEquals(StatusOrdemServico.EM_EXECUCAO, resultado.getStatus());
+    }
+
+    @Test
+    void deveRecusarOrcamentoEManterStatus() {
+        OrdemServico os = new OrdemServico();
+        os.setId(1L);
+        os.setStatus(StatusOrdemServico.AGUARDANDO_APROVACAO);
+
+        RespostaOrcamentoDTO dto = new RespostaOrcamentoDTO(false, "SISTEMA_EXTERNO", "Cliente recusou");
+
+        when(repo.findById(1L)).thenReturn(Optional.of(os));
+        when(repo.save(os)).thenReturn(os);
+
+        OrdemServico resultado = service.processarRespostaOrcamento(1L, dto);
+
+        assertEquals(StatusOrdemServico.AGUARDANDO_APROVACAO, resultado.getStatus());
+    }
+
+    @Test
+    void deveFalharAoResponderOrcamentoQuandoStatusNaoEhAguardandoAprovacao() {
+        OrdemServico os = new OrdemServico();
+        os.setId(1L);
+        os.setStatus(StatusOrdemServico.RECEBIDA);
+
+        RespostaOrcamentoDTO dto = new RespostaOrcamentoDTO(true, "SISTEMA_EXTERNO", "Aprovação");
+
+        when(repo.findById(1L)).thenReturn(Optional.of(os));
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> service.processarRespostaOrcamento(1L, dto));
+        assertTrue(ex.getMessage().contains("não está aguardando aprovação"));
+    }
+
+    @Test
+    void deveProcessarNotificacaoDeStatus() {
+        OrdemServico os = new OrdemServico();
+        os.setId(1L);
+        os.setStatus(StatusOrdemServico.RECEBIDA);
+
+        NotificacaoStatusDTO dto = new NotificacaoStatusDTO(StatusOrdemServico.DIAGNOSTICO, "EMAIL", "Diagnóstico concluído");
+
+        when(repo.findById(1L)).thenReturn(Optional.of(os));
+        when(repo.save(os)).thenReturn(os);
+
+        OrdemServico resultado = service.processarNotificacaoStatus(1L, dto);
+
+        assertEquals(StatusOrdemServico.DIAGNOSTICO, resultado.getStatus());
+    }
+
+    @Test
+    void deveFalharAoProcessarNotificacaoQuandoOSNaoExiste() {
+        NotificacaoStatusDTO dto = new NotificacaoStatusDTO(StatusOrdemServico.DIAGNOSTICO, "EMAIL", "Diagnóstico");
+
+        when(repo.findById(999L)).thenReturn(Optional.empty());
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> service.processarNotificacaoStatus(999L, dto));
         assertTrue(ex.getMessage().contains("OS não encontrada"));
     }
 }

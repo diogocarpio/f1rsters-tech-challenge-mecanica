@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: com.f1rsters.tech_challenge_mecanica.security.AuthEntryPointTest
--------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.023 s -- in com.f1rsters.tech_challenge_mecanica.security.AuthEntryPointTest

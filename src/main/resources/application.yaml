@@ -16,6 +16,13 @@ spring:
 server:
   port: 8080
 
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    display-request-duration: true
+
 security:
   jwt:
     # Chave Base64 com no minimo 256 bits; em producao use somente variavel de ambiente.
