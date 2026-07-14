@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
   workflow_dispatch:
 
 concurrency:
@@ -18,172 +15,223 @@ env:
   K8S_NAMESPACE: oficina
   APP_DEPLOYMENT: oficina-app
   DB_DEPLOYMENT: postgres-db
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
-  IMAGE_TAG: ${{ github.sha }}
+  IMAGE_NAME: f1rsters-tech-challenge-mecanica-app
+  IMAGE_TAG: latest
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   build_and_test:
     name: Build e testes automatizados
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       contents: read
 
     steps:
       - name: Checkout do codigo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Configurar Java ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
           cache: maven
 
-      - name: Garantir permissao do Maven Wrapper
+      - name: Garantir permissao do Maven Wrapper (Linux/macOS)
+        if: runner.os != 'Windows'
         run: chmod +x mvnw
 
-      - name: Executar build e testes (inclui JaCoCo)
+      - name: Executar build e testes (Linux/macOS)
+        if: runner.os != 'Windows'
         run: ./mvnw -B clean verify
 
-  docker_build_and_push:
-    name: Build da imagem Docker
+      - name: Executar build e testes (Windows)
+        if: runner.os == 'Windows'
+        run: .\mvnw.cmd -B clean verify
+
+  build_and_deploy_local:
+    name: Build e deploy no Kubernetes local
     needs: build_and_test
-    if: github.event_name != 'pull_request'
-    runs-on: ubuntu-latest
+
+    # Adicione o label customizado "local-k8s" no runner que possui:
+    # Docker, Kind, kubectl e acesso ao cluster local.
+    #
+    # Funciona em Windows, macOS ou Linux.
+    runs-on: self-hosted
+
     permissions:
       contents: read
-      packages: write
 
-    outputs:
-      image_uri: ${{ steps.image_meta.outputs.image_uri }}
+    env:
+      IMAGE_NAME: f1rsters-tech-challenge-mecanica-app
+
+      IMAGE_TAG: latest
+
+      K8S_NAMESPACE: oficina
+      APP_DEPLOYMENT: oficina-app
+      APP_CONTAINER: oficina-app
+
+      # Confirme com: kind get clusters
+      KIND_CLUSTER_NAME: desktop
 
     steps:
-      - name: Checkout do codigo
-        uses: actions/checkout@v4
-
-      - name: Login no GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Definir metadados da imagem
-        id: image_meta
-        shell: bash
-        run: |
-          IMAGE_URI="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
-          IMAGE_LATEST="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
-          echo "image_uri=${IMAGE_URI}" >> "$GITHUB_OUTPUT"
-          echo "image_latest=${IMAGE_LATEST}" >> "$GITHUB_OUTPUT"
-
-      - name: Build e push da imagem
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: true
-          tags: |
-            ${{ steps.image_meta.outputs.image_uri }}
-            ${{ steps.image_meta.outputs.image_latest }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-  deploy-dev:
-    name: Deploy em DEV (requere aprovação de ambiente)
-    needs: docker_build_and_push
-    if: github.event_name != 'pull_request'
-    runs-on: ubuntu-latest
-    environment: dev
-    steps:
-      - name: Checkout do codigo
-        uses: actions/checkout@v4
+      - name: Checkout do código
+        uses: actions/checkout@v5
 
       - name: Instalar kubectl
-        uses: azure/setup-kubectl@v4
+        uses: azure/setup-kubectl@v5
         with:
           version: latest
 
-      - name: Configurar kubeconfig
-        shell: bash
+      - name: Validar ferramentas e cluster local (Linux/macOS)
+        if: runner.os != 'Windows'
         run: |
-          mkdir -p "$HOME/.kube"
-          echo "${KUBE_CONFIG_DATA}" | base64 --decode > "$HOME/.kube/config"
-        env:
-          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+          docker version
+          kind version
+          kubectl version --client
+          kubectl config current-context
+          kubectl cluster-info
+          kubectl get nodes
 
-      - name: Aplicar overlay kustomize (dev)
-        shell: bash
+      - name: Validar ferramentas e cluster local (Windows)
+        if: runner.os == 'Windows'
         run: |
-          kubectl apply -k k8s/overlays/dev
+          docker version
+          kind version
+          kubectl version --client
+          kubectl config current-context
+          kubectl cluster-info
+          kubectl get nodes
 
-      - name: Atualizar imagem para a tag do build
-        shell: bash
+      - name: Build da imagem Docker local (Linux/macOS)
+        if: runner.os != 'Windows'
         run: |
-          kubectl -n ${K8S_NAMESPACE} set image deployment/${APP_DEPLOYMENT} oficina-app=${{ needs.docker_build_and_push.outputs.image_uri }}
+          docker build --pull -t "${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" .
 
-  deploy-qa:
-    name: Deploy em QA (requer aprovação de ambiente)
-    needs: deploy-dev
-    if: github.event_name != 'pull_request'
-    runs-on: ubuntu-latest
-    environment: qa
-    steps:
-      - name: Checkout do codigo
-        uses: actions/checkout@v4
-
-      - name: Instalar kubectl
-        uses: azure/setup-kubectl@v4
-        with:
-          version: latest
-
-      - name: Configurar kubeconfig
-        shell: bash
+      - name: Build da imagem Docker local (Windows)
+        if: runner.os == 'Windows'
         run: |
-          mkdir -p "$HOME/.kube"
-          echo "${KUBE_CONFIG_DATA}" | base64 --decode > "$HOME/.kube/config"
-        env:
-          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+          docker build --pull -t "${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" .
 
-      - name: Aplicar overlay kustomize (qa)
-        shell: bash
+      - name: Validar imagem criada (Linux/macOS)
+        if: runner.os != 'Windows'
         run: |
-          kubectl apply -k k8s/overlays/qa
+          docker image inspect "${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
 
-      - name: Atualizar imagem para a tag do build
-        shell: bash
+      - name: Validar imagem criada (Windows)
+        if: runner.os == 'Windows'
         run: |
-          kubectl -n ${K8S_NAMESPACE} set image deployment/${APP_DEPLOYMENT} oficina-app=${{ needs.docker_build_and_push.outputs.image_uri }}
+          docker image inspect "${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
 
-  deploy-prod:
-    name: Deploy em PROD (requer aprovação de ambiente)
-    needs: deploy-qa
-    if: github.event_name != 'pull_request'
-    runs-on: ubuntu-latest
-    environment: prod
-    steps:
-      - name: Checkout do codigo
-        uses: actions/checkout@v4
-
-      - name: Instalar kubectl
-        uses: azure/setup-kubectl@v4
-        with:
-          version: latest
-
-      - name: Configurar kubeconfig
-        shell: bash
+      - name: Carregar imagem no cluster Kind (Linux/macOS)
+        if: runner.os != 'Windows'
         run: |
-          mkdir -p "$HOME/.kube"
-          echo "${KUBE_CONFIG_DATA}" | base64 --decode > "$HOME/.kube/config"
-        env:
-          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+          kind load docker-image "${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" --name "${{ env.KIND_CLUSTER_NAME }}"
 
-      - name: Aplicar overlay kustomize (prod)
-        shell: bash
+      - name: Carregar imagem no cluster Kind (Windows)
+        if: runner.os == 'Windows'
         run: |
-          kubectl apply -k k8s/overlays/prod
+          kind load docker-image "${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" --name "${{ env.KIND_CLUSTER_NAME }}"
 
-      - name: Atualizar imagem para a tag do build
-        shell: bash
+      - name: Aplicar namespace (Linux/macOS)
+        if: runner.os != 'Windows'
         run: |
-          kubectl -n ${K8S_NAMESPACE} set image deployment/${APP_DEPLOYMENT} oficina-app=${{ needs.docker_build_and_push.outputs.image_uri }}
+          kubectl apply -f k8s/namespace.yaml
+
+      - name: Aplicar namespace (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          kubectl apply -f k8s/namespace.yaml
+
+      - name: Aplicar manifestos do banco de dados (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: |
+          kubectl apply -f k8s/db-secret.yaml
+          kubectl apply -f k8s/db-pvc.yaml
+          kubectl apply -f k8s/db-service.yaml
+          kubectl apply -f k8s/db-deployment.yaml
+
+      - name: Aplicar manifestos do banco de dados (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          kubectl apply -f k8s/db-secret.yaml
+          kubectl apply -f k8s/db-pvc.yaml
+          kubectl apply -f k8s/db-service.yaml
+          kubectl apply -f k8s/db-deployment.yaml
+
+      - name: Aguardar banco de dados (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: |
+          kubectl rollout status deployment/postgres-db \
+            --namespace "${{ env.K8S_NAMESPACE }}" \
+            --timeout=180s
+
+      - name: Aguardar banco de dados (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          kubectl rollout status deployment/postgres-db --namespace "${{ env.K8S_NAMESPACE }}" --timeout=180s
+
+      - name: Aplicar manifestos da aplicação (Linux/macOS)
+        shell: bash
+        if: runner.os != 'Windows'
+        run: |
+          kubectl apply -f k8s/app-secret.yaml
+          kubectl apply -f k8s/app-configmap.yaml
+          kubectl apply -f k8s/app-service.yaml
+          kubectl apply -f k8s/app-deployment.yaml
+          kubectl apply -f k8s/app-hpa.yaml
+
+      - name: Aplicar manifestos da aplicação (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          kubectl apply -f k8s/app-secret.yaml
+          kubectl apply -f k8s/app-configmap.yaml
+          kubectl apply -f k8s/app-service.yaml
+          kubectl apply -f k8s/app-deployment.yaml
+          kubectl apply -f k8s/app-hpa.yaml
+
+      - name: Atualizar imagem da aplicação (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: |
+          kubectl set image \
+            deployment/${{ env.APP_DEPLOYMENT }} \
+            ${{ env.APP_CONTAINER }}=${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} \
+            --namespace "${{ env.K8S_NAMESPACE }}"
+
+      - name: Atualizar imagem da aplicação (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          kubectl set image deployment/${{ env.APP_DEPLOYMENT }} ${{ env.APP_CONTAINER }}=${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} --namespace "${{ env.K8S_NAMESPACE }}"
+
+      - name: Aguardar rollout da aplicação (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: |
+          kubectl rollout status \
+            deployment/${{ env.APP_DEPLOYMENT }} \
+            --namespace "${{ env.K8S_NAMESPACE }}" \
+            --timeout=300s
+
+      - name: Aguardar rollout da aplicação (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          kubectl rollout status deployment/${{ env.APP_DEPLOYMENT }} --namespace "${{ env.K8S_NAMESPACE }}" --timeout=300s
+
+      - name: Exibir recursos implantados (Linux/macOS)
+        if: always() && runner.os != 'Windows'
+        run: |
+          kubectl get pods \
+            --namespace "${{ env.K8S_NAMESPACE }}" \
+            -o wide
+
+          kubectl get services \
+            --namespace "${{ env.K8S_NAMESPACE }}"
+
+          kubectl get deployments \
+            --namespace "${{ env.K8S_NAMESPACE }}"
+
+      - name: Exibir recursos implantados (Windows)
+        if: always() && runner.os == 'Windows'
+        run: |
+          kubectl get pods --namespace "${{ env.K8S_NAMESPACE }}" -o wide
+          kubectl get services --namespace "${{ env.K8S_NAMESPACE }}"
+          kubectl get deployments --namespace "${{ env.K8S_NAMESPACE }}"
