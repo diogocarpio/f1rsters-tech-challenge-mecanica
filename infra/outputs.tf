@@ -25,7 +25,7 @@ output "postgres_service_name" {
 
 output "hpa_name" {
   description = "Nome do HPA"
-  value       = kubernetes_horizontal_pod_autoscaler.app.metadata[0].name
+  value       = kubernetes_horizontal_pod_autoscaler_v2.app.metadata[0].name
 }
 
 output "kubectl_get_pods" {
