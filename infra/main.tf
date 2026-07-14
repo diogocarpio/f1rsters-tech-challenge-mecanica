@@ -35,13 +35,13 @@ resource "kubernetes_config_map" "app" {
   }
 
   data = {
-    SPRING_PROFILES_ACTIVE        = var.spring_profiles_active
-    APP_ENV                       = var.app_env
-    LOG_LEVEL                     = var.log_level
-    JWT_ISSUER                    = var.jwt_issuer
-    JWT_ACCESS_TOKEN_MINUTES      = var.jwt_access_token_minutes
-    SECURITY_SEED_ENABLED         = var.security_seed_enabled
-    SECURITY_SEED_ADMIN_EMAIL     = var.security_seed_admin_email
+    SPRING_PROFILES_ACTIVE    = var.spring_profiles_active
+    APP_ENV                   = var.app_env
+    LOG_LEVEL                 = var.log_level
+    JWT_ISSUER                = var.jwt_issuer
+    JWT_ACCESS_TOKEN_MINUTES  = var.jwt_access_token_minutes
+    SECURITY_SEED_ENABLED     = var.security_seed_enabled
+    SECURITY_SEED_ADMIN_EMAIL = var.security_seed_admin_email
   }
 }
 
@@ -55,7 +55,7 @@ resource "kubernetes_secret" "app" {
   type = "Opaque"
 
   data = {
-    JWT_SECRET_BASE64          = var.jwt_secret_base64
+    JWT_SECRET_BASE64            = var.jwt_secret_base64
     SECURITY_SEED_ADMIN_PASSWORD = var.security_seed_admin_password
   }
 }
@@ -70,21 +70,24 @@ resource "kubernetes_secret" "db" {
   type = "Opaque"
 
   data = {
-    POSTGRES_DB     = var.postgres_db
-    POSTGRES_USER   = var.postgres_user
+    POSTGRES_DB       = var.postgres_db
+    POSTGRES_USER     = var.postgres_user
     POSTGRES_PASSWORD = var.postgres_password
   }
 }
 
 # Persistent Volume Claim for PostgreSQL
 resource "kubernetes_persistent_volume_claim" "postgres" {
+  wait_until_bound = false
+
   metadata {
     name      = "postgres-pvc"
     namespace = kubernetes_namespace.this.metadata[0].name
   }
 
   spec {
-    access_modes = ["ReadWriteOnce"]
+    access_modes       = ["ReadWriteOnce"]
+    storage_class_name = var.postgres_storage_class_name
     resources {
       requests = {
         storage = var.postgres_storage_size
@@ -213,6 +216,8 @@ resource "kubernetes_service" "postgres" {
 
 # App Deployment
 resource "kubernetes_deployment" "app" {
+  wait_for_rollout = false
+
   metadata {
     name      = "oficina-app"
     namespace = kubernetes_namespace.this.metadata[0].name
@@ -239,8 +244,8 @@ resource "kubernetes_deployment" "app" {
 
       spec {
         container {
-          name  = "oficina-app"
-          image = var.app_image
+          name              = "oficina-app"
+          image             = var.app_image
           image_pull_policy = "IfNotPresent"
 
           port {
@@ -411,7 +416,7 @@ resource "kubernetes_service" "app" {
   }
 
   spec {
-    type = "NodePort"
+    type = "LoadBalancer"
 
     port {
       port        = 80
@@ -426,7 +431,7 @@ resource "kubernetes_service" "app" {
 }
 
 # HPA
-resource "kubernetes_horizontal_pod_autoscaler" "app" {
+resource "kubernetes_horizontal_pod_autoscaler_v2" "app" {
   metadata {
     name      = "oficina-app-hpa"
     namespace = kubernetes_namespace.this.metadata[0].name

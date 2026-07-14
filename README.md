@@ -393,6 +393,9 @@ kubectl delete -f k8s/
 
 Para provisionar a infraestrutura Kubernetes usando Terraform.
 
+> Antes do `terraform apply`, garanta que a imagem `oficina-app:latest` exista no cluster local.
+> O Terraform expõe `postgres_storage_class_name` para ajustar a StorageClass do PVC do Postgres; em kind com Docker Desktop, `standard` costuma funcionar.
+
 **1. Inicializar o Terraform:**
 
 ```bash

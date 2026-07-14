@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: oficina-app
-        image: oficina-app:latest
+        image: f1rsters-tech-challenge-mecanica-app:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080

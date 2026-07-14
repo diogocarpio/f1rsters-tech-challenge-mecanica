@@ -33,10 +33,13 @@ As variáveis podem ser configuradas em um arquivo `terraform.tfvars`:
 project_name     = "oficina"
 environment      = "production"
 namespace        = "oficina"
-app_image        = "f1rsters-tech-challenge-mecanica-app:latest"
+app_image        = "oficina-app:latest"
 app_replicas     = 2
 postgres_password = "sua-senha-segura"
+postgres_storage_class_name = "standard"
 ```
+
+Use `postgres_storage_class_name` para apontar o PVC do Postgres para a StorageClass correta do cluster local. Em kind com Docker Desktop, `standard` costuma funcionar; se o cluster usar outro provisionador, ajuste para a classe disponivel.
 
 ## Como Executar
 

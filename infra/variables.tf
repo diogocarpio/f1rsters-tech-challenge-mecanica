@@ -118,6 +118,12 @@ variable "postgres_storage_size" {
   default     = "1Gi"
 }
 
+variable "postgres_storage_class_name" {
+  description = "StorageClass usada pelo PVC do PostgreSQL"
+  type        = string
+  default     = "standard"
+}
+
 # HPA variables
 variable "hpa_min_replicas" {
   description = "Número mínimo de réplicas do HPA"
