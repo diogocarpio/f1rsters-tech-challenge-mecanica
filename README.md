@@ -110,7 +110,7 @@ Controller (REST)  -->  Service (Regras de Negocio)  -->  Repository (JPA)  --> 
 
 ## Diagrama de Arquitetura
 
-![Arquitetura](./arquitetura.svg)
+![Arquitetura](./arquitetura.jpeg)
 
 O diagrama acima representa a arquitetura completa da solução, incluindo CI/CD, ambientes de desenvolvimento e produção, e a estrutura do cluster Kubernetes. Abaixo, uma explicação detalhada de cada camada:
 

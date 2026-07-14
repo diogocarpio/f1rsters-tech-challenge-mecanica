@@ -47,7 +47,7 @@ public class SecurityConfig {
                         .accessDeniedHandler(accessDeniedHandler))
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/api/public/**", "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/api/public/**", "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/actuator/health","/actuator/health/**").permitAll()
                         .requestMatchers(HttpMethod.PATCH, "/api/admin/ordens-servico/*/status").hasAnyRole("ADMIN", "MECANICO")
                         .requestMatchers(HttpMethod.GET, "/api/admin/pecas", "/api/admin/pecas/estoque", "/api/admin/pecas/**").hasAnyRole("ADMIN", "ESTOQUISTA", "MECANICO")
                         .requestMatchers(HttpMethod.POST, "/api/admin/pecas").hasAnyRole("ADMIN", "ESTOQUISTA")
