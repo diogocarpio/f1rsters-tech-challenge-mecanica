@@ -13,12 +13,15 @@ import com.f1rsters.tech_challenge_mecanica.repository.ServicoRepository;
 import com.f1rsters.tech_challenge_mecanica.repository.VeiculoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceLock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.context.WebApplicationContext;
 import jakarta.servlet.ServletException;
 
@@ -33,7 +36,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
+@SpringBootTest(properties = "test.context=ordem-servico-api")
+@ActiveProfiles("test")
+@ResourceLock("integration-db")
 class OrdemServicoApiIntegrationTest {
 
     private MockMvc mockMvc;
@@ -69,9 +74,8 @@ class OrdemServicoApiIntegrationTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void deveCriarOrdemServicoComSucesso() throws Exception {
-        String token = login("admin@oficina.local", "admin123");
-
         Cliente cliente = new Cliente();
         cliente.setNome("Cliente OS");
         cliente.setCpfCnpj("52998224725");
@@ -107,7 +111,6 @@ class OrdemServicoApiIntegrationTest {
 
         mockMvc.perform(post("/api/admin/ordens-servico")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token)
                         .content(body))
                 .andExpect(status().isOk());
 
@@ -217,4 +220,3 @@ class OrdemServicoApiIntegrationTest {
         return response.split("\"accessToken\":\"")[1].split("\"")[0];
     }
 }
-

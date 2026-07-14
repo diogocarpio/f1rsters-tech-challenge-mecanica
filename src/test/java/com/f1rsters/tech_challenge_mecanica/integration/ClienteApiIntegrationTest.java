@@ -6,6 +6,7 @@ import com.f1rsters.tech_challenge_mecanica.repository.ClienteRepository;
 import com.f1rsters.tech_challenge_mecanica.repository.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceLock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -13,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.Set;
@@ -22,7 +24,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
+@SpringBootTest(properties = "test.context=cliente-api")
+@ActiveProfiles("test")
+@ResourceLock("integration-db")
 class ClienteApiIntegrationTest {
 
     private MockMvc mockMvc;
@@ -136,4 +140,3 @@ class ClienteApiIntegrationTest {
         return response.split("\"accessToken\":\"")[1].split("\"")[0];
     }
 }
-
