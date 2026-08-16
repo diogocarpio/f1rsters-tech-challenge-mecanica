@@ -56,8 +56,13 @@ Preparar o sistema para suportar crescimento, novas unidades da oficina e maior 
 - [Validacoes Customizadas](#validacoes-customizadas)
 - [Mascaramento de Dados Sensiveis](#mascaramento-de-dados-sensiveis)
 - [Testes](#testes)
+    - [Estrutura de Testes](#estrutura-de-testes)
+    - [Executar Testes](#executar-todos-os-testes)
+    - [Tecnologias de Teste](#tecnologias-de-teste)
+    - [Configuracao de Testes](#configuracao-de-testes)
+    - [Cobertura de Codigo Atual](#cobertura-de-codigo-atual)
+    - [Estrategia de Testes](#estrategia-de-testes)
 - [Cobertura de Codigo (JaCoCo)](#cobertura-de-codigo-jacoco)
-- [Tratamento de Erros](#tratamento-de-erros)
 
 ---
 
@@ -610,6 +615,8 @@ Realiza login e retorna um token JWT.
 > **Autenticacao necessaria.** Envie o header: `Authorization: Bearer <token>`
 
 #### `POST /api/admin/clientes` - Criar cliente
+
+**Request Body:**
 ```json
 {
   "nome": "Cliente Exemplo",
@@ -617,11 +624,65 @@ Realiza login e retorna um token JWT.
 }
 ```
 
+**Response (200 OK):**
+```json
+{
+  "id": 1,
+  "nome": "Cliente Exemplo",
+  "cpfCnpjMascarado": "***.45.***-01"
+}
+```
+
+**Response (400 BAD_REQUEST):**
+```json
+{
+  "status": 400,
+  "error": "VALIDATION_ERROR",
+  "fields": [
+    {
+      "field": "cpfCnpj",
+      "message": "CPF/CNPJ inválido"
+    }
+  ]
+}
+```
+
 #### `GET /api/admin/clientes` - Listar todos os clientes
+
+**Response (200 OK):**
+```json
+[
+  {
+    "id": 1,
+    "nome": "Cliente Exemplo",
+    "cpfCnpjMascarado": "***.45.***-01"
+  }
+]
+```
 
 #### `GET /api/admin/clientes/{id}` - Buscar cliente por ID
 
+**Response (200 OK):**
+```json
+{
+  "id": 1,
+  "nome": "Cliente Exemplo",
+  "cpfCnpjMascarado": "***.45.***-01"
+}
+```
+
+**Response (404 NOT_FOUND):**
+```json
+{
+  "status": 404,
+  "error": "NOT_FOUND",
+  "message": "Cliente não encontrado"
+}
+```
+
 #### `PUT /api/admin/clientes/{id}` - Atualizar cliente
+
+**Request Body:**
 ```json
 {
   "nome": "Cliente Atualizado",
@@ -629,7 +690,18 @@ Realiza login e retorna um token JWT.
 }
 ```
 
+**Response (200 OK):**
+```json
+{
+  "id": 1,
+  "nome": "Cliente Atualizado",
+  "cpfCnpjMascarado": "***.45.***-01"
+}
+```
+
 #### `DELETE /api/admin/clientes/{id}` - Remover cliente
+
+**Response (204 NO_CONTENT):** (sem corpo)
 
 > **Nota:** O CPF/CNPJ e validado com o algoritmo oficial (digitos verificadores). O campo `cpfCnpj` aceita tanto CPF (11 digitos) quanto CNPJ (14 digitos), com ou sem formatacao (pontos, tracos, barras sao removidos automaticamente). Na resposta, o CPF/CNPJ e retornado mascarado (ex: `***.45.***-01`).
 
@@ -640,6 +712,8 @@ Realiza login e retorna um token JWT.
 > **Autenticacao necessaria.** Envie o header: `Authorization: Bearer <token>`
 
 #### `POST /api/admin/veiculos` - Cadastrar veiculo
+
+**Request Body:**
 ```json
 {
   "clienteId": 1,
@@ -650,11 +724,65 @@ Realiza login e retorna um token JWT.
 }
 ```
 
+**Response (200 OK):**
+```json
+{
+  "id": 1,
+  "clienteId": 1,
+  "placaMascarada": "ABC****",
+  "marca": "Toyota",
+  "modelo": "Corolla",
+  "ano": 2020
+}
+```
+
+**Response (400 BAD_REQUEST):**
+```json
+{
+  "status": 400,
+  "error": "VALIDATION_ERROR",
+  "fields": [
+    {
+      "field": "placa",
+      "message": "Placa inválida"
+    }
+  ]
+}
+```
+
 #### `GET /api/admin/veiculos` - Listar todos os veiculos
+
+**Response (200 OK):**
+```json
+[
+  {
+    "id": 1,
+    "clienteId": 1,
+    "placaMascarada": "ABC****",
+    "marca": "Toyota",
+    "modelo": "Corolla",
+    "ano": 2020
+  }
+]
+```
 
 #### `GET /api/admin/veiculos/{id}` - Buscar veiculo por ID
 
+**Response (200 OK):**
+```json
+{
+  "id": 1,
+  "clienteId": 1,
+  "placaMascarada": "ABC****",
+  "marca": "Toyota",
+  "modelo": "Corolla",
+  "ano": 2020
+}
+```
+
 #### `PUT /api/admin/veiculos/{id}` - Atualizar veiculo
+
+**Request Body:**
 ```json
 {
   "clienteId": 1,
@@ -665,7 +793,21 @@ Realiza login e retorna um token JWT.
 }
 ```
 
+**Response (200 OK):**
+```json
+{
+  "id": 1,
+  "clienteId": 1,
+  "placaMascarada": "ABC****",
+  "marca": "Toyota",
+  "modelo": "Corolla XEi",
+  "ano": 2021
+}
+```
+
 #### `DELETE /api/admin/veiculos/{id}` - Remover veiculo
+
+**Response (204 NO_CONTENT):** (sem corpo)
 
 > **Nota:** A placa aceita o formato brasileiro antigo (`ABC1234`) e o formato Mercosul (`ABC1D23`). Caracteres especiais (tracos, espacos) sao removidos automaticamente. Na resposta, a placa e mascarada (ex: `ABC****`).
 
@@ -676,6 +818,8 @@ Realiza login e retorna um token JWT.
 > **Autenticacao necessaria.** Envie o header: `Authorization: Bearer <token>`
 
 #### `POST /api/admin/servicos` - Cadastrar servico
+
+**Request Body:**
 ```json
 {
   "descricao": "Troca de oleo",
@@ -683,11 +827,56 @@ Realiza login e retorna um token JWT.
 }
 ```
 
+**Response (200 OK):**
+```json
+{
+  "id": 1,
+  "descricao": "Troca de oleo",
+  "valor": 150.00
+}
+```
+
+**Response (400 BAD_REQUEST):**
+```json
+{
+  "status": 400,
+  "error": "VALIDATION_ERROR",
+  "fields": [
+    {
+      "field": "descricao",
+      "message": "Descrição é obrigatória"
+    }
+  ]
+}
+```
+
 #### `GET /api/admin/servicos` - Listar todos os servicos
+
+**Response (200 OK):**
+```json
+[
+  {
+    "id": 1,
+    "descricao": "Troca de oleo",
+    "valor": 150.00
+  }
+]
+```
 
 #### `GET /api/admin/servicos/{id}` - Buscar servico por ID
 
+**Response (200 OK):**
+```json
+{
+  "id": 1,
+  "descricao": "Troca de oleo",
+  "valor": 150.00
+}
+```
+
 #### `PUT /api/admin/servicos/{id}` - Atualizar servico
+
+**Request Body:**
 ```json
 {
   "descricao": "Alinhamento e Balanceamento",
@@ -695,7 +884,18 @@ Realiza login e retorna um token JWT.
 }
 ```
 
+**Response (200 OK):**
+```json
+{
+  "id": 1,
+  "descricao": "Alinhamento e Balanceamento",
+  "valor": 200.00
+}
+```
+
 #### `DELETE /api/admin/servicos/{id}` - Remover servico
+
+**Response (204 NO_CONTENT):** (sem corpo)
 
 ---
 
@@ -704,6 +904,8 @@ Realiza login e retorna um token JWT.
 > **Autenticacao necessaria.** Envie o header: `Authorization: Bearer <token>`
 
 #### `POST /api/admin/pecas` - Cadastrar peca
+
+**Request Body:**
 ```json
 {
   "descricao": "Filtro de oleo",
@@ -712,11 +914,45 @@ Realiza login e retorna um token JWT.
 }
 ```
 
+**Response (200 OK):**
+```json
+{
+  "id": 1,
+  "descricao": "Filtro de oleo",
+  "quantidadeEstoque": 20,
+  "valorUnitario": 35.90
+}
+```
+
 #### `GET /api/admin/pecas` - Listar todas as pecas
+
+**Response (200 OK):**
+```json
+[
+  {
+    "id": 1,
+    "descricao": "Filtro de oleo",
+    "quantidadeEstoque": 20,
+    "valorUnitario": 35.90
+  }
+]
+```
 
 #### `GET /api/admin/pecas/{id}` - Buscar peca por ID
 
+**Response (200 OK):**
+```json
+{
+  "id": 1,
+  "descricao": "Filtro de oleo",
+  "quantidadeEstoque": 20,
+  "valorUnitario": 35.90
+}
+```
+
 #### `PUT /api/admin/pecas/{id}` - Atualizar peca
+
+**Request Body:**
 ```json
 {
   "descricao": "Filtro de ar",
@@ -725,15 +961,60 @@ Realiza login e retorna um token JWT.
 }
 ```
 
+**Response (200 OK):**
+```json
+{
+  "id": 1,
+  "descricao": "Filtro de ar",
+  "quantidadeEstoque": 10,
+  "valorUnitario": 49.90
+}
+```
+
 #### `DELETE /api/admin/pecas/{id}` - Remover peca
+
+**Response (204 NO_CONTENT):** (sem corpo)
 
 #### `GET /api/admin/pecas/estoque` - Consultar estoque de pecas
 
+**Response (200 OK):**
+```json
+[
+  {
+    "id": 1,
+    "descricao": "Filtro de oleo",
+    "quantidadeEstoque": 20,
+    "valorUnitario": 35.90
+  }
+]
+```
+
 #### `POST /api/admin/pecas/baixa` - Dar baixa no estoque
+
+**Request Body:**
 ```json
 {
   "pecaId": 1,
   "quantidade": 1
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "id": 1,
+  "descricao": "Filtro de oleo",
+  "quantidadeEstoque": 19,
+  "valorUnitario": 35.90
+}
+```
+
+**Response (400 BAD_REQUEST):**
+```json
+{
+  "status": 400,
+  "error": "BUSINESS_ERROR",
+  "message": "Estoque insuficiente para a peça: Filtro de oleo"
 }
 ```
 
@@ -746,6 +1027,8 @@ Realiza login e retorna um token JWT.
 > **Autenticacao necessaria.** Envie o header: `Authorization: Bearer <token>`
 
 #### `POST /api/admin/ordens-servico` - Criar ordem de servico
+
+**Request Body:**
 ```json
 {
   "cpfCnpjCliente": "12345678901",
@@ -755,26 +1038,149 @@ Realiza login e retorna um token JWT.
 }
 ```
 
+**Response (200 OK):**
+```json
+{
+  "id": 1,
+  "cliente": {
+    "id": 1,
+    "nome": "Cliente Exemplo",
+    "cpfCnpj": "***.45.***-01"
+  },
+  "veiculo": {
+    "id": 1,
+    "placa": "ABC****",
+    "marca": "Toyota",
+    "modelo": "Corolla"
+  },
+  "servicos": [
+    {
+      "id": 1,
+      "descricao": "Troca de oleo",
+      "valor": 150.00
+    }
+  ],
+  "pecas": [
+    {
+      "id": 1,
+      "descricao": "Filtro de oleo",
+      "valorUnitario": 35.90
+    }
+  ],
+  "valorTotal": 185.90,
+  "status": "RECEBIDA",
+  "criadoEm": "2025-01-15T10:30:00"
+}
+```
+
+**Response (400 BAD_REQUEST):**
+```json
+{
+  "status": 400,
+  "error": "BUSINESS_ERROR",
+  "message": "Estoque insuficiente para a peça: Filtro de oleo"
+}
+```
+
 **Logica de criacao:**
 1. Busca o cliente pelo CPF/CNPJ
 2. Busca o veiculo pela placa
 3. Busca os servicos e pecas pelos IDs informados
 4. Valida e desconta 1 unidade de cada peca do estoque
 5. Calcula o valor total (soma dos servicos + soma das pecas)
-6. Cria a OS com status `AGUARDANDO_APROVACAO`
+6. Cria a OS com status `RECEBIDA`
 
 #### `GET /api/admin/ordens-servico` - Listar todas as ordens de servico
 
+**Response (200 OK):**
+```json
+[
+  {
+    "id": 1,
+    "cliente": {
+      "id": 1,
+      "nome": "Cliente Exemplo",
+      "cpfCnpj": "***.45.***-01"
+    },
+    "veiculo": {
+      "id": 1,
+      "placa": "ABC****",
+      "marca": "Toyota",
+      "modelo": "Corolla"
+    },
+    "valorTotal": 185.90,
+    "status": "EM_EXECUCAO",
+    "criadoEm": "2025-01-15T10:30:00"
+  }
+]
+```
+
 #### `GET /api/admin/ordens-servico/{id}` - Detalhar ordem de servico
 
+**Response (200 OK):**
+```json
+{
+  "id": 1,
+  "cliente": {
+    "id": 1,
+    "nome": "Cliente Exemplo",
+    "cpfCnpj": "***.45.***-01"
+  },
+  "veiculo": {
+    "id": 1,
+    "placa": "ABC****",
+    "marca": "Toyota",
+    "modelo": "Corolla"
+  },
+  "servicos": [
+    {
+      "id": 1,
+      "descricao": "Troca de oleo",
+      "valor": 150.00
+    }
+  ],
+  "pecas": [
+    {
+      "id": 1,
+      "descricao": "Filtro de oleo",
+      "valorUnitario": 35.90
+    }
+  ],
+  "valorTotal": 185.90,
+  "status": "EM_EXECUCAO",
+  "criadoEm": "2025-01-15T10:30:00"
+}
+```
+
 #### `PATCH /api/admin/ordens-servico/{id}/status` - Atualizar status da OS
+
+**Request Body:**
 ```json
 {
   "novoStatus": "EM_EXECUCAO"
 }
 ```
 
+**Response (200 OK):**
+```json
+{
+  "id": 1,
+  "cliente": {
+    "id": 1,
+    "nome": "Cliente Exemplo"
+  },
+  "veiculo": {
+    "id": 1,
+    "placa": "ABC****"
+  },
+  "valorTotal": 185.90,
+  "status": "EM_EXECUCAO",
+  "criadoEm": "2025-01-15T10:30:00"
+}
+```
+
 #### `GET /api/admin/ordens-servico/{id}/status` - Consultar status da OS
+
 Retorna o status atual da ordem de servico.
 
 **Response (200 OK):**
@@ -787,6 +1193,7 @@ Retorna o status atual da ordem de servico.
 ```
 
 #### `POST /api/admin/ordens-servico/{id}/orcamento/resposta` - Responder orcamento
+
 Recebe notificacao externa de aprovacao ou recusa do orcamento.
 
 **Request Body:**
@@ -798,12 +1205,23 @@ Recebe notificacao externa de aprovacao ou recusa do orcamento.
 }
 ```
 
+**Response (200 OK):**
+```json
+{
+  "id": 1,
+  "valorTotal": 185.90,
+  "status": "EM_EXECUCAO",
+  "criadoEm": "2025-01-15T10:30:00"
+}
+```
+
 **Logica:**
 - Se `aprovado = true`: move a OS para `EM_EXECUCAO`
 - Se `aprovado = false`: mantem o status atual mas registra a decisao
 - Apenas aceita OS com status `AGUARDANDO_APROVACAO`
 
 #### `POST /api/admin/ordens-servico/{id}/status/notificacao` - Atualizar status via notificacao externa
+
 Simula ou integra recebimento de notificacao externa (ex: email) para atualizar o status da OS.
 
 **Request Body:**
@@ -812,6 +1230,16 @@ Simula ou integra recebimento de notificacao externa (ex: email) para atualizar 
   "novoStatus": "AGUARDANDO_APROVACAO",
   "origem": "EMAIL",
   "mensagem": "Diagnostico concluido. Aguardando aprovacao do cliente."
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "id": 1,
+  "valorTotal": 185.90,
+  "status": "AGUARDANDO_APROVACAO",
+  "criadoEm": "2025-01-15T10:30:00"
 }
 ```
 
@@ -1068,7 +1496,25 @@ Isso garante que dados sensiveis nao sejam expostos desnecessariamente nas respo
 
 ## Testes
 
-O projeto possui testes unitarios e de integracao abrangentes.
+O projeto possui uma suite abrangente de testes automatizados, incluindo testes unitários e de integração, garantindo a qualidade e confiabilidade da aplicação.
+
+### Estrutura de Testes
+
+**Testes Unitários:**
+- Testes de Services (lógica de negócio)
+- Testes de Utilitários (validações, normalização, mascaramento)
+- Testes de Validation (validadores customizados)
+- Testes de Security (JWT, autenticação)
+- Testes de Mapper (conversão de DTOs)
+- Testes de Exception (tratamento de erros)
+
+**Testes de Integração:**
+- ClienteApiIntegrationTest - Fluxo completo de CRUD de clientes
+- VeiculoApiIntegrationTest - Fluxo completo de CRUD de veículos
+- ServicoApiIntegrationTest - Fluxo completo de CRUD de serviços
+- PecaApiIntegrationTest - Fluxo completo de CRUD de peças e baixa de estoque
+- OrdemServicoApiIntegrationTest - Fluxo completo de ordens de serviço
+- SecurityIntegrationTests - Testes de segurança e autorização
 
 ### Executar todos os testes:
 
@@ -1080,17 +1526,47 @@ O projeto possui testes unitarios e de integracao abrangentes.
 mvnw.cmd test
 ```
 
-### Tecnologias de teste:
-- **JUnit 5** - Framework de testes
-- **Mockito** - Mocking de dependencias
-- **Spring Boot Test** - Testes de integracao com contexto Spring
-- **Spring Security Test** - Testes de autenticacao e autorizacao
-- **H2 Database** - Banco em memoria para testes (profile `test`)
+### Executar testes com relatório de cobertura:
 
-### Configuracao de testes:
-- Os testes utilizam o profile `test` com banco H2 em memoria (`application-test.yaml`)
-- O seed do admin e **desabilitado** nos testes (`security.seed.enabled: false`)
-- Os testes rodam em **paralelo** por classe (configurado no `pom.xml`)
+```bash
+# Linux / macOS
+./mvnw test jacoco:report
+
+# Windows
+mvnw.cmd test jacoco:report
+```
+
+O relatório de cobertura será gerado em: `target/site/jacoco/index.html`
+
+### Tecnologias de teste:
+- **JUnit 5** - Framework de testes com suporte a testes parametrizados e paralelos
+- **Mockito** - Mocking de dependências para testes unitários
+- **Spring Boot Test** - Testes de integração com contexto Spring completo
+- **Spring Security Test** - Testes de autenticação e autorização com @WithMockUser
+- **H2 Database** - Banco em memória para testes (profile `test`)
+- **JaCoCo** - Ferramenta de análise de cobertura de código
+
+### Configuração de testes:
+- Os testes utilizam o profile `test` com banco H2 em memória (`application-test.yaml`)
+- O seed do admin é **habilitado** nos testes (`security.seed.enabled: true`)
+- Os testes rodam em **paralelo** por classe (configurado no `pom.xml` com paralelismo 2)
+- Testes de integração usam `@ResourceLock("integration-db")` para evitar conflitos de banco
+
+### Cobertura de Código Atual
+
+A análise do JaCoCo mostra uma cobertura excelente:
+- **Cobertura geral: 99% de linhas, 91% de branches**
+- Services: 99% linhas, 100% branches
+- Controllers: 100% linhas
+- Security: 98% linhas, 68% branches
+- **Total de testes: 184 testes executando com sucesso**
+
+### Estratégia de Testes
+
+1. **Testes Unitários**: Focam na lógica de negócio isolada, usando mocks para dependências externas
+2. **Testes de Integração**: Validam fluxos completos da API, incluindo autenticação, autorização e persistência
+3. **Testes de Segurança**: Garantem que endpoints protegidos funcionem corretamente com diferentes roles
+4. **Testes de Validação**: Verificam que as validações customizadas (CPF/CNPJ, placa) funcionam corretamente
 
 ---
 
