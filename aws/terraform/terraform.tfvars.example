@@ -1,0 +1,22 @@
+# Terraform Variables Example
+# Copy this file to terraform.tfvars and fill in the values
+
+aws_region = "sa-east-1"
+project_name = "f1rsters-tech-challenge-mecanica"
+environment = "dev"
+
+lambda_artifacts_bucket = "f1rsters-tech-challenge-lambda-artifacts"
+lambda_auth_s3_key = "auth-function.jar"
+
+# VPC Configuration (get from your AWS account)
+vpc_id = "vpc-xxxxxxxxxxxxx"
+private_subnet_ids = ["subnet-xxxxxxxxxxxxx", "subnet-xxxxxxxxxxxxx"]
+allowed_cidr_blocks = ["10.0.0.0/8"]
+
+# Database Configuration
+db_name = "oficina"
+db_username = "oficinauser"
+db_password = "your_secure_password_here"
+
+# JWT Configuration
+jwt_secret = "your_jwt_secret_base64_encoded"
