@@ -33,7 +33,7 @@ public class DatabaseService {
                 }
             }
         } catch (Exception e) {
-            throw new RuntimeException("Database error: " + e.getMessage(), e);
+            throw new IllegalArgumentException("Database error: " + e.getMessage(), e);
         }
         
         return null;

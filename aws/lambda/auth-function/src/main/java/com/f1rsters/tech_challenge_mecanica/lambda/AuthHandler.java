@@ -9,6 +9,7 @@ import java.util.Map;
 
 public class AuthHandler implements RequestHandler<Map<String, Object>, Map<String, Object>> {
 
+    private static final String STATUS_CODE = "statusCode";
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private final CpfValidator cpfValidator;
     private final JwtService jwtService;
@@ -55,7 +56,7 @@ public class AuthHandler implements RequestHandler<Map<String, Object>, Map<Stri
             context.getLogger().log("JWT token generated successfully");
             
             // Build success response
-            response.put("statusCode", 200);
+            response.put(STATUS_CODE, 200);
             response.put("body", buildSuccessBody(client, token));
             
         } catch (Exception e) {
@@ -105,10 +106,10 @@ public class AuthHandler implements RequestHandler<Map<String, Object>, Map<Stri
     
     private Map<String, Object> buildErrorResponse(int statusCode, String message) {
         Map<String, Object> response = new HashMap<>();
-        response.put("statusCode", statusCode);
+        response.put(STATUS_CODE, statusCode);
         response.put("body", Map.of(
             "error", message,
-            "statusCode", statusCode
+            STATUS_CODE, statusCode
         ));
         return response;
     }
