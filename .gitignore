@@ -1,1 +1,10 @@
 target
+.env
+.env.local
+.env.*.local
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+*.jar
+*.class
