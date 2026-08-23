@@ -37,6 +37,7 @@ Preparar o sistema para suportar crescimento, novas unidades da oficina e maior 
     - [Opcao 2 - Execucao Local (sem Docker)](#opcao-2---execucao-local-sem-docker)
     - [Opcao 3 - Kubernetes](#opcao-3---kubernetes)
     - [Opcao 4 - Terraform (Infraestrutura como Codigo)](#opcao-4---terraform-infraestrutura-como-codigo)
+- [Opcao 5 - AWS (Lambda, API Gateway, RDS)](#opcao-5---aws-lambda-api-gateway-rds)
 - [Variaveis de Ambiente](#variaveis-de-ambiente)
 - [Autenticacao e Seguranca](#autenticacao-e-seguranca)
     - [Perfis de Acesso (Roles)](#perfis-de-acesso-roles)
@@ -85,6 +86,9 @@ Preparar o sistema para suportar crescimento, novas unidades da oficina e maior 
 | **Docker / Docker Compose** | - | Containerizacao da aplicacao |
 | **Kubernetes** | - | Orquestracao de containers |
 | **Terraform** | >= 1.0 | Infraestrutura como codigo |
+| **AWS Lambda** | - | Funcoes serverless para autenticacao |
+| **AWS API Gateway** | - | Gateway de API para Lambda |
+| **AWS RDS** | PostgreSQL 15 | Banco de dados gerenciado |
 | **Bean Validation** | - | Validacoes customizadas (CPF/CNPJ, Placa) |
 
 ---
@@ -510,6 +514,110 @@ terraform destroy
 ```
 
 Para mais detalhes, consulte o `infra/README.md`.
+
+---
+
+### Opcao 5 - AWS (Lambda, API Gateway, RDS)
+
+Para executar a aplicacao usando AWS Lambda, API Gateway e RDS PostgreSQL (Tech Challenge Parte 1).
+
+**Pre-requisitos AWS:**
+- Conta AWS com credenciais configuradas
+- AWS CLI instalado e configurado
+- Terraform instalado
+- Buckets S3 criados para Terraform state e Lambda artifacts
+
+**1. Configurar credenciais AWS:**
+
+```bash
+# Configure suas credenciais AWS
+aws configure
+```
+
+Ou use o arquivo de exemplo:
+```bash
+cp .env.example .env
+# Edite o arquivo .env com suas credenciais
+```
+
+**2. Criar buckets S3 necessarios:**
+
+```bash
+# Bucket para estado do Terraform
+aws s3 mb s3://f1rsters-tech-challenge-terraform-state --region sa-east-1
+
+# Bucket para artifacts da Lambda
+aws s3 mb s3://f1rsters-tech-challenge-lambda-artifacts --region sa-east-1
+
+# Criar tabela DynamoDB para locks do Terraform
+aws dynamodb create-table \
+  --table-name terraform-locks \
+  --attribute-definitions AttributeName=LockID,AttributeType=S \
+  --key-schema AttributeName=LockID,KeyType=HASH \
+  --billing-mode PAY_PER_REQUEST \
+  --region sa-east-1
+```
+
+**3. Configurar variaveis do Terraform:**
+
+```bash
+cd aws/terraform
+cp terraform.tfvars.example terraform.tfvars
+# Edite terraform.tfvars com suas configuracoes (VPC, subnets, etc.)
+```
+
+**4. Inicializar e aplicar Terraform:**
+
+```bash
+cd aws/terraform
+terraform init \
+  -backend-config="bucket=f1rsters-tech-challenge-terraform-state" \
+  -backend-config="key=tech-challenge-mecanica/terraform.tfstate" \
+  -backend-config="region=sa-east-1" \
+  -backend-config="encrypt=true"
+
+terraform plan
+terraform apply
+```
+
+**5. Build e deploy da Lambda Function:**
+
+```bash
+cd aws/lambda/auth-function
+mvn clean package
+
+# Upload para S3
+aws s3 cp target/auth-function.jar s3://f1rsters-tech-challenge-lambda-artifacts/auth-function.jar
+
+# Atualizar Lambda
+aws lambda update-function-code \
+  --function-name f1rsters-tech-challenge-mecanica-auth-function \
+  --s3-bucket f1rsters-tech-challenge-lambda-artifacts \
+  --s3-key auth-function.jar
+```
+
+**6. Testar a API:**
+
+```bash
+# Obter o endpoint do API Gateway
+aws apigatewayv2 get-stage \
+  --api-id $(terraform output -raw api_id) \
+  --stage-name dev
+
+# Testar autenticacao
+curl -X POST https://<api-gateway-endpoint>/dev/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"cpf": "12345678909"}'
+```
+
+**7. Destruir recursos AWS:**
+
+```bash
+cd aws/terraform
+terraform destroy
+```
+
+Para mais detalhes sobre a Lambda Function, consulte `aws/lambda/auth-function/README.md`.
 
 ---
 
