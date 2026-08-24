@@ -153,6 +153,7 @@ jobs:
           terraform plan -out=tfplan
 
       - name: Terraform Plan Summary
+        id: plan
         run: |
           cd aws/terraform
           terraform show -no-color tfplan
