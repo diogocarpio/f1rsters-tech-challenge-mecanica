@@ -25,6 +25,7 @@ env:
   PROJECT_NAME: "f1rsters-tech-challenge-mecanica"
   LAMBDA_FUNCTION_NAME: "f1rsters-tech-challenge-auth-function"
   LAMBDA_ARTIFACTS_BUCKET: "f1rsters-tech-challenge-lambda-artifacts"
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   build_and_test_lambda:
