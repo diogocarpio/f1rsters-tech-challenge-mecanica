@@ -172,7 +172,22 @@ jobs:
         continue-on-error: true
         run: |
           cd aws/terraform
-          terraform force-unlock -force d49a3c19-c508-bebd-7088-f654c574c61f || true
+          # Try to get the current lock ID from DynamoDB
+          LOCK_INFO=$(aws dynamodb get-item \
+            --table-name terraform-locks \
+            --key '{"LockID":{"S":"f1rsters-tech-challenge-terraform-state/tech-challenge-mecanica/terraform.tfstate-md5"}}' \
+            --region sa-east-1 \
+            --query 'Item.Info.S' \
+            --output text 2>/dev/null || echo "")
+          
+          if [ -n "$LOCK_INFO" ]; then
+            # Extract lock ID from the Info field
+            LOCK_ID=$(echo "$LOCK_INFO" | grep -oP '(?<="ID":")[^"]+' || echo "")
+            if [ -n "$LOCK_ID" ]; then
+              echo "Found lock ID: $LOCK_ID, attempting to unlock..."
+              terraform force-unlock -force "$LOCK_ID" || true
+            fi
+          fi
 
       - name: Terraform Format Check
         run: |
@@ -284,7 +299,22 @@ jobs:
         continue-on-error: true
         run: |
           cd aws/terraform
-          terraform force-unlock -force d49a3c19-c508-bebd-7088-f654c574c61f || true
+          # Try to get the current lock ID from DynamoDB
+          LOCK_INFO=$(aws dynamodb get-item \
+            --table-name terraform-locks \
+            --key '{"LockID":{"S":"f1rsters-tech-challenge-terraform-state/tech-challenge-mecanica/terraform.tfstate-md5"}}' \
+            --region sa-east-1 \
+            --query 'Item.Info.S' \
+            --output text 2>/dev/null || echo "")
+          
+          if [ -n "$LOCK_INFO" ]; then
+            # Extract lock ID from the Info field
+            LOCK_ID=$(echo "$LOCK_INFO" | grep -oP '(?<="ID":")[^"]+' || echo "")
+            if [ -n "$LOCK_ID" ]; then
+              echo "Found lock ID: $LOCK_ID, attempting to unlock..."
+              terraform force-unlock -force "$LOCK_ID" || true
+            fi
+          fi
 
       - name: Terraform Apply
         run: |
