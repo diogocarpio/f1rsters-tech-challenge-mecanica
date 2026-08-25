@@ -137,6 +137,24 @@ jobs:
             -backend-config="region=${{ env.AWS_REGION }}" \
             -backend-config="encrypt=true"
 
+      - name: Create terraform.tfvars
+        run: |
+          cd aws/terraform
+          cat > terraform.tfvars << EOF
+          aws_region = "${{ env.AWS_REGION }}"
+          project_name = "${{ env.PROJECT_NAME }}"
+          environment = "dev"
+          lambda_artifacts_bucket = "${{ env.LAMBDA_ARTIFACTS_BUCKET }}"
+          lambda_auth_s3_key = "auth-function.jar"
+          vpc_id = "${{ secrets.VPC_ID }}"
+          private_subnet_ids = ${{ secrets.PRIVATE_SUBNET_IDS }}
+          allowed_cidr_blocks = ["10.0.0.0/8"]
+          db_name = "oficina"
+          db_username = "oficinauser"
+          db_password = "${{ secrets.DB_PASSWORD }}"
+          jwt_secret = "${{ secrets.JWT_SECRET }}"
+          EOF
+
       - name: Force Unlock Terraform State
         continue-on-error: true
         run: |
@@ -217,6 +235,24 @@ jobs:
             -backend-config="key=tech-challenge-mecanica/terraform.tfstate" \
             -backend-config="region=${{ env.AWS_REGION }}" \
             -backend-config="encrypt=true"
+
+      - name: Create terraform.tfvars
+        run: |
+          cd aws/terraform
+          cat > terraform.tfvars << EOF
+          aws_region = "${{ env.AWS_REGION }}"
+          project_name = "${{ env.PROJECT_NAME }}"
+          environment = "dev"
+          lambda_artifacts_bucket = "${{ env.LAMBDA_ARTIFACTS_BUCKET }}"
+          lambda_auth_s3_key = "auth-function.jar"
+          vpc_id = "${{ secrets.VPC_ID }}"
+          private_subnet_ids = ${{ secrets.PRIVATE_SUBNET_IDS }}
+          allowed_cidr_blocks = ["10.0.0.0/8"]
+          db_name = "oficina"
+          db_username = "oficinauser"
+          db_password = "${{ secrets.DB_PASSWORD }}"
+          jwt_secret = "${{ secrets.JWT_SECRET }}"
+          EOF
 
       - name: Force Unlock Terraform State
         continue-on-error: true
