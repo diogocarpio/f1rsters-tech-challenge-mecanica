@@ -1,0 +1,20 @@
+# Homologation Environment Configuration
+aws_region = "sa-east-1"
+project_name = "f1rsters-tech-challenge-mecanica"
+environment = "homolog"
+
+lambda_artifacts_bucket = "f1rsters-tech-challenge-lambda-artifacts"
+lambda_auth_s3_key = "auth-function.jar"
+
+# VPC Configuration (get from your AWS account)
+vpc_id = "vpc-xxxxxxxxxxxxx"
+private_subnet_ids = ["subnet-xxxxxxxxxxxxx", "subnet-xxxxxxxxxxxxx"]
+allowed_cidr_blocks = ["10.0.0.0/8"]
+
+# Database Configuration
+db_name = "oficina"
+db_username = "oficinauser"
+# db_password will be loaded from GitHub Secret: DB_PASSWORD
+
+# JWT Configuration
+# jwt_secret will be loaded from GitHub Secret: JWT_SECRET

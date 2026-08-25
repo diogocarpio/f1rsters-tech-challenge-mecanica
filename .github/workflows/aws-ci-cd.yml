@@ -140,20 +140,33 @@ jobs:
       - name: Create terraform.tfvars
         run: |
           cd aws/terraform
-          cat > terraform.tfvars << EOF
-          aws_region = "${{ env.AWS_REGION }}"
-          project_name = "${{ env.PROJECT_NAME }}"
-          environment = "dev"
-          lambda_artifacts_bucket = "${{ env.LAMBDA_ARTIFACTS_BUCKET }}"
-          lambda_auth_s3_key = "auth-function.jar"
-          vpc_id = "${{ secrets.VPC_ID }}"
-          private_subnet_ids = ${{ secrets.PRIVATE_SUBNET_IDS }}
-          allowed_cidr_blocks = ["10.0.0.0/8"]
-          db_name = "oficina"
-          db_username = "oficinauser"
-          db_password = "${{ secrets.DB_PASSWORD }}"
-          jwt_secret = "${{ secrets.JWT_SECRET }}"
-          EOF
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            ENV="prod"
+          elif [ "${{ github.ref }}" == "refs/heads/homologacao" ]; then
+            ENV="homolog"
+          else
+            ENV="dev"
+          fi
+          
+          if [ -f "terraform.tfvars.${ENV}" ]; then
+            cp "terraform.tfvars.${ENV}" terraform.tfvars
+            # Append sensitive values from secrets
+            echo "db_password = \"${{ secrets.DB_PASSWORD }}\"" >> terraform.tfvars
+            echo "jwt_secret = \"${{ secrets.JWT_SECRET }}\"" >> terraform.tfvars
+          else
+            echo "No tfvars file found for environment ${ENV}, using defaults"
+            cat > terraform.tfvars << EOF
+            aws_region = "${{ env.AWS_REGION }}"
+            project_name = "${{ env.PROJECT_NAME }}"
+            environment = "${ENV}"
+            lambda_artifacts_bucket = "${{ env.LAMBDA_ARTIFACTS_BUCKET }}"
+            lambda_auth_s3_key = "auth-function.jar"
+            db_name = "oficina"
+            db_username = "oficinauser"
+            db_password = "${{ secrets.DB_PASSWORD }}"
+            jwt_secret = "${{ secrets.JWT_SECRET }}"
+            EOF
+          fi
 
       - name: Force Unlock Terraform State
         continue-on-error: true
@@ -239,20 +252,33 @@ jobs:
       - name: Create terraform.tfvars
         run: |
           cd aws/terraform
-          cat > terraform.tfvars << EOF
-          aws_region = "${{ env.AWS_REGION }}"
-          project_name = "${{ env.PROJECT_NAME }}"
-          environment = "dev"
-          lambda_artifacts_bucket = "${{ env.LAMBDA_ARTIFACTS_BUCKET }}"
-          lambda_auth_s3_key = "auth-function.jar"
-          vpc_id = "${{ secrets.VPC_ID }}"
-          private_subnet_ids = ${{ secrets.PRIVATE_SUBNET_IDS }}
-          allowed_cidr_blocks = ["10.0.0.0/8"]
-          db_name = "oficina"
-          db_username = "oficinauser"
-          db_password = "${{ secrets.DB_PASSWORD }}"
-          jwt_secret = "${{ secrets.JWT_SECRET }}"
-          EOF
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            ENV="prod"
+          elif [ "${{ github.ref }}" == "refs/heads/homologacao" ]; then
+            ENV="homolog"
+          else
+            ENV="dev"
+          fi
+          
+          if [ -f "terraform.tfvars.${ENV}" ]; then
+            cp "terraform.tfvars.${ENV}" terraform.tfvars
+            # Append sensitive values from secrets
+            echo "db_password = \"${{ secrets.DB_PASSWORD }}\"" >> terraform.tfvars
+            echo "jwt_secret = \"${{ secrets.JWT_SECRET }}\"" >> terraform.tfvars
+          else
+            echo "No tfvars file found for environment ${ENV}, using defaults"
+            cat > terraform.tfvars << EOF
+            aws_region = "${{ env.AWS_REGION }}"
+            project_name = "${{ env.PROJECT_NAME }}"
+            environment = "${ENV}"
+            lambda_artifacts_bucket = "${{ env.LAMBDA_ARTIFACTS_BUCKET }}"
+            lambda_auth_s3_key = "auth-function.jar"
+            db_name = "oficina"
+            db_username = "oficinauser"
+            db_password = "${{ secrets.DB_PASSWORD }}"
+            jwt_secret = "${{ secrets.JWT_SECRET }}"
+            EOF
+          fi
 
       - name: Force Unlock Terraform State
         continue-on-error: true
