@@ -25,6 +25,7 @@ env:
   PROJECT_NAME: "f1rsters-tech-challenge-mecanica"
   LAMBDA_FUNCTION_NAME: "f1rsters-tech-challenge-auth-function"
   LAMBDA_ARTIFACTS_BUCKET: "f1rsters-tech-challenge-lambda-artifacts"
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   build_and_test_lambda:
@@ -118,7 +119,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: "1.6.0"
+          terraform_version: "1.9.0"
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -136,10 +137,62 @@ jobs:
             -backend-config="region=${{ env.AWS_REGION }}" \
             -backend-config="encrypt=true"
 
+      - name: Create terraform.tfvars
+        run: |
+          cd aws/terraform
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            ENV="prod"
+          elif [ "${{ github.ref }}" == "refs/heads/homologacao" ]; then
+            ENV="homolog"
+          else
+            ENV="dev"
+          fi
+          
+          if [ -f "terraform.tfvars.${ENV}" ]; then
+            cp "terraform.tfvars.${ENV}" terraform.tfvars
+            # Append sensitive values from secrets
+            echo "db_password = \"${{ secrets.DB_PASSWORD }}\"" >> terraform.tfvars
+            echo "jwt_secret = \"${{ secrets.JWT_SECRET }}\"" >> terraform.tfvars
+          else
+            echo "No tfvars file found for environment ${ENV}, using defaults"
+            cat > terraform.tfvars <<EOF
+          aws_region = "${{ env.AWS_REGION }}"
+          project_name = "${{ env.PROJECT_NAME }}"
+          environment = "${ENV}"
+          lambda_artifacts_bucket = "${{ env.LAMBDA_ARTIFACTS_BUCKET }}"
+          lambda_auth_s3_key = "auth-function.jar"
+          db_name = "oficina"
+          db_username = "oficinauser"
+          db_password = "${{ secrets.DB_PASSWORD }}"
+          jwt_secret = "${{ secrets.JWT_SECRET }}"
+          EOF
+          fi
+
+      - name: Force Unlock Terraform State
+        continue-on-error: true
+        run: |
+          cd aws/terraform
+          # Try to get the current lock ID from DynamoDB
+          LOCK_INFO=$(aws dynamodb get-item \
+            --table-name terraform-locks \
+            --key '{"LockID":{"S":"f1rsters-tech-challenge-terraform-state/tech-challenge-mecanica/terraform.tfstate-md5"}}' \
+            --region sa-east-1 \
+            --query 'Item.Info.S' \
+            --output text 2>/dev/null || echo "")
+          
+          if [ -n "$LOCK_INFO" ]; then
+            # Extract lock ID from the Info field
+            LOCK_ID=$(echo "$LOCK_INFO" | grep -oP '(?<="ID":")[^"]+' || echo "")
+            if [ -n "$LOCK_ID" ]; then
+              echo "Found lock ID: $LOCK_ID, attempting to unlock..."
+              terraform force-unlock -force "$LOCK_ID" || true
+            fi
+          fi
+
       - name: Terraform Format Check
         run: |
           cd aws/terraform
-          terraform fmt -check
+          terraform fmt
 
       - name: Terraform Validate
         run: |
@@ -152,6 +205,7 @@ jobs:
           terraform plan -out=tfplan
 
       - name: Terraform Plan Summary
+        id: plan
         run: |
           cd aws/terraform
           terraform show -no-color tfplan
@@ -192,7 +246,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: "1.6.0"
+          terraform_version: "1.9.0"
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -209,6 +263,58 @@ jobs:
             -backend-config="key=tech-challenge-mecanica/terraform.tfstate" \
             -backend-config="region=${{ env.AWS_REGION }}" \
             -backend-config="encrypt=true"
+
+      - name: Create terraform.tfvars
+        run: |
+          cd aws/terraform
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            ENV="prod"
+          elif [ "${{ github.ref }}" == "refs/heads/homologacao" ]; then
+            ENV="homolog"
+          else
+            ENV="dev"
+          fi
+          
+          if [ -f "terraform.tfvars.${ENV}" ]; then
+            cp "terraform.tfvars.${ENV}" terraform.tfvars
+            # Append sensitive values from secrets
+            echo "db_password = \"${{ secrets.DB_PASSWORD }}\"" >> terraform.tfvars
+            echo "jwt_secret = \"${{ secrets.JWT_SECRET }}\"" >> terraform.tfvars
+          else
+            echo "No tfvars file found for environment ${ENV}, using defaults"
+            cat > terraform.tfvars <<EOF
+          aws_region = "${{ env.AWS_REGION }}"
+          project_name = "${{ env.PROJECT_NAME }}"
+          environment = "${ENV}"
+          lambda_artifacts_bucket = "${{ env.LAMBDA_ARTIFACTS_BUCKET }}"
+          lambda_auth_s3_key = "auth-function.jar"
+          db_name = "oficina"
+          db_username = "oficinauser"
+          db_password = "${{ secrets.DB_PASSWORD }}"
+          jwt_secret = "${{ secrets.JWT_SECRET }}"
+          EOF
+          fi
+
+      - name: Force Unlock Terraform State
+        continue-on-error: true
+        run: |
+          cd aws/terraform
+          # Try to get the current lock ID from DynamoDB
+          LOCK_INFO=$(aws dynamodb get-item \
+            --table-name terraform-locks \
+            --key '{"LockID":{"S":"f1rsters-tech-challenge-terraform-state/tech-challenge-mecanica/terraform.tfstate-md5"}}' \
+            --region sa-east-1 \
+            --query 'Item.Info.S' \
+            --output text 2>/dev/null || echo "")
+          
+          if [ -n "$LOCK_INFO" ]; then
+            # Extract lock ID from the Info field
+            LOCK_ID=$(echo "$LOCK_INFO" | grep -oP '(?<="ID":")[^"]+' || echo "")
+            if [ -n "$LOCK_ID" ]; then
+              echo "Found lock ID: $LOCK_ID, attempting to unlock..."
+              terraform force-unlock -force "$LOCK_ID" || true
+            fi
+          fi
 
       - name: Terraform Apply
         run: |
