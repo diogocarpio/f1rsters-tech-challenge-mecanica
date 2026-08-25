@@ -44,6 +44,19 @@ resource "aws_s3_bucket_versioning" "lambda_artifacts" {
   }
 }
 
+resource "aws_s3_bucket_lifecycle_configuration" "lambda_artifacts" {
+  bucket = aws_s3_bucket.lambda_artifacts.id
+
+  rule {
+    id     = "delete-old-versions"
+    status = "Enabled"
+
+    noncurrent_version_expiration {
+      noncurrent_days = 30
+    }
+  }
+}
+
 # RDS PostgreSQL
 resource "aws_db_subnet_group" "main" {
   name       = "${var.project_name}-db-subnet-group"
@@ -161,8 +174,8 @@ resource "aws_lambda_function" "auth" {
   s3_bucket = aws_s3_bucket.lambda_artifacts.id
   s3_key    = var.lambda_auth_s3_key
 
-  timeout     = 30
-  memory_size = 512
+  timeout     = 15
+  memory_size = 256
 
   environment {
     variables = {
