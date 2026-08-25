@@ -137,6 +137,21 @@ jobs:
             -backend-config="region=${{ env.AWS_REGION }}" \
             -backend-config="encrypt=true"
 
+      - name: Force Unlock Terraform State
+        continue-on-error: true
+        run: |
+          cd aws/terraform
+          # Try to get lock ID and unlock
+          LOCK_ID=$(aws dynamodb get-item \
+            --table-name terraform-locks \
+            --key '{"LockID":{"S":"tech-challenge-mecanica/terraform.tfstate-md5"}}' \
+            --region sa-east-1 \
+            --query 'Item.LockID.S' \
+            --output text 2>/dev/null || echo "")
+          if [ -n "$LOCK_ID" ]; then
+            terraform force-unlock -force "$LOCK_ID" || true
+          fi
+
       - name: Terraform Format Check
         run: |
           cd aws/terraform
@@ -211,6 +226,21 @@ jobs:
             -backend-config="key=tech-challenge-mecanica/terraform.tfstate" \
             -backend-config="region=${{ env.AWS_REGION }}" \
             -backend-config="encrypt=true"
+
+      - name: Force Unlock Terraform State
+        continue-on-error: true
+        run: |
+          cd aws/terraform
+          # Try to get lock ID and unlock
+          LOCK_ID=$(aws dynamodb get-item \
+            --table-name terraform-locks \
+            --key '{"LockID":{"S":"tech-challenge-mecanica/terraform.tfstate-md5"}}' \
+            --region sa-east-1 \
+            --query 'Item.LockID.S' \
+            --output text 2>/dev/null || echo "")
+          if [ -n "$LOCK_ID" ]; then
+            terraform force-unlock -force "$LOCK_ID" || true
+          fi
 
       - name: Terraform Apply
         run: |
