@@ -155,17 +155,17 @@ jobs:
             echo "jwt_secret = \"${{ secrets.JWT_SECRET }}\"" >> terraform.tfvars
           else
             echo "No tfvars file found for environment ${ENV}, using defaults"
-            cat > terraform.tfvars << EOF
-            aws_region = "${{ env.AWS_REGION }}"
-            project_name = "${{ env.PROJECT_NAME }}"
-            environment = "${ENV}"
-            lambda_artifacts_bucket = "${{ env.LAMBDA_ARTIFACTS_BUCKET }}"
-            lambda_auth_s3_key = "auth-function.jar"
-            db_name = "oficina"
-            db_username = "oficinauser"
-            db_password = "${{ secrets.DB_PASSWORD }}"
-            jwt_secret = "${{ secrets.JWT_SECRET }}"
-            EOF
+            cat > terraform.tfvars <<EOF
+          aws_region = "${{ env.AWS_REGION }}"
+          project_name = "${{ env.PROJECT_NAME }}"
+          environment = "${ENV}"
+          lambda_artifacts_bucket = "${{ env.LAMBDA_ARTIFACTS_BUCKET }}"
+          lambda_auth_s3_key = "auth-function.jar"
+          db_name = "oficina"
+          db_username = "oficinauser"
+          db_password = "${{ secrets.DB_PASSWORD }}"
+          jwt_secret = "${{ secrets.JWT_SECRET }}"
+          EOF
           fi
 
       - name: Force Unlock Terraform State
@@ -267,17 +267,17 @@ jobs:
             echo "jwt_secret = \"${{ secrets.JWT_SECRET }}\"" >> terraform.tfvars
           else
             echo "No tfvars file found for environment ${ENV}, using defaults"
-            cat > terraform.tfvars << EOF
-            aws_region = "${{ env.AWS_REGION }}"
-            project_name = "${{ env.PROJECT_NAME }}"
-            environment = "${ENV}"
-            lambda_artifacts_bucket = "${{ env.LAMBDA_ARTIFACTS_BUCKET }}"
-            lambda_auth_s3_key = "auth-function.jar"
-            db_name = "oficina"
-            db_username = "oficinauser"
-            db_password = "${{ secrets.DB_PASSWORD }}"
-            jwt_secret = "${{ secrets.JWT_SECRET }}"
-            EOF
+            cat > terraform.tfvars <<EOF
+          aws_region = "${{ env.AWS_REGION }}"
+          project_name = "${{ env.PROJECT_NAME }}"
+          environment = "${ENV}"
+          lambda_artifacts_bucket = "${{ env.LAMBDA_ARTIFACTS_BUCKET }}"
+          lambda_auth_s3_key = "auth-function.jar"
+          db_name = "oficina"
+          db_username = "oficinauser"
+          db_password = "${{ secrets.DB_PASSWORD }}"
+          jwt_secret = "${{ secrets.JWT_SECRET }}"
+          EOF
           fi
 
       - name: Force Unlock Terraform State
