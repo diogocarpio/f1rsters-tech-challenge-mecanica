@@ -14,7 +14,7 @@ allowed_cidr_blocks = ["172.31.0.0/16"]
 # Database Configuration
 db_name = "oficina"
 db_username = "oficinauser"
-db_backup_retention_period = 30
+db_backup_retention_period = 1
 # db_password will be loaded from GitHub Secret: DB_PASSWORD
 
 # JWT Configuration
