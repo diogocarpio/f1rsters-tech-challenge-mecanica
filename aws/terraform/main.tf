@@ -205,6 +205,29 @@ resource "aws_apigatewayv2_route" "auth" {
   target = "integrations/${aws_apigatewayv2_integration.auth_lambda.id}"
 }
 
+# Protected route example (requires JWT)
+resource "aws_apigatewayv2_route" "protected" {
+  api_id           = aws_apigatewayv2_api.main.id
+  route_key        = "GET /clientes/me"
+  authorization_type = "CUSTOM"
+  authorizer_id    = aws_apigatewayv2_authorizer.jwt.id
+
+  target = "integrations/${aws_apigatewayv2_integration.auth_lambda.id}"
+}
+
+# JWT Authorizer for protected routes
+resource "aws_apigatewayv2_authorizer" "jwt" {
+  api_id           = aws_apigatewayv2_api.main.id
+  name             = "${var.project_name}-jwt-authorizer"
+  authorizer_type = "JWT"
+  identity_sources = ["$request.header.Authorization"]
+
+  jwt_configuration {
+    audience = ["tech-challenge-api"]
+    issuer   = "tech-challenge-auth-lambda"
+  }
+}
+
 resource "aws_lambda_permission" "apigateway" {
   statement_id  = "AllowAPIGatewayInvoke"
   action        = "lambda:InvokeFunction"

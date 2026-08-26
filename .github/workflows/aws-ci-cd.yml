@@ -55,6 +55,16 @@ jobs:
           cd aws/lambda/auth-function
           mvn test
 
+      - name: Code Quality Check (Checkstyle)
+        run: |
+          cd aws/lambda/auth-function
+          mvn checkstyle:check
+
+      - name: Code Quality Check (SpotBugs)
+        run: |
+          cd aws/lambda/auth-function
+          mvn spotbugs:check
+
       - name: Upload Lambda JAR
         uses: actions/upload-artifact@v4
         with:
