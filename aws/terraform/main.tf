@@ -28,33 +28,9 @@ provider "aws" {
   }
 }
 
-# S3 Bucket for Lambda artifacts
-resource "aws_s3_bucket" "lambda_artifacts" {
+# S3 Bucket for Lambda artifacts (referencing existing bucket)
+data "aws_s3_bucket" "lambda_artifacts" {
   bucket = var.lambda_artifacts_bucket
-
-  tags = {
-    Name = "${var.project_name}-lambda-artifacts"
-  }
-}
-
-resource "aws_s3_bucket_versioning" "lambda_artifacts" {
-  bucket = aws_s3_bucket.lambda_artifacts.id
-  versioning_configuration {
-    status = "Enabled"
-  }
-}
-
-resource "aws_s3_bucket_lifecycle_configuration" "lambda_artifacts" {
-  bucket = aws_s3_bucket.lambda_artifacts.id
-
-  rule {
-    id     = "delete-old-versions"
-    status = "Enabled"
-
-    noncurrent_version_expiration {
-      noncurrent_days = 30
-    }
-  }
 }
 
 # RDS PostgreSQL
@@ -93,7 +69,7 @@ resource "aws_security_group" "rds" {
 resource "aws_db_instance" "postgres" {
   identifier             = "${var.project_name}-postgres"
   engine                 = "postgres"
-  engine_version         = "15.4"
+  engine_version         = "15.13"
   instance_class         = "db.t3.micro"
   allocated_storage      = 10
   storage_type           = "gp3"
@@ -110,7 +86,7 @@ resource "aws_db_instance" "postgres" {
   skip_final_snapshot = false
   final_snapshot_identifier = "${var.project_name}-postgres-final-snapshot"
 
-  backup_retention_period = 1
+  backup_retention_period = var.db_backup_retention_period
   backup_window          = "03:00-04:00"
   maintenance_window     = "Mon:04:00-Mon:05:00"
 
@@ -171,7 +147,7 @@ resource "aws_lambda_function" "auth" {
   runtime       = "java17"
   handler       = "com.f1rsters.tech_challenge_mecanica.lambda.AuthHandler::handleRequest"
 
-  s3_bucket = aws_s3_bucket.lambda_artifacts.id
+  s3_bucket = data.aws_s3_bucket.lambda_artifacts.id
   s3_key    = var.lambda_auth_s3_key
 
   timeout     = 15

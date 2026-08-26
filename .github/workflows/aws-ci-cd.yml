@@ -23,7 +23,7 @@ env:
   JAVA_VERSION: "17"
   AWS_REGION: "sa-east-1"
   PROJECT_NAME: "f1rsters-tech-challenge-mecanica"
-  LAMBDA_FUNCTION_NAME: "f1rsters-tech-challenge-auth-function"
+  LAMBDA_FUNCTION_NAME: "f1rsters-tech-challenge-mecanica-auth-function"
   LAMBDA_ARTIFACTS_BUCKET: "f1rsters-tech-challenge-lambda-artifacts"
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
