@@ -67,3 +67,9 @@ variable "jwt_secret" {
   type        = string
   sensitive   = true
 }
+
+variable "db_backup_retention_period" {
+  description = "Number of days to retain automated backups (0-35)"
+  type        = number
+  default     = 7
+}
