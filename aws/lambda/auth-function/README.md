@@ -173,16 +173,31 @@ sam local invoke AuthFunction --event events/test-event.json
 - [x] Retornar respostas de erro adequadas
 - [x] Organizar variáveis de ambiente e configurações sensíveis de forma segura
 - [x] Criar testes para os principais cenários da função
-- [ ] Criar pipeline de CI/CD para build, testes e deploy automático
-- [ ] Configurar as regras de branch e Pull Request do repositório
+- [x] Criar pipeline de CI/CD para build, testes e deploy automático
+- [x] Configurar as regras de branch e Pull Request do repositório
 
 ## Integração com API Gateway
 
-A função é integrada com o API Gateway através do Terraform. O endpoint configurado é:
+A função é integrada com o API Gateway através do Terraform. Os endpoints configurados são:
 
+### Endpoint Público (Autenticação)
 - **Método**: POST
 - **Rota**: `/auth/login`
 - **Integração**: AWS_PROXY com Lambda
+- **Descrição**: Endpoint público para autenticação via CPF
+
+### Endpoint Protegido (Exemplo)
+- **Método**: GET
+- **Rota**: `/clientes/me`
+- **Integração**: AWS_PROXY com Lambda
+- **Authorizer**: JWT Authorizer
+- **Descrição**: Endpoint protegido que requer JWT válido
+
+### JWT Authorizer
+- **Tipo**: JWT
+- **Identity Source**: `$request.header.Authorization`
+- **Audience**: `tech-challenge-api`
+- **Issuer**: `tech-challenge-auth-lambda`
 
 ## Segurança
 
@@ -217,3 +232,19 @@ aws logs tail /aws/lambda/f1rsters-tech-challenge-mecanica-auth-function --follo
 ## Contribuição
 
 Este projeto é parte do Tech Challenge FIAP. Para contribuições, siga as regras de branch e Pull Request configuradas no repositório principal.
+
+## Documentação Adicional
+
+- [Diagrama de Sequência da Autenticação](../../docs/authentication-sequence-diagram.md)
+- [RFC - Estratégia de Autenticação](../../docs/rfc-authentication-strategy.md)
+- [Guia de Testes da API](../../docs/api-testing-guide.md)
+
+## Qualidade de Código
+
+O projeto utiliza as seguintes ferramentas de qualidade de código:
+- **Checkstyle**: Validação de estilo de código (Google Java Style)
+- **SpotBugs**: Análise estática para encontrar bugs
+- **JUnit 5**: Framework de testes unitários
+- **Mockito**: Framework de mocking para testes
+
+Essas validações são executadas automaticamente no pipeline CI/CD.

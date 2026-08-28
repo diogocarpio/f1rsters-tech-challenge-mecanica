@@ -42,6 +42,7 @@ public class JwtService {
                 .issuedAt(now)
                 .expiration(expiration)
                 .issuer("tech-challenge-auth-lambda")
+                .audience().add("tech-challenge-api").and()
                 .signWith(secretKey)
                 .compact();
     }
