@@ -55,55 +55,22 @@ jobs:
           cd aws/lambda/auth-function
           mvn test
 
+      - name: Code Quality Check (Checkstyle)
+        run: |
+          cd aws/lambda/auth-function
+          mvn checkstyle:check
+
+      - name: Code Quality Check (SpotBugs)
+        run: |
+          cd aws/lambda/auth-function
+          mvn spotbugs:check
+
       - name: Upload Lambda JAR
         uses: actions/upload-artifact@v4
         with:
           name: lambda-jar
           path: aws/lambda/auth-function/target/auth-function.jar
           retention-days: 7
-
-  deploy_lambda:
-    name: Deploy Lambda Function
-    needs: build_and_test_lambda
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/homologacao' || github.ref == 'refs/heads/develop'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
-
-    steps:
-      - name: Checkout do código
-        uses: actions/checkout@v5
-
-      - name: Download Lambda JAR
-        uses: actions/download-artifact@v4
-        with:
-          name: lambda-jar
-          path: aws/lambda/auth-function/target
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Upload to S3
-        run: |
-          aws s3 cp aws/lambda/auth-function/target/auth-function.jar \
-            s3://${{ env.LAMBDA_ARTIFACTS_BUCKET }}/auth-function.jar
-
-      - name: Update Lambda function code
-        run: |
-          aws lambda update-function-code \
-            --function-name ${{ env.LAMBDA_FUNCTION_NAME }} \
-            --s3-bucket ${{ env.LAMBDA_ARTIFACTS_BUCKET }} \
-            --s3-key auth-function.jar
-
-      - name: Wait for Lambda update
-        run: |
-          aws lambda wait function-updated \
-            --function-name ${{ env.LAMBDA_FUNCTION_NAME }}
 
   terraform_plan:
     name: Terraform Plan
@@ -325,3 +292,46 @@ jobs:
         run: |
           cd aws/terraform
           terraform output -json
+
+  deploy_lambda:
+    name: Deploy Lambda Function
+    needs: [build_and_test_lambda, terraform_apply]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/homologacao' || github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v5
+
+      - name: Download Lambda JAR
+        uses: actions/download-artifact@v4
+        with:
+          name: lambda-jar
+          path: aws/lambda/auth-function/target
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Upload to S3
+        run: |
+          aws s3 cp aws/lambda/auth-function/target/auth-function.jar \
+            s3://${{ env.LAMBDA_ARTIFACTS_BUCKET }}/auth-function.jar
+
+      - name: Update Lambda function code
+        run: |
+          aws lambda update-function-code \
+            --function-name ${{ env.LAMBDA_FUNCTION_NAME }} \
+            --s3-bucket ${{ env.LAMBDA_ARTIFACTS_BUCKET }} \
+            --s3-key auth-function.jar
+
+      - name: Wait for Lambda update
+        run: |
+          aws lambda wait function-updated \
+            --function-name ${{ env.LAMBDA_FUNCTION_NAME }}
