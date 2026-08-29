@@ -17,7 +17,7 @@ public class AuthHandler implements RequestHandler<Map<String, Object>, Map<Stri
 
     public AuthHandler() {
         this.cpfValidator = new CpfValidator();
-        this.jwtService = new JwtService();
+        this.jwtService = JwtService().create();
         this.databaseService = new DatabaseService();
     }
 
@@ -66,17 +66,19 @@ public class AuthHandler implements RequestHandler<Map<String, Object>, Map<Stri
         
         return response;
     }
-    
+
     private String extractCpf(Map<String, Object> input) {
         if (input.containsKey("body")) {
+            String body = (String) input.get("body");
+
             try {
-                String body = (String) input.get("body");
                 Map<String, String> bodyMap = objectMapper.readValue(body, Map.class);
                 return bodyMap.getOrDefault("cpf", "");
-            } catch (Exception e) {
+            } catch (JsonProcessingException e) {
                 return "";
             }
         }
+
         return input.getOrDefault("cpf", "").toString();
     }
     
