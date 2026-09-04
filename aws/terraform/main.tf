@@ -71,7 +71,7 @@ resource "aws_db_instance" "postgres" {
   engine                 = "postgres"
   engine_version         = "15.13"
   instance_class         = "db.t3.micro"
-  allocated_storage      = 10
+  allocated_storage      = 100
   storage_type           = "gp3"
   storage_encrypted      = true
 
@@ -224,7 +224,7 @@ resource "aws_apigatewayv2_authorizer" "jwt" {
 
   jwt_configuration {
     audience = ["tech-challenge-api"]
-    issuer   = "tech-challenge-auth-lambda"
+    issuer   = "https://tech-challenge-auth-lambda"
   }
 }
 
