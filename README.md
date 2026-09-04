@@ -221,7 +221,10 @@ f1rsters-tech-challenge-mecanica/
 │   │   │   │   ├── BaixaEstoqueDTO.java               # Baixa de estoque
 │   │   │   │   ├── CriarOrdemServicoDTO.java          # Criacao de OS
 │   │   │   │   ├── AtualizarStatusOSDTO.java          # Atualizacao de status da OS
-│   │   │   │   └── OrdemServicoPublicDTO.java         # Visualizacao publica da OS
+│   │   │   │   ├── OrdemServicoPublicDTO.java         # Visualizacao publica da OS
+│   │   │   │   ├── NotificacaoStatusDTO.java          # DTO de notificacao de status
+│   │   │   │   ├── RespostaOrcamentoDTO.java          # DTO de resposta de orcamento
+│   │   │   │   └── StatusOrdemServicoDTO.java        # DTO de status da OS
 │   │   │   ├── exception/
 │   │   │   │   └── ApiExceptionHandler.java           # Handler global de excecoes
 │   │   │   ├── mapper/
@@ -278,6 +281,31 @@ f1rsters-tech-challenge-mecanica/
 │   ├── variables.tf                                   # Variaveis Terraform
 │   ├── outputs.tf                                     # Outputs Terraform
 │   └── README.md                                      # Documentacao da infraestrutura
+├── aws/                                               # Recursos AWS (Lambda, API Gateway, RDS)
+│   ├── lambda/                                        # Funcoes Lambda
+│   │   ├── auth-function/                             # Lambda de autenticacao
+│   │   │   ├── src/main/java/com/f1rsters/tech_challenge_mecanica/lambda/
+│   │   │   │   ├── AuthHandler.java                   # Handler da Lambda
+│   │   │   │   ├── JwtService.java                    # Servico JWT
+│   │   │   │   ├── DatabaseService.java               # Servico de banco de dados
+│   │   │   │   ├── CpfValidator.java                  # Validador de CPF
+│   │   │   │   └── ClientInfo.java                    # Informacoes do cliente
+│   │   │   ├── pom.xml                                 # Dependencias Maven
+│   │   │   └── README.md                              # Documentacao da Lambda
+│   │   └── common/                                    # Codigo compartilhado entre Lambdas
+│   ├── terraform/                                     # Infraestrutura AWS com Terraform
+│   │   ├── main.tf                                    # Configuracao principal
+│   │   ├── variables.tf                               # Variaveis
+│   │   ├── outputs.tf                                 # Outputs
+│   │   ├── terraform.tfvars.example                   # Exemplo de variaveis
+│   │   ├── terraform.tfvars.dev                       # Variaveis dev
+│   │   ├── terraform.tfvars.homolog                   # Variaveis homolog
+│   │   └── terraform.tfvars.prod                      # Variaveis prod
+│   └── ARCHITECTURE.md                                # Documentacao da arquitetura AWS
+├── docs/                                              # Documentacao adicional
+│   ├── api-testing-guide.md                           # Guia de testes da API
+│   ├── authentication-sequence-diagram.md            # Diagrama de sequencia de autenticacao
+│   └── rfc-authentication-strategy.md                 # RFC da estrategia de autenticacao
 ├── Dockerfile                                         # Imagem Docker da aplicacao (multi-stage)
 ├── docker-compose.yml                                 # Orquestracao (PostgreSQL + App)
 ├── TechChallengeMecanica.postman_collection.json      # Colecao Postman pronta
