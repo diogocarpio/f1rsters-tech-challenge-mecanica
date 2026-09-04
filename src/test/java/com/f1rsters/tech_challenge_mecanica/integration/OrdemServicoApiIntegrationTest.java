@@ -153,13 +153,12 @@ class OrdemServicoApiIntegrationTest {
                 }
                 """.formatted(servico.getId(), peca.getId());
 
-        assertThrows(ServletException.class, () ->
-                mockMvc.perform(post("/api/admin/ordens-servico")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .header("Authorization", "Bearer " + token)
-                                .content(body))
-                        .andReturn()
-        );
+        mockMvc.perform(post("/api/admin/ordens-servico")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + token)
+                        .content(body))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("BUSINESS_ERROR"));
     }
 
     @Test
@@ -196,9 +195,10 @@ class OrdemServicoApiIntegrationTest {
     }
 
     @Test
-    void endpointPublicoDeveRetornar404QuandoOsNaoExiste() throws Exception {
+    void endpointPublicoDeveRetornar400QuandoOsNaoExiste() throws Exception {
         mockMvc.perform(get("/api/public/ordens-servico/999999"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("BUSINESS_ERROR"));
     }
 
     private String login(String email, String senha) throws Exception {

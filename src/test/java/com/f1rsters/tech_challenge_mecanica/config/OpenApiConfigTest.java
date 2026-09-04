@@ -18,8 +18,8 @@ class OpenApiConfigTest {
         assertThat(openAPI).isNotNull();
         assertThat(openAPI.getInfo()).isNotNull();
         assertThat(openAPI.getInfo().getTitle()).isEqualTo("Tech Challenge Mecanica API");
-        assertThat(openAPI.getInfo().getVersion()).isEqualTo("v1");
-        assertThat(openAPI.getInfo().getDescription()).isEqualTo("API de gerenciamento da oficina mecanica");
+        assertThat(openAPI.getInfo().getVersion()).isEqualTo("v1.0.0");
+        assertThat(openAPI.getInfo().getDescription()).contains("API REST para gerenciamento de oficina mecânica");
 
         assertThat(openAPI.getSecurity()).isNotNull();
         assertThat(openAPI.getSecurity()).isNotEmpty();

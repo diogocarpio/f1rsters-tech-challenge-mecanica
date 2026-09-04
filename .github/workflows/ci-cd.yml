@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - main
+      - homologacao
+      - develop
+      - feature/diogo
+      - feature/alexandra
+      - feature/rodrigo
   workflow_dispatch:
 
 concurrency:
@@ -49,8 +54,8 @@ jobs:
         if: runner.os == 'Windows'
         run: .\mvnw.cmd -B clean verify
 
-  build_and_deploy_local:
-    name: Build e deploy no Kubernetes local
+  build_and_deploy_k8s:
+    name: Build e deploy no Kubernetes
     needs: build_and_test
 
     # Adicione o label customizado "local-k8s" no runner que possui:
@@ -66,15 +71,10 @@ jobs:
 
     env:
       IMAGE_NAME: f1rsters-tech-challenge-mecanica-app
-
       IMAGE_TAG: latest
-
       K8S_NAMESPACE: oficina
       APP_DEPLOYMENT: oficina-app
       APP_CONTAINER: oficina-app
-
-      # Confirme com: kind get clusters
-      KIND_CLUSTER_NAME: desktop
 
     steps:
       - name: Checkout do código
@@ -85,21 +85,19 @@ jobs:
         with:
           version: latest
 
-      - name: Validar ferramentas e cluster local (Linux/macOS)
+      - name: Validar ferramentas e cluster (Linux/macOS)
         if: runner.os != 'Windows'
         run: |
           docker version
-          kind version
           kubectl version --client
           kubectl config current-context
           kubectl cluster-info
           kubectl get nodes
 
-      - name: Validar ferramentas e cluster local (Windows)
+      - name: Validar ferramentas e cluster (Windows)
         if: runner.os == 'Windows'
         run: |
           docker version
-          kind version
           kubectl version --client
           kubectl config current-context
           kubectl cluster-info
@@ -124,16 +122,6 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           docker image inspect "${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
-
-      - name: Carregar imagem no cluster Kind (Linux/macOS)
-        if: runner.os != 'Windows'
-        run: |
-          kind load docker-image "${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" --name "${{ env.KIND_CLUSTER_NAME }}"
-
-      - name: Carregar imagem no cluster Kind (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          kind load docker-image "${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" --name "${{ env.KIND_CLUSTER_NAME }}"
 
       - name: Aplicar namespace (Linux/macOS)
         if: runner.os != 'Windows'
