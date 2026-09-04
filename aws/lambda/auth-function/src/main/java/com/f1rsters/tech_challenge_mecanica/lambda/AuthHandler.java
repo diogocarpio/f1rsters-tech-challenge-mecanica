@@ -2,6 +2,7 @@ package com.f1rsters.tech_challenge_mecanica.lambda;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.HashMap;
@@ -17,7 +18,7 @@ public class AuthHandler implements RequestHandler<Map<String, Object>, Map<Stri
 
     public AuthHandler() {
         this.cpfValidator = new CpfValidator();
-        this.jwtService = JwtService().create();
+        this.jwtService = JwtService.create();
         this.databaseService = new DatabaseService();
     }
 
