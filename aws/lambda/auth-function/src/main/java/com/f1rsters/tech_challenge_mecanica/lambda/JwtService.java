@@ -12,18 +12,35 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class JwtService {
-    
-    private static final long EXPIRATION_TIME = 15 * 60 * 1000; // 15 minutes
+
+    private static final long EXPIRATION_TIME = 15 * 60 * 1000;
+
     private final SecretKey secretKey;
-    
-    public JwtService() {
+
+    private JwtService(SecretKey secretKey) {
+        this.secretKey = secretKey;
+    }
+
+    public static JwtService create() {
         String jwtSecretBase64 = System.getenv("JWT_SECRET");
-        if (jwtSecretBase64 == null || jwtSecretBase64.isEmpty()) {
-            throw new IllegalStateException("JWT_SECRET environment variable not set");
+
+        if (jwtSecretBase64 == null || jwtSecretBase64.isBlank()) {
+            throw new IllegalStateException(
+                    "JWT_SECRET environment variable not set"
+            );
         }
-        
-        byte[] decodedKey = Base64.getDecoder().decode(jwtSecretBase64);
-        this.secretKey = Keys.hmacShaKeyFor(decodedKey);
+
+        try {
+            byte[] decodedKey = Base64.getDecoder().decode(jwtSecretBase64);
+            SecretKey secretKey = Keys.hmacShaKeyFor(decodedKey);
+
+            return new JwtService(secretKey);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalStateException(
+                    "JWT_SECRET contains an invalid Base64 or JWT key",
+                    e
+            );
+        }
     }
     
     public String generateToken(ClientInfo client) {
@@ -55,7 +72,10 @@ public class JwtService {
                     .parseSignedClaims(token)
                     .getPayload();
         } catch (Exception e) {
-            throw new IllegalArgumentException("Invalid token: " + e.getMessage());
+            throw new IllegalArgumentException(
+                    "Invalid token: " + e.getMessage(),
+                    e
+            );
         }
     }
 }
