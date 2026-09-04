@@ -57,8 +57,14 @@ jobs:
   build_and_deploy_k8s:
     name: Build e deploy no Kubernetes
     needs: build_and_test
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/homologacao' || github.ref == 'refs/heads/develop'
-    runs-on: self-hosted
+
+    # Adicione o label customizado "local-k8s" no runner que possui:
+    # Docker, Kind, kubectl e acesso ao cluster local.
+    #
+    # Funciona em Windows, macOS ou Linux.
+    # Se não tiver runner self-hosted, este job será pulado
+    runs-on: [self-hosted, local-k8s]
+    if: false  # Desabilitado temporariamente até configurar runner self-hosted
 
     permissions:
       contents: read
