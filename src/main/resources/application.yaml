@@ -16,6 +16,11 @@ spring:
 server:
   port: 8080
 
+logging:
+  structured:
+    format:
+      console: logstash
+
 springdoc:
   api-docs:
     path: /v3/api-docs
