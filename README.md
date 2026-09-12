@@ -54,6 +54,7 @@ Preparar o sistema para suportar crescimento, novas unidades da oficina e maior 
 - [Swagger / OpenAPI](#swagger--openapi)
 - [Postman Collection](#postman-collection)
 - [Modelo de Dominio](#modelo-de-dominio)
+- [Banco de Dados e Diagrama ER](docs/database-model.md)
 - [Validacoes Customizadas](#validacoes-customizadas)
 - [Mascaramento de Dados Sensiveis](#mascaramento-de-dados-sensiveis)
 - [Testes](#testes)
