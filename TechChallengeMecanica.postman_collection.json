@@ -8,6 +8,7 @@
   "variable": [
     { "key": "baseUrl", "value": "http://localhost:8080" },
     { "key": "accessToken", "value": "" },
+    { "key": "clientAccessToken", "value": "" },
     { "key": "adminEmail", "value": "admin@oficina.local" },
     { "key": "adminPassword", "value": "admin123" },
     { "key": "clienteId", "value": "1" },
@@ -53,6 +54,22 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "auth", "login"]
             }
+          }
+        }
+      ]
+    },
+    {
+      "name": "ClienteAutenticadoController",
+      "auth": {
+        "type": "bearer",
+        "bearer": [{ "key": "token", "value": "{{clientAccessToken}}", "type": "string" }]
+      },
+      "item": [
+        {
+          "name": "GET /api/clientes/me",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/clientes/me", "host": ["{{baseUrl}}"], "path": ["api", "clientes", "me"] }
           }
         }
       ]

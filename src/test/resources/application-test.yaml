@@ -18,5 +18,7 @@ security:
     secret: QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVo0NTY3ODkwQUJDREVG
     access-token-minutes: 15
     issuer: tech-challenge-mecanica-api
+    client-issuer: tech-challenge-auth-lambda
+    client-audience: tech-challenge-api
   seed:
     enabled: true

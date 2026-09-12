@@ -114,6 +114,18 @@ class ClienteServiceTest {
     }
 
     @Test
+    void deveObterClientePorCpfCnpjNormalizado() {
+        Cliente cliente = new Cliente();
+        cliente.setId(8L);
+        when(repo.findByCpfCnpj("52998224725")).thenReturn(Optional.of(cliente));
+
+        Cliente resultado = service.getByCpfCnpj("529.982.247-25");
+
+        assertSame(cliente, resultado);
+        verify(repo).findByCpfCnpj("52998224725");
+    }
+
+    @Test
     void deveExcluirClientePorId() {
         service.delete(33L);
         verify(repo).deleteById(33L);

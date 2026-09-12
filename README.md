@@ -200,6 +200,7 @@ f1rsters-tech-challenge-mecanica/
 │   │   │   ├── controller/
 │   │   │   │   ├── AuthController.java                # Login / Autenticacao
 │   │   │   │   ├── ClienteController.java             # CRUD de Clientes
+│   │   │   │   ├── ClienteAutenticadoController.java  # Perfil protegido por JWT via CPF
 │   │   │   │   ├── VeiculoController.java             # CRUD de Veiculos
 │   │   │   │   ├── ServicoController.java             # CRUD de Servicos
 │   │   │   │   ├── PecaController.java                # CRUD de Pecas + Estoque
@@ -658,7 +659,9 @@ A aplicacao utiliza variaveis de ambiente com valores padrao. Em producao, e **o
 |---|---|---|
 | `JWT_SECRET_BASE64` | Chave secreta Base64 para assinatura JWT (min. 256 bits) | `QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVo0NTY3ODkwQUJDREVG` |
 | `JWT_ACCESS_TOKEN_MINUTES` | Tempo de expiracao do token JWT (minutos) | `15` |
-| `JWT_ISSUER` | Emissor do token JWT | `tech-challenge-mecanica-api` |
+| `JWT_ISSUER` | Emissor do token JWT interno | `tech-challenge-mecanica-api` |
+| `JWT_CLIENT_ISSUER` | Emissor aceito para o JWT de cliente | `tech-challenge-auth-lambda` |
+| `JWT_CLIENT_AUDIENCE` | Audience aceita para o JWT de cliente | `tech-challenge-api` |
 | `SECURITY_SEED_ENABLED` | Habilita criacao automatica do usuario admin | `true` |
 | `SECURITY_SEED_ADMIN_EMAIL` | Email do usuario admin seed | `admin@oficina.local` |
 | `SECURITY_SEED_ADMIN_PASSWORD` | Senha do usuario admin seed | `admin123` |
@@ -681,12 +684,15 @@ O sistema possui 4 perfis de acesso com permissoes diferenciadas:
 | **MECANICO** | Atualizar status de OS; Consultar pecas e estoque; Baixar estoque; Criar e listar OS |
 | **ESTOQUISTA** | CRUD de Pecas; Consultar e baixar estoque |
 
+Clientes autenticados por CPF recebem a autoridade de runtime `CLIENTE`, separada dos perfis internos persistidos.
+
 ### Permissoes por Endpoint
 
 | Metodo | Endpoint | Roles Permitidas |
 |---|---|---|
 | `POST` | `/api/auth/login` | Publico (sem autenticacao) |
 | `GET` | `/api/public/ordens-servico/{id}` | Publico (sem autenticacao) |
+| `GET` | `/api/clientes/me` | CLIENTE (JWT emitido pela Lambda) |
 | `POST/PUT/DELETE` | `/api/admin/clientes/**` | ADMIN, ATENDENTE |
 | `GET` | `/api/admin/clientes/**` | ADMIN, ATENDENTE |
 | `POST/PUT/DELETE` | `/api/admin/veiculos/**` | ADMIN, ATENDENTE |
@@ -712,7 +718,9 @@ O sistema possui 4 perfis de acesso com permissoes diferenciadas:
 6. Se invalido/expirado, retorna 401 Unauthorized
 ```
 
-O token JWT contem:
+Para clientes, a Lambda autentica o CPF e emite um JWT com subject igual ao CPF, issuer `tech-challenge-auth-lambda`, audience `tech-challenge-api` e status do cliente. A aplicacao valida esse contrato e libera `/api/clientes/me` com a autoridade `CLIENTE`.
+
+O token JWT interno contem:
 - **subject**: email do usuario
 - **roles**: lista de perfis (ex: `["ROLE_ADMIN"]`)
 - **issuer**: nome do emissor da API
@@ -746,6 +754,27 @@ Realiza login e retorna um token JWT.
 ```
 
 ---
+
+### Cliente autenticado via CPF
+
+#### `GET /api/clientes/me`
+
+Retorna o cliente identificado pelo CPF do JWT emitido pela Lambda.
+
+```bash
+curl http://localhost:8080/api/clientes/me \
+  -H "Authorization: Bearer <token_da_lambda>"
+```
+
+**Response (200 OK):**
+```json
+{
+  "id": 1,
+  "nome": "Cliente Exemplo",
+  "cpfCnpjMascarado": "***.98.***-01",
+  "status": "ATIVO"
+}
+```
 
 ### Clientes
 
@@ -1531,6 +1560,7 @@ Alguns controllers foram atualizados com anotacoes do Swagger para melhorar a na
 
 - `AuthController` (tag **Auth**)
 - `ClienteController` (tag **Clientes**)
+- `ClienteAutenticadoController` (tag **Cliente Autenticado**)
 - `VeiculoController` (tag **Veiculos**)
 - `ServicoController` (tag **Servicos**)
 - `PecaController` (tag **Pecas**)
@@ -1563,7 +1593,8 @@ O projeto inclui uma colecao Postman pronta para uso:
 | Variavel | Valor Padrao | Descricao |
 |---|---|---|
 | `baseUrl` | `http://localhost:8080` | URL base da API |
-| `accessToken` | (vazio) | Preenchido automaticamente apos login |
+| `accessToken` | (vazio) | Preenchido automaticamente apos login administrativo |
+| `clientAccessToken` | (vazio) | Token emitido pela Lambda apos autenticacao via CPF |
 | `adminEmail` | `admin@oficina.local` | Email do admin |
 | `adminPassword` | `admin123` | Senha do admin |
 | `clienteId` | `1` | ID do cliente para testes |

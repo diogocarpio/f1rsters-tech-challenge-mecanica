@@ -5,17 +5,26 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.IOException;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 class JwtAuthenticationFilterTest {
+
+    @AfterEach
+    void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
+    }
 
     @Test
     void shouldSkipFilterWhenNoAuthHeader() throws ServletException, IOException {
@@ -73,6 +82,34 @@ class JwtAuthenticationFilterTest {
         filter.doFilterInternal(request, response, filterChain);
         
         verify(filterChain).doFilter(request, response);
+    }
+
+    @Test
+    void shouldAuthenticateClientTokenWithoutLoadingInternalUser() throws ServletException, IOException {
+        JwtService jwtService = mock(JwtService.class);
+        CustomUserDetailsService userDetailsService = mock(CustomUserDetailsService.class);
+        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtService, userDetailsService);
+
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+        FilterChain filterChain = mock(FilterChain.class);
+
+        when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer clientToken");
+        when(jwtService.extractUsername("clientToken")).thenReturn("52998224725");
+        when(jwtService.isClientToken("clientToken")).thenReturn(true);
+
+        try {
+            filter.doFilterInternal(request, response, filterChain);
+
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            assertEquals("52998224725", authentication.getName());
+            assertTrue(authentication.getAuthorities().stream()
+                    .anyMatch(authority -> "ROLE_CLIENTE".equals(authority.getAuthority())));
+            verify(userDetailsService, never()).loadUserByUsername(anyString());
+            verify(filterChain).doFilter(request, response);
+        } finally {
+            SecurityContextHolder.clearContext();
+        }
     }
 
     @Test
