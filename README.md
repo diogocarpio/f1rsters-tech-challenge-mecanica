@@ -213,6 +213,7 @@ f1rsters-tech-challenge-mecanica/
 │   │   │   │   ├── OrdemServico.java                  # Entidade Ordem de Servico
 │   │   │   │   ├── Usuario.java                       # Entidade Usuario
 │   │   │   │   ├── Role.java                          # Enum de perfis
+│   │   │   │   ├── StatusCliente.java                 # Enum de status do cliente
 │   │   │   │   └── StatusOrdemServico.java            # Enum de status da OS
 │   │   │   ├── dto/
 │   │   │   │   ├── LoginRequestDTO.java               # Requisicao de login
@@ -765,7 +766,8 @@ Realiza login e retorna um token JWT.
 {
   "id": 1,
   "nome": "Cliente Exemplo",
-  "cpfCnpjMascarado": "***.45.***-01"
+  "cpfCnpjMascarado": "***.45.***-01",
+  "status": "ATIVO"
 }
 ```
 
@@ -791,7 +793,8 @@ Realiza login e retorna um token JWT.
   {
     "id": 1,
     "nome": "Cliente Exemplo",
-    "cpfCnpjMascarado": "***.45.***-01"
+    "cpfCnpjMascarado": "***.45.***-01",
+    "status": "ATIVO"
   }
 ]
 ```
@@ -803,7 +806,8 @@ Realiza login e retorna um token JWT.
 {
   "id": 1,
   "nome": "Cliente Exemplo",
-  "cpfCnpjMascarado": "***.45.***-01"
+  "cpfCnpjMascarado": "***.45.***-01",
+  "status": "ATIVO"
 }
 ```
 
@@ -831,7 +835,8 @@ Realiza login e retorna um token JWT.
 {
   "id": 1,
   "nome": "Cliente Atualizado",
-  "cpfCnpjMascarado": "***.45.***-01"
+  "cpfCnpjMascarado": "***.45.***-01",
+  "status": "ATIVO"
 }
 ```
 
@@ -1590,7 +1595,7 @@ OrdemServico (*) <---> (*) Peca      [ManyToMany]
 
 | Entidade | Campos | Descricao |
 |---|---|---|
-| **Cliente** | `id`, `nome`, `cpfCnpj`, `veiculos` | Pessoa fisica ou juridica dona do veiculo |
+| **Cliente** | `id`, `nome`, `cpfCnpj`, `status`, `veiculos` | Pessoa fisica ou juridica dona do veiculo; o status inicial `ATIVO` permite a consulta de elegibilidade usada pela autenticacao |
 | **Veiculo** | `id`, `cliente`, `placa`, `marca`, `modelo`, `ano` | Veiculo associado a um cliente |
 | **Servico** | `id`, `descricao`, `valor` | Tipo de servico oferecido pela oficina |
 | **Peca** | `id`, `descricao`, `quantidadeEstoque`, `valorUnitario` | Peca com controle de estoque |

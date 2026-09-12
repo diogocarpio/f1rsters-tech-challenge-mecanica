@@ -66,6 +66,8 @@ A autenticação seguirá o fluxo **CPF → Lambda → JWT → APIs Protegidas**
 
 ### Status de Cliente Permitidos
 
+O status é persistido na entidade `Cliente`, com valor inicial `ATIVO` para clientes novos e para adequação dos registros existentes.
+
 Os seguintes status permitem autenticação:
 - **ATIVO**: Cliente regular e ativo
 - **APROVADO**: Cliente aprovado mas ainda não ativo

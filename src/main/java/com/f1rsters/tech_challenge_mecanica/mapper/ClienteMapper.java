@@ -13,7 +13,8 @@ public final class ClienteMapper {
         return new ClienteResponseDTO(
                 cliente.getId(),
                 cliente.getNome(),
-                SensitiveDataMasker.maskCpfCnpj(cliente.getCpfCnpj())
+                SensitiveDataMasker.maskCpfCnpj(cliente.getCpfCnpj()),
+                cliente.getStatus()
         );
     }
 }

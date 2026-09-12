@@ -1,6 +1,7 @@
 package com.f1rsters.tech_challenge_mecanica.service;
 
 import com.f1rsters.tech_challenge_mecanica.domain.Cliente;
+import com.f1rsters.tech_challenge_mecanica.domain.StatusCliente;
 import com.f1rsters.tech_challenge_mecanica.dto.ClienteDTO;
 import com.f1rsters.tech_challenge_mecanica.repository.ClienteRepository;
 import org.junit.jupiter.api.Test;
@@ -43,6 +44,7 @@ class ClienteServiceTest {
 
         assertEquals("Joao", salvo.getNome());
         assertEquals("52998224725", salvo.getCpfCnpj());
+        assertEquals(StatusCliente.ATIVO, salvo.getStatus());
         verify(repo, times(1)).save(any(Cliente.class));
     }
 
@@ -62,6 +64,7 @@ class ClienteServiceTest {
     void deveAtualizarClienteComSucesso() {
         Cliente existente = new Cliente();
         existente.setId(10L);
+        existente.setStatus(StatusCliente.BLOQUEADO);
 
         ClienteDTO dto = new ClienteDTO();
         dto.nome = "Maria";
@@ -75,6 +78,7 @@ class ClienteServiceTest {
         assertSame(existente, atualizado);
         assertEquals("Maria", atualizado.getNome());
         assertEquals("04252011000110", atualizado.getCpfCnpj());
+        assertEquals(StatusCliente.BLOQUEADO, atualizado.getStatus());
     }
 
     @Test

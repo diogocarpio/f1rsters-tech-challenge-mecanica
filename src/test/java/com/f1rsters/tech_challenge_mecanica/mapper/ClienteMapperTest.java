@@ -1,6 +1,7 @@
 package com.f1rsters.tech_challenge_mecanica.mapper;
 
 import com.f1rsters.tech_challenge_mecanica.domain.Cliente;
+import com.f1rsters.tech_challenge_mecanica.domain.StatusCliente;
 import com.f1rsters.tech_challenge_mecanica.dto.ClienteResponseDTO;
 import org.junit.jupiter.api.Test;
 
@@ -22,6 +23,7 @@ class ClienteMapperTest {
         assertEquals(1L, responseDTO.id);
         assertEquals("João Silva", responseDTO.nome);
         assertNotNull(responseDTO.cpfCnpjMascarado);
+        assertEquals(StatusCliente.ATIVO, responseDTO.status);
     }
 
     @Test
