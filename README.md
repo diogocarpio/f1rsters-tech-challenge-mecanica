@@ -56,6 +56,8 @@ Preparar o sistema para suportar crescimento, novas unidades da oficina e maior 
 - [Modelo de Dominio](#modelo-de-dominio)
 - [Banco de Dados e Diagrama ER](docs/database-model.md)
 - [Observabilidade](docs/observability.md)
+- [Sequência de Abertura de OS](docs/order-service-sequence-diagram.md)
+- [ADRs](docs/adr/)
 - [Validacoes Customizadas](#validacoes-customizadas)
 - [Mascaramento de Dados Sensiveis](#mascaramento-de-dados-sensiveis)
 - [Testes](#testes)
@@ -314,7 +316,11 @@ f1rsters-tech-challenge-mecanica/
 ├── docs/                                              # Documentacao adicional
 │   ├── api-testing-guide.md                           # Guia de testes da API
 │   ├── authentication-sequence-diagram.md            # Diagrama de sequencia de autenticacao
-│   └── rfc-authentication-strategy.md                 # RFC da estrategia de autenticacao
+│   ├── order-service-sequence-diagram.md             # Diagrama de sequencia de abertura de OS
+│   ├── database-model.md                             # Modelo relacional e diagrama ER
+│   ├── observability.md                              # Logs e correlacao
+│   ├── adr/                                          # Decisoes arquiteturais
+│   └── rfc-authentication-strategy.md                # RFC da estrategia de autenticacao
 ├── Dockerfile                                         # Imagem Docker da aplicacao (multi-stage)
 ├── docker-compose.yml                                 # Orquestracao (PostgreSQL + App)
 ├── TechChallengeMecanica.postman_collection.json      # Colecao Postman pronta
