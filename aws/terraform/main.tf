@@ -5,6 +5,18 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
+    newrelic = {
+      source  = "newrelic/newrelic"
+      version = "~> 3.36"
+    }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.23"
+    }
+    helm = {
+      source  = "hashicorp/helm"
+      version = "~> 2.13"
+    }
   }
 
   backend "s3" {
@@ -25,6 +37,30 @@ provider "aws" {
       Environment = var.environment
       ManagedBy   = "Terraform"
     }
+  }
+}
+
+data "aws_eks_cluster" "observability" {
+  count = var.enable_newrelic && var.eks_cluster_name != "" ? 1 : 0
+  name  = var.eks_cluster_name
+}
+
+data "aws_eks_cluster_auth" "observability" {
+  count = var.enable_newrelic && var.eks_cluster_name != "" ? 1 : 0
+  name  = var.eks_cluster_name
+}
+
+provider "kubernetes" {
+  host                   = try(data.aws_eks_cluster.observability[0].endpoint, null)
+  cluster_ca_certificate = try(base64decode(data.aws_eks_cluster.observability[0].certificate_authority[0].data), null)
+  token                  = try(data.aws_eks_cluster_auth.observability[0].token, null)
+}
+
+provider "helm" {
+  kubernetes {
+    host                   = try(data.aws_eks_cluster.observability[0].endpoint, null)
+    cluster_ca_certificate = try(base64decode(data.aws_eks_cluster.observability[0].certificate_authority[0].data), null)
+    token                  = try(data.aws_eks_cluster_auth.observability[0].token, null)
   }
 }
 
@@ -67,13 +103,13 @@ resource "aws_security_group" "rds" {
 }
 
 resource "aws_db_instance" "postgres" {
-  identifier             = "${var.project_name}-postgres"
-  engine                 = "postgres"
-  engine_version         = "15.13"
-  instance_class         = "db.t3.micro"
-  allocated_storage      = 100
-  storage_type           = "gp3"
-  storage_encrypted      = true
+  identifier        = "${var.project_name}-postgres"
+  engine            = "postgres"
+  engine_version    = "15.13"
+  instance_class    = "db.t3.micro"
+  allocated_storage = 100
+  storage_type      = "gp3"
+  storage_encrypted = true
 
   db_name  = var.db_name
   username = var.db_username
@@ -82,13 +118,13 @@ resource "aws_db_instance" "postgres" {
   db_subnet_group_name   = aws_db_subnet_group.main.name
   vpc_security_group_ids = [aws_security_group.rds.id]
 
-  publicly_accessible  = false
-  skip_final_snapshot = false
+  publicly_accessible       = false
+  skip_final_snapshot       = false
   final_snapshot_identifier = "${var.project_name}-postgres-final-snapshot"
 
   backup_retention_period = var.db_backup_retention_period
-  backup_window          = "03:00-04:00"
-  maintenance_window     = "Mon:04:00-Mon:05:00"
+  backup_window           = "03:00-04:00"
+  maintenance_window      = "Mon:04:00-Mon:05:00"
 
   tags = {
     Name = "${var.project_name}-postgres"

@@ -120,6 +120,11 @@ jobs:
             # Append sensitive values from secrets
             echo "db_password = \"${{ secrets.DB_PASSWORD }}\"" >> terraform.tfvars
             echo "jwt_secret = \"${{ secrets.JWT_SECRET }}\"" >> terraform.tfvars
+            echo "enable_newrelic = true" >> terraform.tfvars
+            echo "newrelic_account_id = \"${{ secrets.NEW_RELIC_ACCOUNT_ID }}\"" >> terraform.tfvars
+            echo "newrelic_api_key = \"${{ secrets.NEW_RELIC_API_KEY }}\"" >> terraform.tfvars
+            echo "newrelic_license_key = \"${{ secrets.NEW_RELIC_LICENSE_KEY }}\"" >> terraform.tfvars
+            echo "eks_cluster_name = \"${{ secrets.EKS_CLUSTER_NAME }}\"" >> terraform.tfvars
           else
             echo "No tfvars file found for environment ${ENV}, using defaults"
             cat > terraform.tfvars <<EOF
@@ -132,6 +137,11 @@ jobs:
           db_username = "oficinauser"
           db_password = "${{ secrets.DB_PASSWORD }}"
           jwt_secret = "${{ secrets.JWT_SECRET }}"
+          enable_newrelic = true
+          newrelic_account_id = "${{ secrets.NEW_RELIC_ACCOUNT_ID }}"
+          newrelic_api_key = "${{ secrets.NEW_RELIC_API_KEY }}"
+          newrelic_license_key = "${{ secrets.NEW_RELIC_LICENSE_KEY }}"
+          eks_cluster_name = "${{ secrets.EKS_CLUSTER_NAME }}"
           EOF
           fi
 
@@ -247,6 +257,11 @@ jobs:
             # Append sensitive values from secrets
             echo "db_password = \"${{ secrets.DB_PASSWORD }}\"" >> terraform.tfvars
             echo "jwt_secret = \"${{ secrets.JWT_SECRET }}\"" >> terraform.tfvars
+            echo "enable_newrelic = true" >> terraform.tfvars
+            echo "newrelic_account_id = \"${{ secrets.NEW_RELIC_ACCOUNT_ID }}\"" >> terraform.tfvars
+            echo "newrelic_api_key = \"${{ secrets.NEW_RELIC_API_KEY }}\"" >> terraform.tfvars
+            echo "newrelic_license_key = \"${{ secrets.NEW_RELIC_LICENSE_KEY }}\"" >> terraform.tfvars
+            echo "eks_cluster_name = \"${{ secrets.EKS_CLUSTER_NAME }}\"" >> terraform.tfvars
           else
             echo "No tfvars file found for environment ${ENV}, using defaults"
             cat > terraform.tfvars <<EOF
@@ -259,6 +274,11 @@ jobs:
           db_username = "oficinauser"
           db_password = "${{ secrets.DB_PASSWORD }}"
           jwt_secret = "${{ secrets.JWT_SECRET }}"
+          enable_newrelic = true
+          newrelic_account_id = "${{ secrets.NEW_RELIC_ACCOUNT_ID }}"
+          newrelic_api_key = "${{ secrets.NEW_RELIC_API_KEY }}"
+          newrelic_license_key = "${{ secrets.NEW_RELIC_LICENSE_KEY }}"
+          eks_cluster_name = "${{ secrets.EKS_CLUSTER_NAME }}"
           EOF
           fi
 
