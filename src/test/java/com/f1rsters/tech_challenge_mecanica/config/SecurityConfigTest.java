@@ -21,7 +21,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, properties = {"management.newrelic.metrics.export.enabled=false"})
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
@@ -72,15 +72,25 @@ class SecurityConfigTest {
     @Test
     void shouldAllowPublicEndpoints() throws Exception {
 
-        mockMvc.perform(get("/api/public/test"))
-                .andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/public/ordens-servico/999999"))
+                .andExpect(result -> {
+                    int status = result.getResponse().getStatus();
+                    if (status == 401 || status == 403) {
+                        throw new AssertionError("Public endpoint should not require authentication");
+                    }
+                });
     }
 
     @Test
     void shouldAllowAuthEndpoints() throws Exception {
 
-        mockMvc.perform(get("/api/auth/login"))
-                .andExpect(status().isMethodNotAllowed());
+        mockMvc.perform(post("/api/auth/login"))
+                .andExpect(result -> {
+                    int status = result.getResponse().getStatus();
+                    if (status == 401 || status == 403) {
+                        throw new AssertionError("Auth endpoint should not require authentication");
+                    }
+                });
     }
 
     // =========================

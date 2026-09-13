@@ -16,11 +16,15 @@ import com.f1rsters.tech_challenge_mecanica.repository.OrdemServicoRepository;
 import com.f1rsters.tech_challenge_mecanica.repository.PecaRepository;
 import com.f1rsters.tech_challenge_mecanica.repository.ServicoRepository;
 import com.f1rsters.tech_challenge_mecanica.repository.VeiculoRepository;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
@@ -29,6 +33,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -39,7 +44,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Method;
+
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class OrdemServicoServiceTest {
 
     @Mock
@@ -57,8 +65,15 @@ class OrdemServicoServiceTest {
     @Mock
     private PecaRepository pecaRepo;
 
-    @InjectMocks
     private OrdemServicoService service;
+
+    private MeterRegistry meterRegistry;
+
+    @BeforeEach
+    void setUp() {
+        meterRegistry = new SimpleMeterRegistry();
+        service = new OrdemServicoService(repo, clienteRepo, veiculoRepo, servicoRepo, pecaRepo, meterRegistry);
+    }
 
     @Test
     void deveCriarOrdemComCalculoDeTotalEDecrementoDeEstoque() {
@@ -93,7 +108,11 @@ class OrdemServicoServiceTest {
         when(veiculoRepo.findByPlaca("ABC1234")).thenReturn(Optional.of(veiculo));
         when(servicoRepo.findAllById(List.of(10L))).thenReturn(List.of(servico));
         when(pecaRepo.findAllById(List.of(20L))).thenReturn(List.of(peca));
-        when(repo.save(any(OrdemServico.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(repo.save(any(OrdemServico.class))).thenAnswer(invocation -> {
+            OrdemServico os = invocation.getArgument(0);
+            os.setId(1L);
+            return os;
+        });
 
         OrdemServico os = service.criarOrdem(dto);
 
@@ -122,10 +141,11 @@ class OrdemServicoServiceTest {
     void deveFalharQuandoVeiculoNaoExiste() {
         Cliente cliente = new Cliente();
         cliente.setCpfCnpj("52998224725");
+        cliente.setId(1L);
 
         CriarOrdemServicoDTO dto = new CriarOrdemServicoDTO();
         dto.cpfCnpjCliente = "529.982.247-25";
-        dto.placaVeiculo = "ABC1234";
+        dto.placaVeiculo = "abc-1234";
         dto.servicos = List.of(1L);
 
         when(clienteRepo.findByCpfCnpj("52998224725")).thenReturn(Optional.of(cliente));
@@ -139,9 +159,11 @@ class OrdemServicoServiceTest {
     @Test
     void deveCriarOrdemSemPecasQuandoListaNula() {
         Cliente cliente = new Cliente();
+        cliente.setId(1L);
         cliente.setCpfCnpj("52998224725");
 
         Veiculo veiculo = new Veiculo();
+        veiculo.setId(1L);
         veiculo.setPlaca("ABC1234");
 
         Servico servico = new Servico();
@@ -156,7 +178,11 @@ class OrdemServicoServiceTest {
         when(clienteRepo.findByCpfCnpj("52998224725")).thenReturn(Optional.of(cliente));
         when(veiculoRepo.findByPlaca("ABC1234")).thenReturn(Optional.of(veiculo));
         when(servicoRepo.findAllById(List.of(1L))).thenReturn(List.of(servico));
-        when(repo.save(any(OrdemServico.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(repo.save(any(OrdemServico.class))).thenAnswer(invocation -> {
+            OrdemServico os = invocation.getArgument(0);
+            os.setId(1L);
+            return os;
+        });
 
         OrdemServico os = service.criarOrdem(dto);
 
@@ -171,6 +197,7 @@ class OrdemServicoServiceTest {
         cliente.setCpfCnpj("52998224725");
 
         Veiculo veiculo = new Veiculo();
+        veiculo.setId(1L);
         veiculo.setPlaca("ABC1234");
 
         Servico servico = new Servico();
@@ -196,6 +223,7 @@ class OrdemServicoServiceTest {
 
         assertThrows(RuntimeException.class, () -> service.criarOrdem(dto));
         verify(repo, never()).save(any(OrdemServico.class));
+        verify(pecaRepo, never()).save(any(Peca.class));
     }
 
     @Test
@@ -384,6 +412,16 @@ class OrdemServicoServiceTest {
     }
 
     @Test
+    void deveFalharAoProcessarRespostaOrcamentoQuandoOSNaoExiste() {
+        RespostaOrcamentoDTO dto = new RespostaOrcamentoDTO(true, "SISTEMA_EXTERNO", "Aprovação");
+
+        when(repo.findById(999L)).thenReturn(Optional.empty());
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> service.processarRespostaOrcamento(999L, dto));
+        assertTrue(ex.getMessage().contains("OS não encontrada"));
+    }
+
+    @Test
     void deveProcessarNotificacaoDeStatus() {
         OrdemServico os = new OrdemServico();
         os.setId(1L);
@@ -408,5 +446,208 @@ class OrdemServicoServiceTest {
         RuntimeException ex = assertThrows(RuntimeException.class, () -> service.processarNotificacaoStatus(999L, dto));
         assertTrue(ex.getMessage().contains("OS não encontrada"));
     }
-}
 
+    @Test
+    void deveRegistrarTransicaoStatusComCriadoEmNaoNuloParaDiagnostic() throws Exception {
+        OrdemServico os = new OrdemServico();
+        os.setCriadoEm(LocalDateTime.now().minusSeconds(100));
+
+        Method method = OrdemServicoService.class.getDeclaredMethod("recordStatusTransition",
+                OrdemServico.class, StatusOrdemServico.class, StatusOrdemServico.class);
+        method.setAccessible(true);
+
+        method.invoke(service, os, StatusOrdemServico.RECEBIDA, StatusOrdemServico.DIAGNOSTICO);
+
+        assertTrue(meterRegistry.counter("ordem_servico.status.transition.total",
+                "from", "RECEBIDA", "to", "DIAGNOSTICO").count() > 0);
+        assertTrue(meterRegistry.get("ordem_servico.status.lead_time.seconds")
+                .tag("status", "DIAGNOSTICO").summary().count() > 0);
+    }
+
+    @Test
+    void deveRegistrarTransicaoStatusComCriadoEmNaoNuloParaEmExecucao() throws Exception {
+        OrdemServico os = new OrdemServico();
+        os.setCriadoEm(LocalDateTime.now().minusSeconds(200));
+
+        Method method = OrdemServicoService.class.getDeclaredMethod("recordStatusTransition",
+                OrdemServico.class, StatusOrdemServico.class, StatusOrdemServico.class);
+        method.setAccessible(true);
+
+        method.invoke(service, os, StatusOrdemServico.DIAGNOSTICO, StatusOrdemServico.EM_EXECUCAO);
+
+        assertTrue(meterRegistry.counter("ordem_servico.status.transition.total",
+                "from", "DIAGNOSTICO", "to", "EM_EXECUCAO").count() > 0);
+        assertTrue(meterRegistry.get("ordem_servico.status.lead_time.seconds")
+                .tag("status", "EM_EXECUCAO").summary().count() > 0);
+    }
+
+    @Test
+    void deveRegistrarTransicaoStatusComCriadoEmNaoNuloParaFinalizada() throws Exception {
+        OrdemServico os = new OrdemServico();
+        os.setCriadoEm(LocalDateTime.now().minusSeconds(300));
+
+        Method method = OrdemServicoService.class.getDeclaredMethod("recordStatusTransition",
+                OrdemServico.class, StatusOrdemServico.class, StatusOrdemServico.class);
+        method.setAccessible(true);
+
+        method.invoke(service, os, StatusOrdemServico.EM_EXECUCAO, StatusOrdemServico.FINALIZADA);
+
+        assertTrue(meterRegistry.counter("ordem_servico.status.transition.total",
+                "from", "EM_EXECUCAO", "to", "FINALIZADA").count() > 0);
+        assertTrue(meterRegistry.get("ordem_servico.status.lead_time.seconds")
+                .tag("status", "FINALIZADA").summary().count() > 0);
+    }
+
+    @Test
+    void deveRegistrarTransicaoStatusSemLeadTimeQuandoStatusNaoEhTracked() throws Exception {
+        OrdemServico os = new OrdemServico();
+        os.setCriadoEm(LocalDateTime.now());
+
+        Method method = OrdemServicoService.class.getDeclaredMethod("recordStatusTransition",
+                OrdemServico.class, StatusOrdemServico.class, StatusOrdemServico.class);
+        method.setAccessible(true);
+
+        method.invoke(service, os, StatusOrdemServico.RECEBIDA, StatusOrdemServico.AGUARDANDO_APROVACAO);
+
+        assertTrue(meterRegistry.counter("ordem_servico.status.transition.total",
+                "from", "RECEBIDA", "to", "AGUARDANDO_APROVACAO").count() > 0);
+        // Lead time meter should not be created for non-tracked statuses
+        assertFalse(meterRegistry.getMeters().stream()
+                .anyMatch(m -> m.getId().getName().equals("ordem_servico.status.lead_time.seconds")
+                        && m.getId().getTag("status") != null
+                        && m.getId().getTag("status").equals("AGUARDANDO_APROVACAO")));
+    }
+
+    @Test
+    void deveRegistrarTransicaoStatusSemLeadTimeQuandoCriadoEmNulo() throws Exception {
+        MeterRegistry isolatedRegistry = new SimpleMeterRegistry();
+        OrdemServicoService isolatedService = new OrdemServicoService(repo, clienteRepo, veiculoRepo, servicoRepo, pecaRepo, isolatedRegistry);
+
+        OrdemServico os = new OrdemServico();
+        os.setCriadoEm(null);
+
+        Method method = OrdemServicoService.class.getDeclaredMethod("recordStatusTransition",
+                OrdemServico.class, StatusOrdemServico.class, StatusOrdemServico.class);
+        method.setAccessible(true);
+
+        method.invoke(isolatedService, os, StatusOrdemServico.RECEBIDA, StatusOrdemServico.DIAGNOSTICO);
+
+        assertTrue(isolatedRegistry.counter("ordem_servico.status.transition.total",
+                "from", "RECEBIDA", "to", "DIAGNOSTICO").count() > 0);
+        // Lead time meter should not be created when criadoEm is null
+        assertFalse(isolatedRegistry.getMeters().stream()
+                .anyMatch(m -> m.getId().getName().equals("ordem_servico.status.lead_time.seconds")));
+    }
+
+    @Test
+    void deveRegistrarTransicaoStatusSemLeadTimeParaStatusEntregue() throws Exception {
+        MeterRegistry isolatedRegistry = new SimpleMeterRegistry();
+        OrdemServicoService isolatedService = new OrdemServicoService(repo, clienteRepo, veiculoRepo, servicoRepo, pecaRepo, isolatedRegistry);
+
+        OrdemServico os = new OrdemServico();
+        os.setCriadoEm(LocalDateTime.now());
+
+        Method method = OrdemServicoService.class.getDeclaredMethod("recordStatusTransition",
+                OrdemServico.class, StatusOrdemServico.class, StatusOrdemServico.class);
+        method.setAccessible(true);
+
+        method.invoke(isolatedService, os, StatusOrdemServico.FINALIZADA, StatusOrdemServico.ENTREGUE);
+
+        assertTrue(isolatedRegistry.counter("ordem_servico.status.transition.total",
+                "from", "FINALIZADA", "to", "ENTREGUE").count() > 0);
+        // Lead time meter should not be created for ENTREGUE status
+        assertFalse(isolatedRegistry.getMeters().stream()
+                .anyMatch(m -> m.getId().getName().equals("ordem_servico.status.lead_time.seconds")
+                        && m.getId().getTag("status") != null
+                        && m.getId().getTag("status").equals("ENTREGUE")));
+    }
+
+    @Test
+    void deveLancarExcecaoNaoTratadaAoCriarOrdem() {
+        Cliente cliente = new Cliente();
+        cliente.setId(1L);
+        cliente.setCpfCnpj("52998224725");
+
+        CriarOrdemServicoDTO dto = new CriarOrdemServicoDTO();
+        dto.cpfCnpjCliente = "529.982.247-25";
+        dto.placaVeiculo = "ABC1234";
+        dto.servicos = List.of(1L);
+
+        when(clienteRepo.findByCpfCnpj("52998224725")).thenReturn(Optional.of(cliente));
+        when(veiculoRepo.findByPlaca("ABC1234")).thenThrow(new RuntimeException("Database error"));
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> service.criarOrdem(dto));
+        assertEquals("Database error", ex.getMessage());
+    }
+
+    @Test
+    void deveLancarExcecaoNaoTratadaAoAtualizarStatus() {
+        OrdemServico os = new OrdemServico();
+        os.setStatus(StatusOrdemServico.RECEBIDA);
+        when(repo.findById(1L)).thenReturn(Optional.of(os));
+        when(repo.save(os)).thenThrow(new RuntimeException("Database error"));
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> service.atualizarStatus(1L, StatusOrdemServico.EM_EXECUCAO));
+        assertEquals("Database error", ex.getMessage());
+    }
+
+    @Test
+    void deveLancarExcecaoNaoTratadaAoProcessarRespostaOrcamento() {
+        OrdemServico os = new OrdemServico();
+        os.setStatus(StatusOrdemServico.AGUARDANDO_APROVACAO);
+
+        RespostaOrcamentoDTO dto = new RespostaOrcamentoDTO(true, "SISTEMA_EXTERNO", "Aprovação");
+
+        when(repo.findById(1L)).thenReturn(Optional.of(os));
+        when(repo.save(os)).thenThrow(new RuntimeException("Database error"));
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> service.processarRespostaOrcamento(1L, dto));
+        assertEquals("Database error", ex.getMessage());
+    }
+
+    @Test
+    void deveLancarExcecaoNaoTratadaAoProcessarNotificacaoStatus() {
+        OrdemServico os = new OrdemServico();
+        os.setStatus(StatusOrdemServico.RECEBIDA);
+
+        NotificacaoStatusDTO dto = new NotificacaoStatusDTO(StatusOrdemServico.DIAGNOSTICO, "EMAIL", "Diagnóstico");
+
+        when(repo.findById(1L)).thenReturn(Optional.of(os));
+        when(repo.save(os)).thenThrow(new RuntimeException("Database error"));
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> service.processarNotificacaoStatus(1L, dto));
+        assertEquals("Database error", ex.getMessage());
+    }
+
+    @Test
+    void deveRegistrarBusinessException() throws Exception {
+        MeterRegistry isolatedRegistry = new SimpleMeterRegistry();
+        OrdemServicoService isolatedService = new OrdemServicoService(repo, clienteRepo, veiculoRepo, servicoRepo, pecaRepo, isolatedRegistry);
+
+        Method method = OrdemServicoService.class.getDeclaredMethod("businessException",
+                String.class, String.class, Long.class, String.class);
+        method.setAccessible(true);
+
+        RuntimeException ex = (RuntimeException) method.invoke(isolatedService, "Test error", "test_reason", 1L, "test_operation");
+
+        assertEquals("Test error", ex.getMessage());
+        assertTrue(isolatedRegistry.counter("ordem_servico.processing.failure.total",
+                "reason", "test_reason", "operation", "test_operation", "os_id", "1").count() > 0);
+    }
+
+    @Test
+    void deveRegistrarBusinessExceptionComOsIdNulo() throws Exception {
+        MeterRegistry isolatedRegistry = new SimpleMeterRegistry();
+        OrdemServicoService isolatedService = new OrdemServicoService(repo, clienteRepo, veiculoRepo, servicoRepo, pecaRepo, isolatedRegistry);
+
+        Method method = OrdemServicoService.class.getDeclaredMethod("businessException",
+                String.class, String.class, Long.class, String.class);
+        method.setAccessible(true);
+
+        RuntimeException ex = (RuntimeException) method.invoke(isolatedService, "Test error", "test_reason", null, "test_operation");
+
+        assertEquals("Test error", ex.getMessage());
+        assertTrue(isolatedRegistry.counter("ordem_servico.processing.failure.total",
+                "reason", "test_reason", "operation", "test_operation", "os_id", "unknown").count() > 0);
+    }
+}

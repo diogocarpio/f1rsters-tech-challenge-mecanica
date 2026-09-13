@@ -6,6 +6,7 @@ import com.f1rsters.tech_challenge_mecanica.repository.UsuarioRepository;
 import com.f1rsters.tech_challenge_mecanica.util.InputNormalizer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,6 +17,7 @@ import java.util.Set;
 public class SecuritySeedConfig {
 
     @Bean
+    @ConditionalOnProperty(name = "security.seed.enabled", havingValue = "true", matchIfMissing = true)
     public CommandLineRunner adminUserSeed(UsuarioRepository usuarioRepository,
                                            PasswordEncoder passwordEncoder,
                                            @Value("${security.seed.enabled:true}") boolean enabled,

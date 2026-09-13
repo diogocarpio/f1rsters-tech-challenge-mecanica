@@ -24,6 +24,12 @@ services:
         condition: service_healthy
     ports:
       - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health/readiness"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/oficina
       - SPRING_DATASOURCE_USERNAME=oficinauser
@@ -35,6 +41,14 @@ services:
       - SECURITY_SEED_ENABLED=true
       - SECURITY_SEED_ADMIN_EMAIL=admin@oficina.local
       - SECURITY_SEED_ADMIN_PASSWORD=admin123
+      - NEW_RELIC_ENABLED=${NEW_RELIC_ENABLED:-true}
+      - NEW_RELIC_APP_NAME=${NEW_RELIC_APP_NAME:-tech-challenge-mecanica-local}
+      - NEW_RELIC_LICENSE_KEY=${NEW_RELIC_LICENSE_KEY:-}
+      - NEW_RELIC_DISTRIBUTED_TRACING_ENABLED=${NEW_RELIC_DISTRIBUTED_TRACING_ENABLED:-true}
+      - NEW_RELIC_ACCOUNT_ID=${NEW_RELIC_ACCOUNT_ID:-0}
+      - NEW_RELIC_API_KEY=${NEW_RELIC_API_KEY:-}
+      - NEW_RELIC_ENVIRONMENT=docker-local
+      - APP_ENV=docker-local
 
 volumes:
   postgres-data:

@@ -20,3 +20,9 @@ security:
     issuer: tech-challenge-mecanica-api
   seed:
     enabled: true
+
+management:
+  newrelic:
+    metrics:
+      export:
+        enabled: false
