@@ -22,7 +22,7 @@ public class SecuritySeedConfig {
                                            PasswordEncoder passwordEncoder,
                                            @Value("${security.seed.enabled:true}") boolean enabled,
                                            @Value("${security.seed.admin.email:admin@oficina.local}") String adminEmail,
-                                           @Value("${security.seed.admin.password:admin123}") String adminPassword) {
+                                           @Value("${security.seed.admin.password}") String adminPassword) {
         return args -> {
             String normalizedAdminEmail = InputNormalizer.normalizeEmail(adminEmail);
             if (!enabled || usuarioRepository.existsByEmail(normalizedAdminEmail)) {

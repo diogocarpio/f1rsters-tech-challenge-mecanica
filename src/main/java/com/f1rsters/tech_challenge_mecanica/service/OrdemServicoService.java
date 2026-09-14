@@ -36,6 +36,18 @@ public class OrdemServicoService {
     private final ServicoRepository servicoRepo;
     private final PecaRepository pecaRepo;
     private final MeterRegistry meterRegistry;
+    
+    private final Counter criarOrdemSuccessCounter;
+    private final Counter criarOrdemErrorCounter;
+    private final Counter atualizarStatusSuccessCounter;
+    private final Counter atualizarStatusErrorCounter;
+    private final Counter processarOrcamentoSuccessCounter;
+    private final Counter processarOrcamentoErrorCounter;
+    private final Counter processarNotificacaoStatusSuccessCounter;
+    private final Counter processarNotificacaoStatusErrorCounter;
+    private final Counter osCreatedTotalCounter;
+    private final Counter processingFailureCounter;
+    private final Counter statusTransitionCounter;
 
     public OrdemServicoService(OrdemServicoRepository repo,
                                ClienteRepository clienteRepo,
@@ -49,6 +61,40 @@ public class OrdemServicoService {
         this.servicoRepo = servicoRepo;
         this.pecaRepo = pecaRepo;
         this.meterRegistry = meterRegistry;
+        
+        this.criarOrdemSuccessCounter = Counter.builder("ordem_servico.criar_ordem.success.total")
+                .description("Sucesso na criação de ordens de serviço")
+                .register(meterRegistry);
+        this.criarOrdemErrorCounter = Counter.builder("ordem_servico.criar_ordem.unexpected_error.total")
+                .description("Erros não esperados na criação de ordens de serviço")
+                .register(meterRegistry);
+        this.atualizarStatusSuccessCounter = Counter.builder("ordem_servico.atualizar_status.success.total")
+                .description("Sucesso na atualização de status de ordens de serviço")
+                .register(meterRegistry);
+        this.atualizarStatusErrorCounter = Counter.builder("ordem_servico.atualizar_status.unexpected_error.total")
+                .description("Erros não esperados na atualização de status")
+                .register(meterRegistry);
+        this.processarOrcamentoSuccessCounter = Counter.builder("ordem_servico.processar_orcamento.success.total")
+                .description("Sucesso no processamento de orçamento")
+                .register(meterRegistry);
+        this.processarOrcamentoErrorCounter = Counter.builder("ordem_servico.processar_orcamento.unexpected_error.total")
+                .description("Erros não esperados no processamento de orçamento")
+                .register(meterRegistry);
+        this.processarNotificacaoStatusSuccessCounter = Counter.builder("ordem_servico.processar_notificacao_status.success.total")
+                .description("Sucesso no processamento de notificação de status")
+                .register(meterRegistry);
+        this.processarNotificacaoStatusErrorCounter = Counter.builder("ordem_servico.processar_notificacao_status.unexpected_error.total")
+                .description("Erros não esperados no processamento de notificação de status")
+                .register(meterRegistry);
+        this.osCreatedTotalCounter = Counter.builder("ordem_servico.created.total")
+                .description("Total de ordens de serviço criadas")
+                .register(meterRegistry);
+        this.processingFailureCounter = Counter.builder("ordem_servico.processing.failure.total")
+                .description("Falhas no processamento de ordens de serviço")
+                .register(meterRegistry);
+        this.statusTransitionCounter = Counter.builder("ordem_servico.status.transition.total")
+                .description("Total de transições de status de ordens de serviço")
+                .register(meterRegistry);
     }
 
     @Transactional
@@ -129,15 +175,8 @@ public class OrdemServicoService {
             
             log.info("Ordem de serviço criada com sucesso: id={}, status={}", created.getId(), created.getStatus());
             
-            Counter.builder("ordem_servico.created.total")
-                    .description("Total de ordens de serviço criadas")
-                    .register(meterRegistry)
-                    .increment();
-            
-            Counter.builder("ordem_servico.criar_ordem.success.total")
-                    .description("Sucesso na criação de ordens de serviço")
-                    .register(meterRegistry)
-                    .increment();
+            osCreatedTotalCounter.increment();
+            criarOrdemSuccessCounter.increment();
             
             sample.stop(Timer.builder("ordem_servico.processing.duration")
                     .description("Duração de processamento das operações de OS")
@@ -151,11 +190,8 @@ public class OrdemServicoService {
             MDC.put("error_message", e.getMessage());
             log.error("Erro não tratado ao criar ordem de serviço", e);
             
-            Counter.builder("ordem_servico.criar_ordem.unexpected_error.total")
-                    .description("Erros não esperados na criação de ordens de serviço")
-                    .tag("error_type", e.getClass().getSimpleName())
-                    .register(meterRegistry)
-                    .increment();
+            recordFailure("criar_ordem", e.getClass().getSimpleName(), null);
+            criarOrdemErrorCounter.increment();
             
             throw e;
             
@@ -189,10 +225,7 @@ public class OrdemServicoService {
             
             recordStatusTransition(updated, statusAnterior, novoStatus);
             
-            Counter.builder("ordem_servico.atualizar_status.success.total")
-                    .description("Sucesso na atualização de status de ordens de serviço")
-                    .register(meterRegistry)
-                    .increment();
+            atualizarStatusSuccessCounter.increment();
             
             sample.stop(Timer.builder("ordem_servico.processing.duration")
                     .description("Duração de processamento das operações de OS")
@@ -206,11 +239,8 @@ public class OrdemServicoService {
             MDC.put("error_message", e.getMessage());
             log.error("Erro não tratado ao atualizar status da OS", e);
             
-            Counter.builder("ordem_servico.atualizar_status.unexpected_error.total")
-                    .description("Erros não esperados na atualização de status")
-                    .tag("error_type", e.getClass().getSimpleName())
-                    .register(meterRegistry)
-                    .increment();
+            recordFailure("atualizar_status", e.getClass().getSimpleName(), id);
+            atualizarStatusErrorCounter.increment();
             
             throw e;
             
@@ -298,15 +328,12 @@ public class OrdemServicoService {
             } else {
                 log.info("Orçamento recusado: id={}, status mantido=AGUARDANDO_APROVACAO", id);
             }
-
+            
             OrdemServico updated = repo.save(os);
             
             recordStatusTransition(updated, statusAnterior, updated.getStatus());
             
-            Counter.builder("ordem_servico.processar_orcamento.success.total")
-                    .description("Sucesso no processamento de orçamento")
-                    .register(meterRegistry)
-                    .increment();
+            processarOrcamentoSuccessCounter.increment();
             
             sample.stop(Timer.builder("ordem_servico.processing.duration")
                     .description("Duração de processamento das operações de OS")
@@ -320,11 +347,8 @@ public class OrdemServicoService {
             MDC.put("error_message", e.getMessage());
             log.error("Erro não tratado ao processar resposta de orçamento", e);
             
-            Counter.builder("ordem_servico.processar_orcamento.unexpected_error.total")
-                    .description("Erros não esperados no processamento de orçamento")
-                    .tag("error_type", e.getClass().getSimpleName())
-                    .register(meterRegistry)
-                    .increment();
+            recordFailure("processar_orcamento", e.getClass().getSimpleName(), id);
+            processarOrcamentoErrorCounter.increment();
             
             throw e;
             
@@ -361,10 +385,7 @@ public class OrdemServicoService {
             
             recordStatusTransition(updated, statusAnterior, dto.novoStatus());
             
-            Counter.builder("ordem_servico.processar_notificacao_status.success.total")
-                    .description("Sucesso no processamento de notificação de status")
-                    .register(meterRegistry)
-                    .increment();
+            processarNotificacaoStatusSuccessCounter.increment();
             
             sample.stop(Timer.builder("ordem_servico.processing.duration")
                     .description("Duração de processamento das operações de OS")
@@ -378,11 +399,8 @@ public class OrdemServicoService {
             MDC.put("error_message", e.getMessage());
             log.error("Erro não tratado ao processar notificação de status", e);
             
-            Counter.builder("ordem_servico.processar_notificacao_status.unexpected_error.total")
-                    .description("Erros não esperados no processamento de notificação de status")
-                    .tag("error_type", e.getClass().getSimpleName())
-                    .register(meterRegistry)
-                    .increment();
+            recordFailure("processar_notificacao_status", e.getClass().getSimpleName(), id);
+            processarNotificacaoStatusErrorCounter.increment();
             
             throw e;
             
@@ -406,18 +424,20 @@ public class OrdemServicoService {
         );
     }
 
-    private RuntimeException businessException(String message, String reason, Long osId, String operation) {
+    private void recordFailure(String operation, String errorType, Long osId) {
         Counter.builder("ordem_servico.processing.failure.total")
                 .description("Falhas no processamento de ordens de serviço")
-                .tag("reason", reason)
                 .tag("operation", operation)
+                .tag("error_type", errorType)
                 .tag("os_id", osId != null ? osId.toString() : "unknown")
                 .register(meterRegistry)
                 .increment();
-        
+    }
+
+    private RuntimeException businessException(String message, String reason, Long osId, String operation) {
+        recordFailure(operation, reason, osId);
         log.error("Falha no processamento de OS: reason={}, operation={}, osId={}, message={}", 
                   reason, operation, osId, message);
-        
         return new RuntimeException(message);
     }
 

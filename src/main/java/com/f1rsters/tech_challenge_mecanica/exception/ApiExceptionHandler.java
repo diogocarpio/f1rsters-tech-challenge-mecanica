@@ -24,19 +24,23 @@ public class ApiExceptionHandler {
         MDC.put("error_type", "MethodArgumentNotValidException");
         MDC.put("error_handler", "ApiExceptionHandler");
         
-        List<Map<String, String>> errors = ex.getBindingResult()
-                .getFieldErrors()
-                .stream()
-                .map(this::toFieldError)
-                .toList();
+        try {
+            List<Map<String, String>> errors = ex.getBindingResult()
+                    .getFieldErrors()
+                    .stream()
+                    .map(this::toFieldError)
+                    .toList();
 
-        log.error("Erro de validação: {} campos inválidos", errors.size());
+            log.error("Erro de validação: {} campos inválidos", errors.size());
 
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("status", HttpStatus.BAD_REQUEST.value());
-        body.put("error", "VALIDATION_ERROR");
-        body.put("fields", errors);
-        return ResponseEntity.badRequest().body(body);
+            Map<String, Object> body = new LinkedHashMap<>();
+            body.put("status", HttpStatus.BAD_REQUEST.value());
+            body.put("error", "VALIDATION_ERROR");
+            body.put("fields", errors);
+            return ResponseEntity.badRequest().body(body);
+        } finally {
+            MDC.clear();
+        }
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -44,23 +48,27 @@ public class ApiExceptionHandler {
         MDC.put("error_type", "ConstraintViolationException");
         MDC.put("error_handler", "ApiExceptionHandler");
         
-        List<Map<String, String>> errors = ex.getConstraintViolations()
-                .stream()
-                .map(violation -> {
-                    Map<String, String> field = new LinkedHashMap<>();
-                    field.put("field", violation.getPropertyPath().toString());
-                    field.put("message", violation.getMessage());
-                    return field;
-                })
-                .toList();
+        try {
+            List<Map<String, String>> errors = ex.getConstraintViolations()
+                    .stream()
+                    .map(violation -> {
+                        Map<String, String> field = new LinkedHashMap<>();
+                        field.put("field", violation.getPropertyPath().toString());
+                        field.put("message", violation.getMessage());
+                        return field;
+                    })
+                    .toList();
 
-        log.error("Violação de constraint: {} violações", errors.size());
+            log.error("Violação de constraint: {} violações", errors.size());
 
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("status", HttpStatus.BAD_REQUEST.value());
-        body.put("error", "VALIDATION_ERROR");
-        body.put("fields", errors);
-        return ResponseEntity.badRequest().body(body);
+            Map<String, Object> body = new LinkedHashMap<>();
+            body.put("status", HttpStatus.BAD_REQUEST.value());
+            body.put("error", "VALIDATION_ERROR");
+            body.put("fields", errors);
+            return ResponseEntity.badRequest().body(body);
+        } finally {
+            MDC.clear();
+        }
     }
 
     @ExceptionHandler(RuntimeException.class)
@@ -69,13 +77,17 @@ public class ApiExceptionHandler {
         MDC.put("error_message", ex.getMessage());
         MDC.put("error_handler", "ApiExceptionHandler");
         
-        log.error("Erro de negócio capturado: {}", ex.getMessage());
+        try {
+            log.error("Erro de negócio capturado: {}", ex.getMessage());
 
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("status", HttpStatus.BAD_REQUEST.value());
-        body.put("error", "BUSINESS_ERROR");
-        body.put("message", ex.getMessage());
-        return ResponseEntity.badRequest().body(body);
+            Map<String, Object> body = new LinkedHashMap<>();
+            body.put("status", HttpStatus.BAD_REQUEST.value());
+            body.put("error", "BUSINESS_ERROR");
+            body.put("message", ex.getMessage());
+            return ResponseEntity.badRequest().body(body);
+        } finally {
+            MDC.clear();
+        }
     }
 
     @ExceptionHandler(Exception.class)
@@ -84,13 +96,17 @@ public class ApiExceptionHandler {
         MDC.put("error_message", ex.getMessage());
         MDC.put("error_handler", "ApiExceptionHandler");
         
-        log.error("Erro não tratado capturado pelo handler global", ex);
+        try {
+            log.error("Erro não tratado capturado pelo handler global", ex);
 
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-        body.put("error", "INTERNAL_ERROR");
-        body.put("message", "Erro interno no processamento da requisição");
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
+            Map<String, Object> body = new LinkedHashMap<>();
+            body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            body.put("error", "INTERNAL_ERROR");
+            body.put("message", "Erro interno no processamento da requisição");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
+        } finally {
+            MDC.clear();
+        }
     }
 
     private Map<String, String> toFieldError(FieldError fieldError) {

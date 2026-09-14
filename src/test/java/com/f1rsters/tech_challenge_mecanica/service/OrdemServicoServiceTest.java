@@ -632,7 +632,7 @@ class OrdemServicoServiceTest {
 
         assertEquals("Test error", ex.getMessage());
         assertTrue(isolatedRegistry.counter("ordem_servico.processing.failure.total",
-                "reason", "test_reason", "operation", "test_operation", "os_id", "1").count() > 0);
+                "error_type", "test_reason", "operation", "test_operation", "os_id", "1").count() > 0);
     }
 
     @Test
@@ -648,6 +648,6 @@ class OrdemServicoServiceTest {
 
         assertEquals("Test error", ex.getMessage());
         assertTrue(isolatedRegistry.counter("ordem_servico.processing.failure.total",
-                "reason", "test_reason", "operation", "test_operation", "os_id", "unknown").count() > 0);
+                "error_type", "test_reason", "operation", "test_operation", "os_id", "unknown").count() > 0);
     }
 }
