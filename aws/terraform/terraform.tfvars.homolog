@@ -21,7 +21,7 @@ db_backup_retention_period = 1
 # jwt_secret will be loaded from GitHub Secret: JWT_SECRET
 
 # New Relic Configuration
-enable_newrelic = true
+enable_newrelic = false
 # newrelic_account_id will be loaded from GitHub Secret: NEW_RELIC_ACCOUNT_ID
 # newrelic_api_key will be loaded from GitHub Secret: NEW_RELIC_API_KEY
 newrelic_region = "US"
