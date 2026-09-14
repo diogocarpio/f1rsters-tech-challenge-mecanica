@@ -25,6 +25,7 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Service
@@ -45,6 +46,8 @@ public class OrdemServicoService {
     private static final String PROCESSAR_ORCAMENTO = "processar_orcamento";
     private static final String PROCESSAR_NOTIFICACAO_STATUS = "processar_notificacao_status";
     private static final String OS_NAO_ENCONTRADA_REASON = "os_nao_encontrada";
+    private static final String DETALHAR = "detalhar";
+    private static final String CONSULTAR_STATUS = "consultar_status";
     
     private final OrdemServicoRepository repo;
     private final ClienteRepository clienteRepo;
@@ -142,7 +145,7 @@ public class OrdemServicoService {
                         MDC.put(ERROR_REASON, "veiculo_nao_encontrado");
                         MDC.put("vehicle_plate", SensitiveDataMasker.maskPlaca(placaNormalizada));
                         log.error("Veículo não encontrado para placa: {}", placaNormalizada);
-                        return businessException("Veículo não encontrado", "veiculo_nao_encontrado", null, "criar_ordem");
+                        return businessException("Veículo não encontrado", "veiculo_nao_encontrado", null, CRIAR_ORDEM);
                     });
             
             MDC.put("vehicle_id", veiculo.getId().toString());
@@ -270,16 +273,16 @@ public class OrdemServicoService {
     }
 
     public OrdemServico detalhar(Long id) {
-        MDC.put("operation", "detalhar");
+        MDC.put(OPERATION, DETALHAR);
         MDC.put(OS_ID, id.toString());
         
         try {
             log.info("Buscando detalhes da OS: id={}", id);
             
             OrdemServico os = repo.findById(id).orElseThrow(() -> {
-                MDC.put(ERROR_REASON, "os_nao_encontrada");
+                MDC.put(ERROR_REASON, OS_NAO_ENCONTRADA_REASON);
                 log.error("OS não encontrada: id={}", id);
-                return businessException(OS_NAO_ENCONTRADA, OS_NAO_ENCONTRADA_REASON, id, "detalhar");
+                return businessException(OS_NAO_ENCONTRADA, OS_NAO_ENCONTRADA_REASON, id, DETALHAR);
             });
             
             log.info("OS encontrada: id={}, status={}", id, os.getStatus());
@@ -292,7 +295,7 @@ public class OrdemServicoService {
     }
 
     public StatusOrdemServicoDTO consultarStatus(Long id) {
-        MDC.put("operation", "consultar_status");
+        MDC.put(OPERATION, CONSULTAR_STATUS);
         MDC.put(OS_ID, id.toString());
         
         try {
@@ -301,7 +304,7 @@ public class OrdemServicoService {
             OrdemServico os = repo.findById(id).orElseThrow(() -> {
                 MDC.put(ERROR_REASON, "os_nao_encontrada");
                 log.error("OS não encontrada: id={}", id);
-                return businessException(OS_NAO_ENCONTRADA, OS_NAO_ENCONTRADA_REASON, id, "consultar_status");
+                return businessException(OS_NAO_ENCONTRADA, OS_NAO_ENCONTRADA_REASON, id, CONSULTAR_STATUS);
             });
             
             log.info("Status consultado: id={}, status={}", id, os.getStatus());
@@ -334,7 +337,7 @@ public class OrdemServicoService {
             if (os.getStatus() != StatusOrdemServico.AGUARDANDO_APROVACAO) {
                 MDC.put(ERROR_REASON, "transicao_status_invalida");
                 log.error("OS não está aguardando aprovação: id={}, status={}", id, os.getStatus());
-                throw businessException("OS não está aguardando aprovação", "transicao_status_invalida", id, "processar_orcamento");
+                throw businessException("OS não está aguardando aprovação", "transicao_status_invalida", id, PROCESSAR_ORCAMENTO);
             }
             
             StatusOrdemServico statusAnterior = os.getStatus();
@@ -474,7 +477,7 @@ public class OrdemServicoService {
         if (statusAtual == StatusOrdemServico.DIAGNOSTICO
                 || statusAtual == StatusOrdemServico.EM_EXECUCAO
                 || statusAtual == StatusOrdemServico.FINALIZADA) {
-            double elapsedSeconds = Math.max(0, Duration.between(os.getCriadoEm(), LocalDateTime.now(ZoneId.systemDefault())).toSeconds());
+            double elapsedSeconds = Math.max(0, Duration.between(os.getCriadoEm().atZone(ZoneId.systemDefault()), ZonedDateTime.now(ZoneId.systemDefault())).toSeconds());
             DistributionSummary.builder("ordem_servico.status.lead_time.seconds")
                     .description("Tempo em segundos para alcançar um status de OS")
                     .tag("status", statusAtual.name())
