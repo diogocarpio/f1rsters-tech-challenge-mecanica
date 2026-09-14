@@ -18,11 +18,15 @@ import java.util.Map;
 @RestControllerAdvice
 public class ApiExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(ApiExceptionHandler.class);
+    private static final String ERROR_TYPE = "error_type";
+    private static final String ERROR_HANDLER = "error_handler";
+    private static final String ERROR_MESSAGE = "error_message";
+    private static final String HANDLER_NAME = "ApiExceptionHandler";
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex) {
-        MDC.put("error_type", "MethodArgumentNotValidException");
-        MDC.put("error_handler", "ApiExceptionHandler");
+        MDC.put(ERROR_TYPE, "MethodArgumentNotValidException");
+        MDC.put(ERROR_HANDLER, HANDLER_NAME);
         
         try {
             List<Map<String, String>> errors = ex.getBindingResult()
@@ -45,8 +49,8 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<Map<String, Object>> handleConstraintViolation(ConstraintViolationException ex) {
-        MDC.put("error_type", "ConstraintViolationException");
-        MDC.put("error_handler", "ApiExceptionHandler");
+        MDC.put(ERROR_TYPE, "ConstraintViolationException");
+        MDC.put(ERROR_HANDLER, HANDLER_NAME);
         
         try {
             List<Map<String, String>> errors = ex.getConstraintViolations()
@@ -73,9 +77,9 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Map<String, Object>> handleRuntimeException(RuntimeException ex) {
-        MDC.put("error_type", ex.getClass().getSimpleName());
-        MDC.put("error_message", ex.getMessage());
-        MDC.put("error_handler", "ApiExceptionHandler");
+        MDC.put(ERROR_TYPE, ex.getClass().getSimpleName());
+        MDC.put(ERROR_MESSAGE, ex.getMessage());
+        MDC.put(ERROR_HANDLER, HANDLER_NAME);
         
         try {
             log.error("Erro de negócio capturado: {}", ex.getMessage());
@@ -92,9 +96,9 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
-        MDC.put("error_type", ex.getClass().getSimpleName());
-        MDC.put("error_message", ex.getMessage());
-        MDC.put("error_handler", "ApiExceptionHandler");
+        MDC.put(ERROR_TYPE, ex.getClass().getSimpleName());
+        MDC.put(ERROR_MESSAGE, ex.getMessage());
+        MDC.put(ERROR_HANDLER, HANDLER_NAME);
         
         try {
             log.error("Erro não tratado capturado pelo handler global", ex);
