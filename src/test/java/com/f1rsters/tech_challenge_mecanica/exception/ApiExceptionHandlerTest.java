@@ -54,4 +54,16 @@ class ApiExceptionHandlerTest {
         assertEquals(HttpStatus.BAD_REQUEST.value(), response.getBody().get("status"));
         assertEquals("VALIDATION_ERROR", response.getBody().get("error"));
     }
+
+    @Test
+    void shouldHandleGenericException() {
+        Exception ex = mock(Exception.class);
+        when(ex.getMessage()).thenReturn("Test exception message");
+        
+        ResponseEntity<Map<String, Object>> response = exceptionHandler.handleGenericException(ex);
+        
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), response.getBody().get("status"));
+        assertEquals("INTERNAL_ERROR", response.getBody().get("error"));
+        assertEquals("Erro interno no processamento da requisição", response.getBody().get("message"));
+    }
 }

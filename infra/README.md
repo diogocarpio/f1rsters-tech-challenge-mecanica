@@ -123,3 +123,20 @@ O estado do Terraform é armazenado localmente em `./terraform.tfstate`.
 - Secrets Kubernetes são usados para credenciais
 - ConfigMaps para configurações não sensíveis
 - Probes de health check configurados para resiliência
+
+## Observabilidade New Relic
+
+Para habilitar integração de observabilidade no cluster local:
+
+```hcl
+enable_newrelic_k8s_integration = true
+new_relic_license_key           = "<SUA_LICENSE_KEY>"
+new_relic_cluster_name          = "oficina-local-k8s"
+new_relic_enabled               = "true"
+new_relic_app_name              = "tech-challenge-mecanica-k8s-local"
+new_relic_metrics_enabled       = "true"
+new_relic_account_id            = "<SEU_ACCOUNT_ID>"
+new_relic_api_key               = "<SUA_API_KEY>"
+```
+
+A instalação usa o chart `nri-bundle` da New Relic via provider Helm e habilita coleta de recursos Kubernetes (CPU/memória), além de suportar health/uptime e logs/traces pela aplicação instrumentada.

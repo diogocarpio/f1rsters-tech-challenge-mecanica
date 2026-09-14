@@ -23,9 +23,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(properties = "test.context=security-integration")
+@SpringBootTest(properties = {"test.context=security-integration", "management.newrelic.metrics.export.enabled=false"})
 @ActiveProfiles("test")
-@ResourceLock("integration-db")
 class SecurityIntegrationTests {
 
     private MockMvc mockMvc;
