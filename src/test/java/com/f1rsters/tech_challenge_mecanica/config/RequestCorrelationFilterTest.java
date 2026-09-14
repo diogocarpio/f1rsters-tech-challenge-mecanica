@@ -1,4 +1,4 @@
-package com.f1rsters.tech_challenge_mecanica.observability;
+package com.f1rsters.tech_challenge_mecanica.config;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,17 +9,17 @@ import org.mockito.ArgumentCaptor;
 import org.slf4j.MDC;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-class CorrelationIdFilterTest {
+class RequestCorrelationFilterTest {
 
-    private final CorrelationIdFilter filter = new CorrelationIdFilter();
+    private final RequestCorrelationFilter filter = new RequestCorrelationFilter();
 
     @AfterEach
     void clearMdc() {
@@ -27,48 +27,52 @@ class CorrelationIdFilterTest {
     }
 
     @Test
-    void deveGerarCorrelationIdQuandoHeaderNaoForEnviado() throws Exception {
+    void deveGerarIdentificadoresQuandoHeadersNaoForemEnviados() throws Exception {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
         FilterChain chain = mock(FilterChain.class);
 
-        when(request.getHeader(CorrelationIdFilter.HEADER_NAME)).thenReturn(null);
         when(request.getMethod()).thenReturn("GET");
         when(request.getRequestURI()).thenReturn("/api/clientes/me");
         doAnswer(invocation -> {
-            assertNotNull(MDC.get(CorrelationIdFilter.MDC_KEY));
+            assertNotNull(MDC.get("request_id"));
+            assertNotNull(MDC.get("correlation_id"));
             return null;
         }).when(chain).doFilter(request, response);
 
         filter.doFilterInternal(request, response, chain);
 
+        ArgumentCaptor<String> requestIdCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> correlationIdCaptor = ArgumentCaptor.forClass(String.class);
-        verify(response).setHeader(eq(CorrelationIdFilter.HEADER_NAME), correlationIdCaptor.capture());
+        verify(response).setHeader(eq(RequestCorrelationFilter.REQUEST_ID_HEADER), requestIdCaptor.capture());
+        verify(response).setHeader(eq(RequestCorrelationFilter.CORRELATION_ID_HEADER), correlationIdCaptor.capture());
+        assertNotNull(requestIdCaptor.getValue());
         assertNotNull(correlationIdCaptor.getValue());
-        assertFalse(MDC.getCopyOfContextMap() != null
-                && MDC.getCopyOfContextMap().containsKey(CorrelationIdFilter.MDC_KEY));
+        assertNull(MDC.get("request_id"));
+        assertNull(MDC.get("correlation_id"));
     }
 
     @Test
-    void devePreservarCorrelationIdRecebido() throws Exception {
-        String correlationId = "request-123";
+    void devePreservarIdentificadoresRecebidos() throws Exception {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
         FilterChain chain = mock(FilterChain.class);
 
-        when(request.getHeader(CorrelationIdFilter.HEADER_NAME)).thenReturn(correlationId);
+        when(request.getHeader(RequestCorrelationFilter.REQUEST_ID_HEADER)).thenReturn("request-123");
+        when(request.getHeader(RequestCorrelationFilter.CORRELATION_ID_HEADER)).thenReturn("correlation-123");
         when(request.getMethod()).thenReturn("GET");
         when(request.getRequestURI()).thenReturn("/api/clientes/me");
         doAnswer(invocation -> {
-            assertEquals(correlationId, MDC.get(CorrelationIdFilter.MDC_KEY));
+            assertEquals("request-123", MDC.get("request_id"));
+            assertEquals("correlation-123", MDC.get("correlation_id"));
             return null;
         }).when(chain).doFilter(request, response);
 
         filter.doFilterInternal(request, response, chain);
 
-        verify(response).setHeader(CorrelationIdFilter.HEADER_NAME, correlationId);
-        assertFalse(MDC.getCopyOfContextMap() != null
-                && MDC.getCopyOfContextMap().containsKey(CorrelationIdFilter.MDC_KEY));
+        verify(response).setHeader(RequestCorrelationFilter.REQUEST_ID_HEADER, "request-123");
+        verify(response).setHeader(RequestCorrelationFilter.CORRELATION_ID_HEADER, "correlation-123");
+        assertNull(MDC.get("request_id"));
+        assertNull(MDC.get("correlation_id"));
     }
-
 }

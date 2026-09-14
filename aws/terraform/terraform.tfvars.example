@@ -20,3 +20,11 @@ db_password = "your_secure_password_here"
 
 # JWT Configuration
 jwt_secret = "your_jwt_secret_base64_encoded"
+
+# New Relic observability
+enable_newrelic     = true
+newrelic_account_id = 12345678
+newrelic_api_key    = "NRAK-..."
+newrelic_license_key = "NRII-..."
+newrelic_region     = "US"
+eks_cluster_name    = "your-eks-cluster-name"

@@ -73,3 +73,41 @@ variable "db_backup_retention_period" {
   type        = number
   default     = 7
 }
+
+variable "enable_newrelic" {
+  description = "Enable New Relic resources provisioning"
+  type        = bool
+  default     = false
+}
+
+variable "newrelic_account_id" {
+  description = "New Relic account ID"
+  type        = number
+  default     = 0
+}
+
+variable "newrelic_api_key" {
+  description = "New Relic user API key"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "newrelic_region" {
+  description = "New Relic region"
+  type        = string
+  default     = "US"
+}
+
+variable "newrelic_license_key" {
+  description = "New Relic license key"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "eks_cluster_name" {
+  description = "Existing EKS cluster name used for New Relic integration"
+  type        = string
+  default     = ""
+}

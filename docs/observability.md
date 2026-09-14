@@ -2,32 +2,36 @@
 
 ## Logs estruturados
 
-A aplicação utiliza o logging estruturado nativo do Spring Boot com formato `logstash` no console. Os logs são emitidos em JSON para facilitar a coleta por ferramentas de monitoramento e agregadores de logs.
+A aplicação utiliza Logback com `LogstashEncoder` para emitir logs JSON no console e em arquivo. A configuração inclui o nome da aplicação, ambiente e os valores disponíveis no MDC.
 
-O filtro HTTP registra a conclusão de cada requisição com:
+O `RequestCorrelationFilter` registra o início e a conclusão das requisições com:
 
 - método HTTP;
 - caminho requisitado;
 - status HTTP;
-- duração em milissegundos;
-- `correlation_id` no contexto MDC.
+- endereço remoto;
+- request ID;
+- correlation ID;
+- trace ID, quando o header `traceparent` estiver presente.
 
 Dados sensíveis, como CPF completo, credenciais e tokens, não devem ser adicionados às mensagens de log.
 
 ## Correlação de requisições
 
-O header utilizado é:
+Os headers utilizados são:
 
 ```text
+X-Request-Id
 X-Correlation-ID
 ```
 
 Comportamento:
 
-1. Se o header for recebido, o valor é preservado.
-2. Se estiver ausente ou inválido, a aplicação gera um UUID.
-3. O valor é devolvido no header da resposta.
-4. O mesmo valor é colocado no MDC com a chave `correlation_id`.
-5. O MDC é limpo ao final da requisição.
+1. Se os headers forem recebidos, os valores são preservados.
+2. Se estiverem ausentes, a aplicação gera UUIDs.
+3. Os valores são devolvidos nos headers da resposta.
+4. Os identificadores são adicionados ao MDC como `request_id` e `correlation_id`.
+5. O header `traceparent`, quando recebido, é registrado como `trace_id`.
+6. O MDC é limpo ao final da requisição.
 
-O API Gateway e a Lambda devem propagar o mesmo header para que uma requisição possa ser acompanhada entre os componentes.
+O API Gateway e a Lambda devem propagar os mesmos headers para permitir correlação entre os componentes. A integração com New Relic é controlada pelas variáveis de ambiente documentadas no README.
