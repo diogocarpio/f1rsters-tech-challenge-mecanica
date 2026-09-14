@@ -130,7 +130,7 @@ public class OrdemServicoService {
                         MDC.put(ERROR_REASON, "cliente_nao_encontrado");
                         MDC.put("cpf_cnpj", SensitiveDataMasker.maskCpfCnpj(cpfCnpjNormalizado));
                         log.error("Cliente não encontrado para CPF/CNPJ: {}", cpfCnpjNormalizado);
-                        return businessException("Cliente não encontrado", "cliente_nao_encontrado", null, "criar_ordem");
+                        return businessException("Cliente não encontrado", "cliente_nao_encontrado", null, CRIAR_ORDEM);
                     });
             
             MDC.put("client_id", cliente.getId().toString());
@@ -226,9 +226,9 @@ public class OrdemServicoService {
             log.info("Atualizando status da OS: id={}, novoStatus={}", id, novoStatus);
             
             OrdemServico os = repo.findById(id).orElseThrow(() -> {
-                MDC.put(ERROR_REASON, "os_nao_encontrada");
+                MDC.put(ERROR_REASON, OS_NAO_ENCONTRADA_REASON);
                 log.error("OS não encontrada: id={}", id);
-                return businessException(OS_NAO_ENCONTRADA, OS_NAO_ENCONTRADA_REASON, id, "atualizar_status");
+                return businessException(OS_NAO_ENCONTRADA, OS_NAO_ENCONTRADA_REASON, id, ATUALIZAR_STATUS);
             });
             
             StatusOrdemServico statusAnterior = os.getStatus();
@@ -324,9 +324,9 @@ public class OrdemServicoService {
             log.info("Processando resposta de orçamento: id={}, aprovado={}", id, dto.aprovado());
             
             OrdemServico os = repo.findById(id).orElseThrow(() -> {
-                MDC.put(ERROR_REASON, "os_nao_encontrada");
+                MDC.put(ERROR_REASON, OS_NAO_ENCONTRADA_REASON);
                 log.error("OS não encontrada: id={}", id);
-                return businessException(OS_NAO_ENCONTRADA, OS_NAO_ENCONTRADA_REASON, id, "processar_orcamento");
+                return businessException(OS_NAO_ENCONTRADA, OS_NAO_ENCONTRADA_REASON, id, PROCESSAR_ORCAMENTO);
             });
             
             MDC.put("status_atual", os.getStatus().name());
@@ -384,9 +384,9 @@ public class OrdemServicoService {
             log.info("Processando notificação de status: id={}, novoStatus={}", id, dto.novoStatus());
             
             OrdemServico os = repo.findById(id).orElseThrow(() -> {
-                MDC.put(ERROR_REASON, "os_nao_encontrada");
+                MDC.put(ERROR_REASON, OS_NAO_ENCONTRADA_REASON);
                 log.error("OS não encontrada: id={}", id);
-                return businessException(OS_NAO_ENCONTRADA, OS_NAO_ENCONTRADA_REASON, id, "processar_notificacao_status");
+                return businessException(OS_NAO_ENCONTRADA, OS_NAO_ENCONTRADA_REASON, id, PROCESSAR_NOTIFICACAO_STATUS);
             });
             
             // Registrar status anterior para rastreabilidade
@@ -443,9 +443,9 @@ public class OrdemServicoService {
     private void recordFailure(String operation, String errorType, Long osId) {
         Counter.builder("ordem_servico.processing.failure.total")
                 .description("Falhas no processamento de ordens de serviço")
-                .tag("operation", operation)
-                .tag("error_type", errorType)
-                .tag("os_id", osId != null ? osId.toString() : "unknown")
+                .tag(OPERATION, operation)
+                .tag(ERROR_TYPE, errorType)
+                .tag(OS_ID, osId != null ? osId.toString() : "unknown")
                 .register(meterRegistry)
                 .increment();
     }
