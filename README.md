@@ -662,8 +662,44 @@ A aplicacao utiliza variaveis de ambiente com valores padrao. Em producao, e **o
 | `SECURITY_SEED_ADMIN_EMAIL` | Email do usuario admin seed | `admin@oficina.local` |
 | `SECURITY_SEED_ADMIN_PASSWORD` | Senha do usuario admin seed | `admin123` |
 | `SPRING_PROFILES_ACTIVE` | Perfil ativo do Spring | (nenhum / `prod`) |
+| `NEW_RELIC_ENABLED` | Habilita Java Agent New Relic APM | `false` |
+| `NEW_RELIC_APP_NAME` | Nome da aplicacao no New Relic | `tech-challenge-mecanica-local` |
+| `NEW_RELIC_LICENSE_KEY` | License key New Relic (APM/Infra) | (vazio) |
+| `NEW_RELIC_DISTRIBUTED_TRACING_ENABLED` | Habilita distributed tracing | `true` |
+| `NEW_RELIC_METRICS_ENABLED` | Habilita exportacao Micrometer -> New Relic | `false` |
+| `NEW_RELIC_ACCOUNT_ID` | Account ID New Relic para metricas | `0` |
+| `NEW_RELIC_API_KEY` | API key New Relic para metricas Micrometer | (vazio) |
 
 > **Importante:** Na primeira execucao com `SECURITY_SEED_ENABLED=true`, o sistema cria automaticamente um usuario administrador com as credenciais configuradas. Apos o primeiro login, voce pode desabilitar o seed.
+
+---
+
+## Observabilidade com New Relic
+
+### Docker Compose (local)
+
+- A imagem da aplicacao inclui o Java Agent da New Relic e ativa o APM com `NEW_RELIC_ENABLED=true`.
+- Para iniciar com observabilidade:
+
+```bash
+NEW_RELIC_ENABLED=true NEW_RELIC_LICENSE_KEY=<SUA_LICENSE_KEY> docker compose --profile observability up -d
+```
+
+- O profile `observability` sobe o container `newrelic-infra` para coletar metricas de host/container.
+
+### Kubernetes local e EKS
+
+- `k8s/app-configmap.yaml` e `k8s/app-secret.yaml` contem as variaveis de APM/metricas da aplicacao.
+- O Terraform de `infra/` ganhou suporte ao `nri-bundle` via Helm:
+  - `enable_newrelic_k8s_integration=true`
+  - `new_relic_license_key=<SUA_LICENSE_KEY>`
+  - `new_relic_cluster_name=<NOME_CLUSTER>`
+
+### Dashboards e alertas como codigo
+
+- O Terraform em `aws/terraform/newrelic.tf` provisiona:
+  - alertas NRQL para latencia, uptime, healthcheck e falhas de processamento de OS
+  - dashboard de volume diario de OS, tempo medio por status, falhas e recursos de ambiente
 
 ---
 

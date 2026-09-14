@@ -18,3 +18,8 @@ output "db_instance_id" {
   description = "RDS instance ID"
   value       = aws_db_instance.postgres.id
 }
+
+output "newrelic_alert_policy_id" {
+  description = "New Relic alert policy id"
+  value       = var.enable_newrelic ? newrelic_alert_policy.oficina_observability[0].id : null
+}

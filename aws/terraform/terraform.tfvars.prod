@@ -19,3 +19,11 @@ db_backup_retention_period = 1
 
 # JWT Configuration
 # jwt_secret will be loaded from GitHub Secret: JWT_SECRET
+
+# New Relic Configuration
+enable_newrelic = false
+# newrelic_account_id will be loaded from GitHub Secret: NEW_RELIC_ACCOUNT_ID
+# newrelic_api_key will be loaded from GitHub Secret: NEW_RELIC_API_KEY
+newrelic_region = "US"
+# newrelic_license_key will be loaded from GitHub Secret: NEW_RELIC_LICENSE_KEY
+# eks_cluster_name will be loaded from GitHub Secret: EKS_CLUSTER_NAME
