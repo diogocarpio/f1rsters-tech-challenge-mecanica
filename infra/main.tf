@@ -5,6 +5,10 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = "~> 2.23"
     }
+    helm = {
+      source  = "hashicorp/helm"
+      version = "~> 2.13"
+    }
   }
   backend "local" {
     path = "./terraform.tfstate"
@@ -13,6 +17,12 @@ terraform {
 
 provider "kubernetes" {
   config_path = var.kubeconfig_path
+}
+
+provider "helm" {
+  kubernetes {
+    config_path = var.kubeconfig_path
+  }
 }
 
 # Namespace
@@ -35,13 +45,18 @@ resource "kubernetes_config_map" "app" {
   }
 
   data = {
-    SPRING_PROFILES_ACTIVE    = var.spring_profiles_active
-    APP_ENV                   = var.app_env
-    LOG_LEVEL                 = var.log_level
-    JWT_ISSUER                = var.jwt_issuer
-    JWT_ACCESS_TOKEN_MINUTES  = var.jwt_access_token_minutes
-    SECURITY_SEED_ENABLED     = var.security_seed_enabled
-    SECURITY_SEED_ADMIN_EMAIL = var.security_seed_admin_email
+    SPRING_PROFILES_ACTIVE                = var.spring_profiles_active
+    APP_ENV                               = var.app_env
+    LOG_LEVEL                             = var.log_level
+    JWT_ISSUER                            = var.jwt_issuer
+    JWT_ACCESS_TOKEN_MINUTES              = var.jwt_access_token_minutes
+    SECURITY_SEED_ENABLED                 = var.security_seed_enabled
+    SECURITY_SEED_ADMIN_EMAIL             = var.security_seed_admin_email
+    NEW_RELIC_ENABLED                     = var.new_relic_enabled
+    NEW_RELIC_APP_NAME                    = var.new_relic_app_name
+    NEW_RELIC_DISTRIBUTED_TRACING_ENABLED = var.new_relic_distributed_tracing_enabled
+    NEW_RELIC_METRICS_ENABLED             = var.new_relic_metrics_enabled
+    NEW_RELIC_ACCOUNT_ID                  = var.new_relic_account_id
   }
 }
 
@@ -57,6 +72,8 @@ resource "kubernetes_secret" "app" {
   data = {
     JWT_SECRET_BASE64            = var.jwt_secret_base64
     SECURITY_SEED_ADMIN_PASSWORD = var.security_seed_admin_password
+    NEW_RELIC_LICENSE_KEY        = var.new_relic_license_key
+    NEW_RELIC_API_KEY            = var.new_relic_api_key
   }
 }
 
@@ -367,6 +384,76 @@ resource "kubernetes_deployment" "app" {
             }
           }
 
+          env {
+            name = "NEW_RELIC_ENABLED"
+            value_from {
+              config_map_key_ref {
+                name = kubernetes_config_map.app.metadata[0].name
+                key  = "NEW_RELIC_ENABLED"
+              }
+            }
+          }
+
+          env {
+            name = "NEW_RELIC_APP_NAME"
+            value_from {
+              config_map_key_ref {
+                name = kubernetes_config_map.app.metadata[0].name
+                key  = "NEW_RELIC_APP_NAME"
+              }
+            }
+          }
+
+          env {
+            name = "NEW_RELIC_DISTRIBUTED_TRACING_ENABLED"
+            value_from {
+              config_map_key_ref {
+                name = kubernetes_config_map.app.metadata[0].name
+                key  = "NEW_RELIC_DISTRIBUTED_TRACING_ENABLED"
+              }
+            }
+          }
+
+          env {
+            name = "NEW_RELIC_LICENSE_KEY"
+            value_from {
+              secret_key_ref {
+                name = kubernetes_secret.app.metadata[0].name
+                key  = "NEW_RELIC_LICENSE_KEY"
+              }
+            }
+          }
+
+          env {
+            name = "NEW_RELIC_METRICS_ENABLED"
+            value_from {
+              config_map_key_ref {
+                name = kubernetes_config_map.app.metadata[0].name
+                key  = "NEW_RELIC_METRICS_ENABLED"
+              }
+            }
+          }
+
+          env {
+            name = "NEW_RELIC_ACCOUNT_ID"
+            value_from {
+              config_map_key_ref {
+                name = kubernetes_config_map.app.metadata[0].name
+                key  = "NEW_RELIC_ACCOUNT_ID"
+              }
+            }
+          }
+
+          env {
+            name = "NEW_RELIC_API_KEY"
+            value_from {
+              secret_key_ref {
+                name = kubernetes_secret.app.metadata[0].name
+                key  = "NEW_RELIC_API_KEY"
+              }
+            }
+          }
+
           resources {
             requests = {
               memory = "512Mi"
@@ -468,5 +555,23 @@ resource "kubernetes_horizontal_pod_autoscaler_v2" "app" {
         }
       }
     }
+  }
+}
+
+resource "helm_release" "newrelic_bundle" {
+  count      = var.enable_newrelic_k8s_integration && var.new_relic_license_key != "" ? 1 : 0
+  name       = "newrelic-bundle"
+  repository = "https://helm-charts.newrelic.com"
+  chart      = "nri-bundle"
+  namespace  = kubernetes_namespace.this.metadata[0].name
+
+  set {
+    name  = "global.licenseKey"
+    value = var.new_relic_license_key
+  }
+
+  set {
+    name  = "global.cluster"
+    value = var.new_relic_cluster_name
   }
 }

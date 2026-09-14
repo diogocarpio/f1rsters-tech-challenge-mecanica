@@ -1,7 +1,7 @@
-# Homologation Environment Configuration
+# Development Environment Configuration
 aws_region = "sa-east-1"
 project_name = "f1rsters-tech-challenge-mecanica"
-environment = "homolog"
+environment = "dev"
 
 lambda_artifacts_bucket = "f1rsters-tech-challenge-lambda-artifacts"
 lambda_auth_s3_key = "auth-function.jar"
@@ -21,9 +21,15 @@ db_backup_retention_period = 1
 # jwt_secret will be loaded from GitHub Secret: JWT_SECRET
 
 # New Relic Configuration
-enable_newrelic = false
+enable_newrelic = true
 # newrelic_account_id will be loaded from GitHub Secret: NEW_RELIC_ACCOUNT_ID
 # newrelic_api_key will be loaded from GitHub Secret: NEW_RELIC_API_KEY
 newrelic_region = "US"
 # newrelic_license_key will be loaded from GitHub Secret: NEW_RELIC_LICENSE_KEY
 # eks_cluster_name will be loaded from GitHub Secret: EKS_CLUSTER_NAME
+db_password = "dummy_db_password"
+jwt_secret = "dummy_jwt"
+newrelic_account_id = 123456
+newrelic_api_key = "dummy_api_key"
+newrelic_license_key = "dummy_license"
+eks_cluster_name = "dummy-eks"

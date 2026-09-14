@@ -77,6 +77,36 @@ variable "security_seed_admin_email" {
   default     = "admin@oficina.local"
 }
 
+variable "new_relic_enabled" {
+  description = "Habilita o agent New Relic APM na aplicacao"
+  type        = string
+  default     = "false"
+}
+
+variable "new_relic_app_name" {
+  description = "Nome da aplicacao no New Relic"
+  type        = string
+  default     = "tech-challenge-mecanica-k8s-local"
+}
+
+variable "new_relic_distributed_tracing_enabled" {
+  description = "Habilita distributed tracing no New Relic"
+  type        = string
+  default     = "true"
+}
+
+variable "new_relic_metrics_enabled" {
+  description = "Habilita exportacao de metricas Micrometer para New Relic"
+  type        = string
+  default     = "false"
+}
+
+variable "new_relic_account_id" {
+  description = "Account ID New Relic para metricas Micrometer"
+  type        = string
+  default     = "0"
+}
+
 # Secret variables
 variable "jwt_secret_base64" {
   description = "Secret JWT em Base64"
@@ -90,6 +120,20 @@ variable "security_seed_admin_password" {
   type        = string
   sensitive   = true
   default     = "admin123"
+}
+
+variable "new_relic_license_key" {
+  description = "License key New Relic para APM e infraestrutura"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "new_relic_api_key" {
+  description = "API key New Relic para exportacao de metricas Micrometer"
+  type        = string
+  sensitive   = true
+  default     = ""
 }
 
 # Database variables
@@ -147,4 +191,16 @@ variable "hpa_memory_target" {
   description = "Target de utilização de memória do HPA"
   type        = number
   default     = 75
+}
+
+variable "enable_newrelic_k8s_integration" {
+  description = "Habilita a instalacao do nri-bundle no cluster Kubernetes local"
+  type        = bool
+  default     = false
+}
+
+variable "new_relic_cluster_name" {
+  description = "Nome do cluster no New Relic"
+  type        = string
+  default     = "oficina-local-k8s"
 }

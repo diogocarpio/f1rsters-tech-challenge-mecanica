@@ -42,3 +42,8 @@ output "kubectl_get_hpa" {
   description = "Comando para listar HPA"
   value       = "kubectl get hpa -n ${kubernetes_namespace.this.metadata[0].name}"
 }
+
+output "newrelic_k8s_integration_enabled" {
+  description = "Indica se a integracao New Relic no Kubernetes local esta habilitada"
+  value       = var.enable_newrelic_k8s_integration
+}
