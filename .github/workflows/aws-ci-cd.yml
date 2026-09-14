@@ -121,7 +121,9 @@ jobs:
             echo "db_password = \"${{ secrets.DB_PASSWORD }}\"" >> terraform.tfvars
             echo "jwt_secret = \"${{ secrets.JWT_SECRET }}\"" >> terraform.tfvars
             echo "enable_newrelic = true" >> terraform.tfvars
-            echo "newrelic_account_id = \"${{ secrets.NEW_RELIC_ACCOUNT_ID }}\"" >> terraform.tfvars
+            if [ -n "${{ secrets.NEW_RELIC_ACCOUNT_ID }}" ]; then
+               echo "newrelic_account_id = ${{ secrets.NEW_RELIC_ACCOUNT_ID }}" >> terraform.tfvars
+             fi
             echo "newrelic_api_key = \"${{ secrets.NEW_RELIC_API_KEY }}\"" >> terraform.tfvars
             echo "newrelic_license_key = \"${{ secrets.NEW_RELIC_LICENSE_KEY }}\"" >> terraform.tfvars
             echo "eks_cluster_name = \"${{ secrets.EKS_CLUSTER_NAME }}\"" >> terraform.tfvars
@@ -138,7 +140,7 @@ jobs:
           db_password = "${{ secrets.DB_PASSWORD }}"
           jwt_secret = "${{ secrets.JWT_SECRET }}"
           enable_newrelic = true
-          newrelic_account_id = "${{ secrets.NEW_RELIC_ACCOUNT_ID }}"
+          newrelic_account_id = ${{ secrets.NEW_RELIC_ACCOUNT_ID }}
           newrelic_api_key = "${{ secrets.NEW_RELIC_API_KEY }}"
           newrelic_license_key = "${{ secrets.NEW_RELIC_LICENSE_KEY }}"
           eks_cluster_name = "${{ secrets.EKS_CLUSTER_NAME }}"
@@ -258,10 +260,18 @@ jobs:
             echo "db_password = \"${{ secrets.DB_PASSWORD }}\"" >> terraform.tfvars
             echo "jwt_secret = \"${{ secrets.JWT_SECRET }}\"" >> terraform.tfvars
             echo "enable_newrelic = true" >> terraform.tfvars
-            echo "newrelic_account_id = \"${{ secrets.NEW_RELIC_ACCOUNT_ID }}\"" >> terraform.tfvars
-            echo "newrelic_api_key = \"${{ secrets.NEW_RELIC_API_KEY }}\"" >> terraform.tfvars
-            echo "newrelic_license_key = \"${{ secrets.NEW_RELIC_LICENSE_KEY }}\"" >> terraform.tfvars
-            echo "eks_cluster_name = \"${{ secrets.EKS_CLUSTER_NAME }}\"" >> terraform.tfvars
+            if [ -n "${{ secrets.NEW_RELIC_ACCOUNT_ID }}" ]; then
+              echo "newrelic_account_id = ${{ secrets.NEW_RELIC_ACCOUNT_ID }}" >> terraform.tfvars
+            fi
+            if [ -n "${{ secrets.NEW_RELIC_API_KEY }}" ]; then
+              echo "newrelic_api_key = \"${{ secrets.NEW_RELIC_API_KEY }}\"" >> terraform.tfvars
+            fi
+            if [ -n "${{ secrets.NEW_RELIC_LICENSE_KEY }}" ]; then
+              echo "newrelic_license_key = \"${{ secrets.NEW_RELIC_LICENSE_KEY }}\"" >> terraform.tfvars
+            fi
+            if [ -n "${{ secrets.EKS_CLUSTER_NAME }}" ]; then
+              echo "eks_cluster_name = \"${{ secrets.EKS_CLUSTER_NAME }}\"" >> terraform.tfvars
+            fi
           else
             echo "No tfvars file found for environment ${ENV}, using defaults"
             cat > terraform.tfvars <<EOF
@@ -275,8 +285,9 @@ jobs:
           db_password = "${{ secrets.DB_PASSWORD }}"
           jwt_secret = "${{ secrets.JWT_SECRET }}"
           enable_newrelic = true
-          newrelic_account_id = "${{ secrets.NEW_RELIC_ACCOUNT_ID }}"
+          newrelic_account_id = ${{ secrets.NEW_RELIC_ACCOUNT_ID }}
           newrelic_api_key = "${{ secrets.NEW_RELIC_API_KEY }}"
+           newrelic_region = "US"
           newrelic_license_key = "${{ secrets.NEW_RELIC_LICENSE_KEY }}"
           eks_cluster_name = "${{ secrets.EKS_CLUSTER_NAME }}"
           EOF
