@@ -35,7 +35,7 @@ public class OpenApiConfig {
                                 - Endpoint público para acompanhamento de status de OS
                                 
                                 **Autenticação:**
-                                A API utiliza JWT Bearer tokens para autenticação. Faça login em `/api/auth/login` para obter o token.
+                                A API utiliza JWT Bearer tokens. Usuários internos obtêm o token em `/api/auth/login`, e clientes autenticados por CPF usam o token emitido pela Lambda em `/api/clientes/me`.
                                 
                                 **Roles disponíveis:**
                                 - ADMIN: Acesso completo a todos os recursos
