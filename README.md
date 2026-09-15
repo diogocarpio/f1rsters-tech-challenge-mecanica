@@ -1861,4 +1861,7 @@ Retornado quando o recurso solicitado (cliente, veiculo, OS, etc.) nao existe.
 **Turma:** F1RSTERS FIAP - Diogo, Alexandra, Rodrigo e Livea
 
 **Disciplina:** Tech Challenge - Mecanica  
+
+
+
 **Repositorio:** [github.com/diogocarpio/f1rsters-tech-challenge-mecanica](https://github.com/diogocarpio/f1rsters-tech-challenge-mecanica)
