@@ -31,11 +31,13 @@ variable "lambda_auth_s3_key" {
 variable "vpc_id" {
   description = "VPC ID for RDS"
   type        = string
+  default     = "vpc-0a76831510c31af51"
 }
 
 variable "private_subnet_ids" {
   description = "Private subnet IDs for RDS"
   type        = list(string)
+  default     = ["subnet-0a41d64838503ddae", "subnet-056e5e5f5a523f937"]
 }
 
 variable "allowed_cidr_blocks" {

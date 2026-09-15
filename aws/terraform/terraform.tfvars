@@ -15,21 +15,15 @@ allowed_cidr_blocks = ["172.31.0.0/16"]
 db_name = "oficina"
 db_username = "oficinauser"
 db_backup_retention_period = 1
-# db_password will be loaded from GitHub Secret: DB_PASSWORD
-
-# JWT Configuration
-# jwt_secret will be loaded from GitHub Secret: JWT_SECRET
 
 # New Relic Configuration
-enable_newrelic = true
-# newrelic_account_id will be loaded from GitHub Secret: NEW_RELIC_ACCOUNT_ID
-# newrelic_api_key will be loaded from GitHub Secret: NEW_RELIC_API_KEY
+enable_newrelic = false
 newrelic_region = "US"
-# newrelic_license_key will be loaded from GitHub Secret: NEW_RELIC_LICENSE_KEY
-# eks_cluster_name will be loaded from GitHub Secret: EKS_CLUSTER_NAME
-db_password = "dummy_db_password"
-jwt_secret = "dummy_jwt"
-newrelic_account_id = 123456
-newrelic_api_key = "dummy_api_key"
-newrelic_license_key = "dummy_license"
-eks_cluster_name = "dummy-eks"
+
+# Sensitive values (secrets) are injected by GitHub Actions workflow:
+# - db_password (via DB_PASSWORD secret)
+# - jwt_secret (via JWT_SECRET secret)
+# - newrelic_account_id (via NEW_RELIC_ACCOUNT_ID secret, if enable_newrelic=true)
+# - newrelic_api_key (via NEW_RELIC_API_KEY secret)
+# - newrelic_license_key (via NEW_RELIC_LICENSE_KEY secret)
+# - eks_cluster_name (via EKS_CLUSTER_NAME secret)
