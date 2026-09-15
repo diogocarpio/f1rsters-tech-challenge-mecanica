@@ -32,6 +32,9 @@ Preparar o sistema para suportar crescimento, novas unidades da oficina e maior 
 - [Diagrama de Arquitetura](#diagrama-de-arquitetura)
 - [Repositórios da Entrega](#repositórios-da-entrega)
 - [Checklist Final](docs/final-checklist.md)
+- [Roteiro do Vídeo](docs/video-script.md)
+- [Checklist Final](docs/final-checklist.md)
+- [Modelo da Entrega Final](docs/final-delivery.md)
 - [Estrutura de Pastas](#estrutura-de-pastas)
 - [Pre-requisitos](#pre-requisitos)
 - [Configuracao e Execucao](#configuracao-e-execucao)
@@ -57,6 +60,7 @@ Preparar o sistema para suportar crescimento, novas unidades da oficina e maior 
 - [Postman Collection](#postman-collection)
 - [Modelo de Dominio](#modelo-de-dominio)
 - [Banco de Dados e Diagrama ER](docs/database-model.md)
+- [Entrega Final](docs/final-delivery.md)
 - [Observabilidade](docs/observability.md)
 - [Sequência de Abertura de OS](docs/order-service-sequence-diagram.md)
 - [ADRs](docs/adr/)
@@ -140,21 +144,20 @@ O diagrama acima representa a arquitetura da aplicação. A visão consolidada d
 
 Abaixo, uma explicação detalhada de cada camada:
 
-### Camada CI/CD Pipeline (GitHub Actions)
-- **Build & Test**: Compilação do projeto com Maven, execução de testes unitários e integração, e geração de relatório de cobertura com JaCoCo (Java 17).
-- **Docker Build**: Criação da imagem Docker e push para o GitHub Container Registry (GHCR) com tags SHA e latest.
-- **Deploy DEV/QA/PROD**: Deploy automatizado para os ambientes de desenvolvimento, QA e produção, cada um requerendo aprovação manual.
-- **Kustomize**: Gerenciamento de manifests Kubernetes com overlays para diferentes ambientes (dev, qa, prod).
-- **K8s Cluster**: Aplicação dos manifests no cluster Kubernetes, atualizando a imagem da aplicação.
+### Camada CI/CD e repositórios
+- **Aplicação principal**: workflow de build e testes Maven, com Dockerfile e testes automatizados.
+- **Banco gerenciado**: repositório Terraform próprio para o RDS PostgreSQL, com plan/apply por ambiente.
+- **Kubernetes/Observabilidade**: repositório Terraform próprio para recursos Kubernetes e New Relic.
+- **Lambda/API Gateway**: repositório próprio para autenticação serverless, Terraform e deploy da Lambda.
+- **Publicação e deploy da aplicação**: dependem da configuração final do registry e do cluster.
 
 ### Ambiente Local (Docker Compose)
 - **PostgreSQL**: Banco de dados PostgreSQL 15 em container Alpine, porta 5432, com healthcheck e volume persistente.
 - **Spring Boot App**: Aplicação Spring Boot construída a partir do Dockerfile, porta 8080, dependente do banco de dados.
 - **Volume postgres-data**: Persistência dos dados do PostgreSQL localmente.
 
-### GitHub Container Registry (GHCR)
-- **ghcr.io/repo:SHA**: Imagem versionada com o SHA do commit, garantindo rastreabilidade.
-- **ghcr.io/repo:latest**: Imagem mais recente, usada para deployments automáticos.
+### Registry e deploy da aplicação
+A publicação da imagem e o deploy da aplicação no Kubernetes dependem da configuração final do registry e do cluster. O Dockerfile e os manifests da aplicação estão disponíveis neste repositório.
 
 ### Terraform (Infraestrutura como Código)
 - **Provider Kubernetes**: Provedor Terraform para gerenciar recursos Kubernetes.
@@ -171,22 +174,18 @@ Abaixo, uma explicação detalhada de cada camada:
 #### Camada de Aplicação
 - **Service (oficina-app)**: LoadBalancer que expõe a aplicação na porta 80, redirecionando para a porta 8080 dos pods.
 - **HPA (oficina-app-hpa)**: Horizontal Pod Autoscaler configurado para escalar de 1 a 5 réplicas baseado em CPU (70%) e memória (75%).
-- **Deployment (oficina-app)**: Gerencia 2 réplicas da aplicação, usando imagem do GHCR (latest ou SHA).
+- **Deployment (oficina-app)**: Gerencia 2 réplicas da aplicação, usando a imagem do registry definido para o ambiente.
 - **Pods**: Containers da aplicação com recursos limitados (512Mi/1Gi RAM, 500m/1000m CPU), porta 8080.
 - **Health Checks**: Endpoints `/actuator/health` para liveness e readiness probes.
 
 #### Camada de Dados
-- **PVC (postgres-pvc)**: PersistentVolumeClaim com 1Gi para armazenamento persistente do PostgreSQL.
-- **Deployment (postgres-db)**: Gerencia o pod do PostgreSQL com imagem postgres:15-alpine.
-- **Pod (postgres)**: Container do banco com recursos (256Mi/512Mi RAM, 250m/500m CPU).
-- **Service (postgres-db)**: ClusterIP expõe o banco na porta 5432 internamente.
-- **Storage**: Volume montado em `/var/lib/postgresql/data` para persistência dos dados.
+- **Desenvolvimento local**: PostgreSQL em container com PVC e Service `postgres-db`.
+- **Homologação/produção**: PostgreSQL gerenciado no AWS RDS, provisionado pelo repositório de banco.
 
 #### Conexões
 - **Config/Secrets → App**: ConfigMap e Secrets injetados nos pods da aplicação.
-- **App → Database**: Conexão JDBC via `postgresql://postgres-db:5432/oficina`.
-- **GHCR → K8s**: Pull automático da imagem do registry pelo cluster.
-- **PVC → PostgreSQL**: Volume persistente anexado ao pod do banco.
+- **App → Database local**: Conexão JDBC via `postgresql://postgres-db:5432/oficina` no ambiente local.
+- **App → RDS**: Configuração de homologação/produção depende do endpoint e secrets fornecidos pelo ambiente Kubernetes.
 
 #### Acesso Externo
 - **LoadBalancer**: Expõe a aplicação na porta 80 para acesso externo.
@@ -196,9 +195,9 @@ Abaixo, uma explicação detalhada de cada camada:
 - Arquivos YAML para provisionamento de todos os recursos: namespace, ConfigMap, Secrets, PVC, Deployments, Services e HPA.
 
 #### Ambientes
-- **DEV**: Ambiente de desenvolvimento (deploy automático).
-- **QA**: Ambiente de testes (requer aprovação manual).
-- **PROD**: Ambiente de produção (requer aprovação manual).
+- **DEV**: Ambiente de desenvolvimento e validação de plan/configuração.
+- **HOMOLOGAÇÃO**: Ambiente de validação integrada, com deploy controlado pelos repositórios de infraestrutura.
+- **PRODUÇÃO**: Ambiente final, sujeito às configurações e proteções do grupo.
 
 ---
 
