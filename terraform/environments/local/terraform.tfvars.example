@@ -1,0 +1,12 @@
+# Configurações para ambiente local
+kubeconfig_path              = "~/.kube/config"
+kube_context                 = "docker-desktop"
+cluster_name                 = "oficina-docker-desktop"
+enable_newrelic              = true
+enable_newrelic_kube_events  = true
+newrelic_low_data_mode       = false
+
+# License key New Relic
+# Para ambiente local, você pode colocar diretamente aqui ou usar variável de ambiente:
+# $env:TF_VAR_new_relic_license_key = "6511512713fd2de45bffcf65c5bdecb01c38NRAL"
+new_relic_license_key        = "6511512713fd2de45bffcf65c5bdecb01c38NRAL"

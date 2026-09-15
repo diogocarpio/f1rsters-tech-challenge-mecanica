@@ -1,0 +1,37 @@
+# Configurações para Cloud Providers (EKS, GKE, AKS)
+project_name     = "oficina"
+environment      = "production"
+namespace        = "oficina"
+app_image        = "f1rsters-tech-challenge-mecanica-app:latest"
+app_replicas     = 2
+
+# StorageClass para cloud providers
+postgres_storage_class_name = "standard"
+
+# Service type para cloud (LoadBalancer)
+app_service_type = "LoadBalancer"
+app_service_node_port = 30001
+
+# HPA habilitado para cloud
+hpa_min_replicas = 1
+hpa_max_replicas = 5
+hpa_cpu_target   = 70
+hpa_memory_target = 75
+
+# ConfigMap variables
+spring_profiles_active = "prod"
+app_env               = "production"
+log_level             = "INFO"
+
+# Secrets (use valores seguros em produção)
+jwt_secret_base64            = "QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVo0NTY3ODkwQUJDREVG"
+security_seed_admin_password = "admin123"
+postgres_password            = "oficinapassword"
+
+# New Relic (opcional)
+new_relic_enabled                     = "false"
+new_relic_license_key                 = ""
+new_relic_api_key                     = ""
+new_relic_account_id                  = "0"
+enable_newrelic_k8s_integration       = false
+new_relic_cluster_name                = "oficina-cloud-k8s"

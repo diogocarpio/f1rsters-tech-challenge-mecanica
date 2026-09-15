@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: newrelic-bundle-nrk8s-integrations-cfg
+  namespace: oficina
+data:
+  k8s-integration-config.yaml: |
+    integrations:
+      - name: nri-kubernetes
+        env:
+          CLUSTER_NAME: oficina-docker
+          ENABLE_METRICS_EXTRACTOR: "true"
+          ENABLE_KUBE_STATE_METRICS: "true"
+          KUBE_STATE_METRICS_ENABLED: "true"
+          KUBE_STATE_METRICS_URL: http://newrelic-bundle-nrk8s-ksm:8080

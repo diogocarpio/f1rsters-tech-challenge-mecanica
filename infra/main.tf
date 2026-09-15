@@ -53,10 +53,9 @@ resource "kubernetes_config_map" "app" {
     SECURITY_SEED_ENABLED                 = var.security_seed_enabled
     SECURITY_SEED_ADMIN_EMAIL             = var.security_seed_admin_email
     NEW_RELIC_ENABLED                     = var.new_relic_enabled
-    NEW_RELIC_APP_NAME                    = var.new_relic_app_name
+    NEW_RELIC_APP_NAME                    = "${var.new_relic_app_name}-${var.environment}"
     NEW_RELIC_DISTRIBUTED_TRACING_ENABLED = var.new_relic_distributed_tracing_enabled
     NEW_RELIC_METRICS_ENABLED             = var.new_relic_metrics_enabled
-    NEW_RELIC_ACCOUNT_ID                  = var.new_relic_account_id
   }
 }
 
@@ -74,6 +73,7 @@ resource "kubernetes_secret" "app" {
     SECURITY_SEED_ADMIN_PASSWORD = var.security_seed_admin_password
     NEW_RELIC_LICENSE_KEY        = var.new_relic_license_key
     NEW_RELIC_API_KEY            = var.new_relic_api_key
+    NEW_RELIC_ACCOUNT_ID         = var.new_relic_account_id
   }
 }
 
@@ -437,8 +437,8 @@ resource "kubernetes_deployment" "app" {
           env {
             name = "NEW_RELIC_ACCOUNT_ID"
             value_from {
-              config_map_key_ref {
-                name = kubernetes_config_map.app.metadata[0].name
+              secret_key_ref {
+                name = kubernetes_secret.app.metadata[0].name
                 key  = "NEW_RELIC_ACCOUNT_ID"
               }
             }
@@ -503,12 +503,13 @@ resource "kubernetes_service" "app" {
   }
 
   spec {
-    type = "LoadBalancer"
+    type = var.app_service_type
 
     port {
-      port        = 80
+      port        = var.app_service_type == "NodePort" ? var.app_service_node_port : 80
       target_port = 8080
       protocol    = "TCP"
+      node_port   = var.app_service_type == "NodePort" ? var.app_service_node_port : null
     }
 
     selector = {
@@ -573,5 +574,23 @@ resource "helm_release" "newrelic_bundle" {
   set {
     name  = "global.cluster"
     value = var.new_relic_cluster_name
+  }
+
+  # Habilitar coleta de eventos do Kubernetes
+  set {
+    name  = "nrk8s-controlplane.kubeEvents.enabled"
+    value = "true"
+  }
+
+  # Habilitar coleta de métricas do KSM
+  set {
+    name  = "nrk8s-ksm.enabled"
+    value = "true"
+  }
+
+  # Habilitar kube-state-metrics (subchart necessário para KSM)
+  set {
+    name  = "kube-state-metrics.enabled"
+    value = "true"
   }
 }
