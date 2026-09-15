@@ -30,6 +30,8 @@ Preparar o sistema para suportar crescimento, novas unidades da oficina e maior 
 - [Tecnologias Utilizadas](#tecnologias-utilizadas)
 - [Arquitetura do Projeto](#arquitetura-do-projeto)
 - [Diagrama de Arquitetura](#diagrama-de-arquitetura)
+- [Repositórios da Entrega](#repositórios-da-entrega)
+- [Checklist Final](docs/final-checklist.md)
 - [Estrutura de Pastas](#estrutura-de-pastas)
 - [Pre-requisitos](#pre-requisitos)
 - [Configuracao e Execucao](#configuracao-e-execucao)
@@ -125,7 +127,18 @@ Controller (REST)  -->  Service (Regras de Negocio)  -->  Repository (JPA)  --> 
 
 ![Arquitetura](./arquitetura.jpeg)
 
-O diagrama acima representa a arquitetura completa da solução, incluindo CI/CD, ambientes de desenvolvimento e produção, e a estrutura do cluster Kubernetes. Abaixo, uma explicação detalhada de cada camada:
+O diagrama acima representa a arquitetura da aplicação. A visão consolidada dos quatro repositórios, APIs, banco e monitoramento está em [Diagrama de Componentes](docs/component-diagram.md).
+
+## Repositórios da Entrega
+
+| Componente | Repositório |
+|---|---|
+| Aplicação principal | [f1rsters-tech-challenge-mecanica](https://github.com/diogocarpio/f1rsters-tech-challenge-mecanica) |
+| Kubernetes | [f1rsters-tech-challenge-mecanica-terraform-kubernets](https://github.com/diogocarpio/f1rsters-tech-challenge-mecanica-terraform-kubernets) |
+| Banco gerenciado | [f1rsters-tech-challenge-mecanica-terraform-bd](https://github.com/diogocarpio/f1rsters-tech-challenge-mecanica-terraform-bd) |
+| Lambda/API Gateway | [f1rsters-tech-challenge-mecanica-lambda](https://github.com/diogocarpio/f1rsters-tech-challenge-mecanica-lambda) |
+
+Abaixo, uma explicação detalhada de cada camada:
 
 ### Camada CI/CD Pipeline (GitHub Actions)
 - **Build & Test**: Compilação do projeto com Maven, execução de testes unitários e integração, e geração de relatório de cobertura com JaCoCo (Java 17).
