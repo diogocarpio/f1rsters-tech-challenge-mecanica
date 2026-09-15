@@ -17,6 +17,9 @@ public class Cliente {
     private String nome;
     @Column(unique=true)
     private String cpfCnpj;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "varchar(20) default 'ATIVO'")
+    private StatusCliente status = StatusCliente.ATIVO;
     @OneToMany(mappedBy = "cliente")
     private List<Veiculo> veiculos;
 }

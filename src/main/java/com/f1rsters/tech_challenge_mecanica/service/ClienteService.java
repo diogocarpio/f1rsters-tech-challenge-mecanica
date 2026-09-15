@@ -34,6 +34,10 @@ public class ClienteService {
         return repo.save(c);
     }
 
+    public Cliente getByCpfCnpj(String cpfCnpj) {
+        return repo.findByCpfCnpj(InputNormalizer.normalizeCpfCnpj(cpfCnpj)).orElseThrow();
+    }
+
     public void delete(Long id) {
         repo.deleteById(id);
     }

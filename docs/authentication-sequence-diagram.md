@@ -49,25 +49,22 @@ sequenceDiagram
 sequenceDiagram
     participant Cliente as Cliente (Frontend)
     participant APIGW as API Gateway
-    participant Authorizer as JWT Authorizer
-    participant Lambda as Lambda Function
+    participant App as Aplicacao Kubernetes
+    participant RDS as PostgreSQL RDS
 
-    Cliente->>APIGW: GET /clientes/me
+    Cliente->>APIGW: GET /api/clientes/me
     Note over Cliente,APIGW: Header: Authorization: Bearer eyJhbGci...
-    
-    APIGW->>Authorizer: Validate JWT Token
-    Authorizer->>Authorizer: Verify signature
-    Authorizer->>Authorizer: Check expiration
-    Authorizer->>Authorizer: Validate audience (tech-challenge-api)
-    Authorizer->>Authorizer: Validate issuer (tech-challenge-auth-lambda)
+    APIGW->>App: Encaminhar requisicao e Authorization
+    App->>App: Validar assinatura e expiracao
+    App->>App: Validar issuer, audience, CPF e status
     
     alt JWT Inválido/Expirado
-        Authorizer-->>APIGW: 401 Unauthorized
+        App-->>APIGW: 401 Unauthorized
         APIGW-->>Cliente: 401 Unauthorized
     else JWT Válido
-        Authorizer-->>APIGW: 200 OK + Context (clientId, cpf, status)
-        APIGW->>Lambda: Invoke Lambda Function with context
-        Lambda-->>APIGW: Response
+        App->>RDS: Buscar cliente pelo CPF do token
+        RDS-->>App: Cliente
+        App-->>APIGW: 200 OK + cliente com CPF mascarado
         APIGW-->>Cliente: 200 OK
     end
 ```
@@ -100,8 +97,8 @@ sequenceDiagram
   - Claims: clientId, cpf, nome, status
 
 ### 5. Proteção de Rotas
-- **Local**: API Gateway JWT Authorizer
-- **Responsabilidade**: Validar token em cada requisição
+- **Local**: Aplicação principal no Kubernetes
+- **Responsabilidade**: Validar o token da Lambda e autorizar a rota `/api/clientes/me`
 - **Validações**: Assinatura, expiração, audience, issuer
 - **Códigos de erro**: 401 Unauthorized
 

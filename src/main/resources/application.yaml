@@ -61,6 +61,8 @@ security:
     secret: ${JWT_SECRET_BASE64:QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVo0NTY3ODkwQUJDREVG}
     access-token-minutes: ${JWT_ACCESS_TOKEN_MINUTES:15}
     issuer: ${JWT_ISSUER:tech-challenge-mecanica-api}
+    client-issuer: ${JWT_CLIENT_ISSUER:tech-challenge-auth-lambda}
+    client-audience: ${JWT_CLIENT_AUDIENCE:tech-challenge-api}
   seed:
     enabled: ${SECURITY_SEED_ENABLED:true}
     admin:

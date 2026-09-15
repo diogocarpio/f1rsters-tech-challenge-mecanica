@@ -30,6 +30,11 @@ Preparar o sistema para suportar crescimento, novas unidades da oficina e maior 
 - [Tecnologias Utilizadas](#tecnologias-utilizadas)
 - [Arquitetura do Projeto](#arquitetura-do-projeto)
 - [Diagrama de Arquitetura](#diagrama-de-arquitetura)
+- [Repositórios da Entrega](#repositórios-da-entrega)
+- [Checklist Final](docs/final-checklist.md)
+- [Roteiro do Vídeo](docs/video-script.md)
+- [Checklist Final](docs/final-checklist.md)
+- [Modelo da Entrega Final](docs/final-delivery.md)
 - [Estrutura de Pastas](#estrutura-de-pastas)
 - [Pre-requisitos](#pre-requisitos)
 - [Configuracao e Execucao](#configuracao-e-execucao)
@@ -54,6 +59,11 @@ Preparar o sistema para suportar crescimento, novas unidades da oficina e maior 
 - [Swagger / OpenAPI](#swagger--openapi)
 - [Postman Collection](#postman-collection)
 - [Modelo de Dominio](#modelo-de-dominio)
+- [Banco de Dados e Diagrama ER](docs/database-model.md)
+- [Entrega Final](docs/final-delivery.md)
+- [Observabilidade](docs/observability.md)
+- [Sequência de Abertura de OS](docs/order-service-sequence-diagram.md)
+- [ADRs](docs/adr/)
 - [Validacoes Customizadas](#validacoes-customizadas)
 - [Mascaramento de Dados Sensiveis](#mascaramento-de-dados-sensiveis)
 - [Testes](#testes)
@@ -121,23 +131,33 @@ Controller (REST)  -->  Service (Regras de Negocio)  -->  Repository (JPA)  --> 
 
 ![Arquitetura](./arquitetura.jpeg)
 
-O diagrama acima representa a arquitetura completa da solução, incluindo CI/CD, ambientes de desenvolvimento e produção, e a estrutura do cluster Kubernetes. Abaixo, uma explicação detalhada de cada camada:
+O diagrama acima representa a arquitetura da aplicação. A visão consolidada dos quatro repositórios, APIs, banco e monitoramento está em [Diagrama de Componentes](docs/component-diagram.md).
 
-### Camada CI/CD Pipeline (GitHub Actions)
-- **Build & Test**: Compilação do projeto com Maven, execução de testes unitários e integração, e geração de relatório de cobertura com JaCoCo (Java 17).
-- **Docker Build**: Criação da imagem Docker e push para o GitHub Container Registry (GHCR) com tags SHA e latest.
-- **Deploy DEV/QA/PROD**: Deploy automatizado para os ambientes de desenvolvimento, QA e produção, cada um requerendo aprovação manual.
-- **Kustomize**: Gerenciamento de manifests Kubernetes com overlays para diferentes ambientes (dev, qa, prod).
-- **K8s Cluster**: Aplicação dos manifests no cluster Kubernetes, atualizando a imagem da aplicação.
+## Repositórios da Entrega
+
+| Componente | Repositório |
+|---|---|
+| Aplicação principal | [f1rsters-tech-challenge-mecanica](https://github.com/diogocarpio/f1rsters-tech-challenge-mecanica) |
+| Kubernetes | [f1rsters-tech-challenge-mecanica-terraform-kubernets](https://github.com/diogocarpio/f1rsters-tech-challenge-mecanica-terraform-kubernets) |
+| Banco gerenciado | [f1rsters-tech-challenge-mecanica-terraform-bd](https://github.com/diogocarpio/f1rsters-tech-challenge-mecanica-terraform-bd) |
+| Lambda/API Gateway | [f1rsters-tech-challenge-mecanica-lambda](https://github.com/diogocarpio/f1rsters-tech-challenge-mecanica-lambda) |
+
+Abaixo, uma explicação detalhada de cada camada:
+
+### Camada CI/CD e repositórios
+- **Aplicação principal**: workflow de build e testes Maven, com Dockerfile e testes automatizados.
+- **Banco gerenciado**: repositório Terraform próprio para o RDS PostgreSQL, com plan/apply por ambiente.
+- **Kubernetes/Observabilidade**: repositório Terraform próprio para recursos Kubernetes e New Relic.
+- **Lambda/API Gateway**: repositório próprio para autenticação serverless, Terraform e deploy da Lambda.
+- **Publicação e deploy da aplicação**: dependem da configuração final do registry e do cluster.
 
 ### Ambiente Local (Docker Compose)
 - **PostgreSQL**: Banco de dados PostgreSQL 15 em container Alpine, porta 5432, com healthcheck e volume persistente.
 - **Spring Boot App**: Aplicação Spring Boot construída a partir do Dockerfile, porta 8080, dependente do banco de dados.
 - **Volume postgres-data**: Persistência dos dados do PostgreSQL localmente.
 
-### GitHub Container Registry (GHCR)
-- **ghcr.io/repo:SHA**: Imagem versionada com o SHA do commit, garantindo rastreabilidade.
-- **ghcr.io/repo:latest**: Imagem mais recente, usada para deployments automáticos.
+### Registry e deploy da aplicação
+A publicação da imagem e o deploy da aplicação no Kubernetes dependem da configuração final do registry e do cluster. O Dockerfile e os manifests da aplicação estão disponíveis neste repositório.
 
 ### Terraform (Infraestrutura como Código)
 - **Provider Kubernetes**: Provedor Terraform para gerenciar recursos Kubernetes.
@@ -154,22 +174,18 @@ O diagrama acima representa a arquitetura completa da solução, incluindo CI/CD
 #### Camada de Aplicação
 - **Service (oficina-app)**: LoadBalancer que expõe a aplicação na porta 80, redirecionando para a porta 8080 dos pods.
 - **HPA (oficina-app-hpa)**: Horizontal Pod Autoscaler configurado para escalar de 1 a 5 réplicas baseado em CPU (70%) e memória (75%).
-- **Deployment (oficina-app)**: Gerencia 2 réplicas da aplicação, usando imagem do GHCR (latest ou SHA).
+- **Deployment (oficina-app)**: Gerencia 2 réplicas da aplicação, usando a imagem do registry definido para o ambiente.
 - **Pods**: Containers da aplicação com recursos limitados (512Mi/1Gi RAM, 500m/1000m CPU), porta 8080.
 - **Health Checks**: Endpoints `/actuator/health` para liveness e readiness probes.
 
 #### Camada de Dados
-- **PVC (postgres-pvc)**: PersistentVolumeClaim com 1Gi para armazenamento persistente do PostgreSQL.
-- **Deployment (postgres-db)**: Gerencia o pod do PostgreSQL com imagem postgres:15-alpine.
-- **Pod (postgres)**: Container do banco com recursos (256Mi/512Mi RAM, 250m/500m CPU).
-- **Service (postgres-db)**: ClusterIP expõe o banco na porta 5432 internamente.
-- **Storage**: Volume montado em `/var/lib/postgresql/data` para persistência dos dados.
+- **Desenvolvimento local**: PostgreSQL em container com PVC e Service `postgres-db`.
+- **Homologação/produção**: PostgreSQL gerenciado no AWS RDS, provisionado pelo repositório de banco.
 
 #### Conexões
 - **Config/Secrets → App**: ConfigMap e Secrets injetados nos pods da aplicação.
-- **App → Database**: Conexão JDBC via `postgresql://postgres-db:5432/oficina`.
-- **GHCR → K8s**: Pull automático da imagem do registry pelo cluster.
-- **PVC → PostgreSQL**: Volume persistente anexado ao pod do banco.
+- **App → Database local**: Conexão JDBC via `postgresql://postgres-db:5432/oficina` no ambiente local.
+- **App → RDS**: Configuração de homologação/produção depende do endpoint e secrets fornecidos pelo ambiente Kubernetes.
 
 #### Acesso Externo
 - **LoadBalancer**: Expõe a aplicação na porta 80 para acesso externo.
@@ -179,9 +195,9 @@ O diagrama acima representa a arquitetura completa da solução, incluindo CI/CD
 - Arquivos YAML para provisionamento de todos os recursos: namespace, ConfigMap, Secrets, PVC, Deployments, Services e HPA.
 
 #### Ambientes
-- **DEV**: Ambiente de desenvolvimento (deploy automático).
-- **QA**: Ambiente de testes (requer aprovação manual).
-- **PROD**: Ambiente de produção (requer aprovação manual).
+- **DEV**: Ambiente de desenvolvimento e validação de plan/configuração.
+- **HOMOLOGAÇÃO**: Ambiente de validação integrada, com deploy controlado pelos repositórios de infraestrutura.
+- **PRODUÇÃO**: Ambiente final, sujeito às configurações e proteções do grupo.
 
 ---
 
@@ -200,6 +216,7 @@ f1rsters-tech-challenge-mecanica/
 │   │   │   ├── controller/
 │   │   │   │   ├── AuthController.java                # Login / Autenticacao
 │   │   │   │   ├── ClienteController.java             # CRUD de Clientes
+│   │   │   │   ├── ClienteAutenticadoController.java  # Perfil protegido por JWT via CPF
 │   │   │   │   ├── VeiculoController.java             # CRUD de Veiculos
 │   │   │   │   ├── ServicoController.java             # CRUD de Servicos
 │   │   │   │   ├── PecaController.java                # CRUD de Pecas + Estoque
@@ -213,6 +230,7 @@ f1rsters-tech-challenge-mecanica/
 │   │   │   │   ├── OrdemServico.java                  # Entidade Ordem de Servico
 │   │   │   │   ├── Usuario.java                       # Entidade Usuario
 │   │   │   │   ├── Role.java                          # Enum de perfis
+│   │   │   │   ├── StatusCliente.java                 # Enum de status do cliente
 │   │   │   │   └── StatusOrdemServico.java            # Enum de status da OS
 │   │   │   ├── dto/
 │   │   │   │   ├── LoginRequestDTO.java               # Requisicao de login
@@ -310,7 +328,11 @@ f1rsters-tech-challenge-mecanica/
 ├── docs/                                              # Documentacao adicional
 │   ├── api-testing-guide.md                           # Guia de testes da API
 │   ├── authentication-sequence-diagram.md            # Diagrama de sequencia de autenticacao
-│   └── rfc-authentication-strategy.md                 # RFC da estrategia de autenticacao
+│   ├── order-service-sequence-diagram.md             # Diagrama de sequencia de abertura de OS
+│   ├── database-model.md                             # Modelo relacional e diagrama ER
+│   ├── observability.md                              # Logs e correlacao
+│   ├── adr/                                          # Decisoes arquiteturais
+│   └── rfc-authentication-strategy.md                # RFC da estrategia de autenticacao
 ├── Dockerfile                                         # Imagem Docker da aplicacao (multi-stage)
 ├── docker-compose.yml                                 # Orquestracao (PostgreSQL + App)
 ├── TechChallengeMecanica.postman_collection.json      # Colecao Postman pronta
@@ -657,7 +679,9 @@ A aplicacao utiliza variaveis de ambiente com valores padrao. Em producao, e **o
 |---|---|---|
 | `JWT_SECRET_BASE64` | Chave secreta Base64 para assinatura JWT (min. 256 bits) | `QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVo0NTY3ODkwQUJDREVG` |
 | `JWT_ACCESS_TOKEN_MINUTES` | Tempo de expiracao do token JWT (minutos) | `15` |
-| `JWT_ISSUER` | Emissor do token JWT | `tech-challenge-mecanica-api` |
+| `JWT_ISSUER` | Emissor do token JWT interno | `tech-challenge-mecanica-api` |
+| `JWT_CLIENT_ISSUER` | Emissor aceito para o JWT de cliente | `tech-challenge-auth-lambda` |
+| `JWT_CLIENT_AUDIENCE` | Audience aceita para o JWT de cliente | `tech-challenge-api` |
 | `SECURITY_SEED_ENABLED` | Habilita criacao automatica do usuario admin | `true` |
 | `SECURITY_SEED_ADMIN_EMAIL` | Email do usuario admin seed | `admin@oficina.local` |
 | `SECURITY_SEED_ADMIN_PASSWORD` | Senha do usuario admin seed | `admin123` |
@@ -716,12 +740,15 @@ O sistema possui 4 perfis de acesso com permissoes diferenciadas:
 | **MECANICO** | Atualizar status de OS; Consultar pecas e estoque; Baixar estoque; Criar e listar OS |
 | **ESTOQUISTA** | CRUD de Pecas; Consultar e baixar estoque |
 
+Clientes autenticados por CPF recebem a autoridade de runtime `CLIENTE`, separada dos perfis internos persistidos.
+
 ### Permissoes por Endpoint
 
 | Metodo | Endpoint | Roles Permitidas |
 |---|---|---|
 | `POST` | `/api/auth/login` | Publico (sem autenticacao) |
 | `GET` | `/api/public/ordens-servico/{id}` | Publico (sem autenticacao) |
+| `GET` | `/api/clientes/me` | CLIENTE (JWT emitido pela Lambda) |
 | `POST/PUT/DELETE` | `/api/admin/clientes/**` | ADMIN, ATENDENTE |
 | `GET` | `/api/admin/clientes/**` | ADMIN, ATENDENTE |
 | `POST/PUT/DELETE` | `/api/admin/veiculos/**` | ADMIN, ATENDENTE |
@@ -747,7 +774,9 @@ O sistema possui 4 perfis de acesso com permissoes diferenciadas:
 6. Se invalido/expirado, retorna 401 Unauthorized
 ```
 
-O token JWT contem:
+Para clientes, a Lambda autentica o CPF e emite um JWT com subject igual ao CPF, issuer `tech-challenge-auth-lambda`, audience `tech-challenge-api` e status do cliente. A aplicacao valida esse contrato e libera `/api/clientes/me` com a autoridade `CLIENTE`.
+
+O token JWT interno contem:
 - **subject**: email do usuario
 - **roles**: lista de perfis (ex: `["ROLE_ADMIN"]`)
 - **issuer**: nome do emissor da API
@@ -782,6 +811,27 @@ Realiza login e retorna um token JWT.
 
 ---
 
+### Cliente autenticado via CPF
+
+#### `GET /api/clientes/me`
+
+Retorna o cliente identificado pelo CPF do JWT emitido pela Lambda.
+
+```bash
+curl http://localhost:8080/api/clientes/me \
+  -H "Authorization: Bearer <token_da_lambda>"
+```
+
+**Response (200 OK):**
+```json
+{
+  "id": 1,
+  "nome": "Cliente Exemplo",
+  "cpfCnpjMascarado": "***.98.***-01",
+  "status": "ATIVO"
+}
+```
+
 ### Clientes
 
 > **Autenticacao necessaria.** Envie o header: `Authorization: Bearer <token>`
@@ -801,7 +851,8 @@ Realiza login e retorna um token JWT.
 {
   "id": 1,
   "nome": "Cliente Exemplo",
-  "cpfCnpjMascarado": "***.45.***-01"
+  "cpfCnpjMascarado": "***.45.***-01",
+  "status": "ATIVO"
 }
 ```
 
@@ -827,7 +878,8 @@ Realiza login e retorna um token JWT.
   {
     "id": 1,
     "nome": "Cliente Exemplo",
-    "cpfCnpjMascarado": "***.45.***-01"
+    "cpfCnpjMascarado": "***.45.***-01",
+    "status": "ATIVO"
   }
 ]
 ```
@@ -839,7 +891,8 @@ Realiza login e retorna um token JWT.
 {
   "id": 1,
   "nome": "Cliente Exemplo",
-  "cpfCnpjMascarado": "***.45.***-01"
+  "cpfCnpjMascarado": "***.45.***-01",
+  "status": "ATIVO"
 }
 ```
 
@@ -867,7 +920,8 @@ Realiza login e retorna um token JWT.
 {
   "id": 1,
   "nome": "Cliente Atualizado",
-  "cpfCnpjMascarado": "***.45.***-01"
+  "cpfCnpjMascarado": "***.45.***-01",
+  "status": "ATIVO"
 }
 ```
 
@@ -1562,6 +1616,7 @@ Alguns controllers foram atualizados com anotacoes do Swagger para melhorar a na
 
 - `AuthController` (tag **Auth**)
 - `ClienteController` (tag **Clientes**)
+- `ClienteAutenticadoController` (tag **Cliente Autenticado**)
 - `VeiculoController` (tag **Veiculos**)
 - `ServicoController` (tag **Servicos**)
 - `PecaController` (tag **Pecas**)
@@ -1594,7 +1649,8 @@ O projeto inclui uma colecao Postman pronta para uso:
 | Variavel | Valor Padrao | Descricao |
 |---|---|---|
 | `baseUrl` | `http://localhost:8080` | URL base da API |
-| `accessToken` | (vazio) | Preenchido automaticamente apos login |
+| `accessToken` | (vazio) | Preenchido automaticamente apos login administrativo |
+| `clientAccessToken` | (vazio) | Token emitido pela Lambda apos autenticacao via CPF |
 | `adminEmail` | `admin@oficina.local` | Email do admin |
 | `adminPassword` | `admin123` | Senha do admin |
 | `clienteId` | `1` | ID do cliente para testes |
@@ -1626,7 +1682,7 @@ OrdemServico (*) <---> (*) Peca      [ManyToMany]
 
 | Entidade | Campos | Descricao |
 |---|---|---|
-| **Cliente** | `id`, `nome`, `cpfCnpj`, `veiculos` | Pessoa fisica ou juridica dona do veiculo |
+| **Cliente** | `id`, `nome`, `cpfCnpj`, `status`, `veiculos` | Pessoa fisica ou juridica dona do veiculo; o status inicial `ATIVO` permite a consulta de elegibilidade usada pela autenticacao |
 | **Veiculo** | `id`, `cliente`, `placa`, `marca`, `modelo`, `ano` | Veiculo associado a um cliente |
 | **Servico** | `id`, `descricao`, `valor` | Tipo de servico oferecido pela oficina |
 | **Peca** | `id`, `descricao`, `quantidadeEstoque`, `valorUnitario` | Peca com controle de estoque |
