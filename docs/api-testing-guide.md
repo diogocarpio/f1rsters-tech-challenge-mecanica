@@ -206,7 +206,7 @@ pm.test("Response has error message", function () {
 
 #### Request
 ```
-GET {{base_url}}/clientes/me
+GET {{base_url}}/api/clientes/me
 Authorization: Bearer {{token}}
 ```
 
@@ -228,7 +228,7 @@ pm.test("Response has client info", function () {
 {
   "id": 1,
   "nome": "Cliente Exemplo",
-  "cpfMascarado": "***.982.***-25",
+  "cpfCnpjMascarado": "***.98.***-25",
   "status": "ATIVO"
 }
 ```
@@ -237,7 +237,7 @@ pm.test("Response has client info", function () {
 
 #### Request
 ```
-GET {{base_url}}/clientes/me
+GET {{base_url}}/api/clientes/me
 ```
 
 #### Test Scripts
@@ -258,7 +258,7 @@ pm.test("Status code is 401", function () {
 
 #### Request
 ```
-GET {{base_url}}/clientes/me
+GET {{base_url}}/api/clientes/me
 Authorization: Bearer invalid_token_here
 ```
 
@@ -367,7 +367,7 @@ paths:
                   statusCode:
                     type: integer
 
-  /clientes/me:
+  /api/clientes/me:
     get:
       summary: Obter informações do cliente autenticado
       operationId: getClientInfo
@@ -385,7 +385,7 @@ paths:
                     type: integer
                   nome:
                     type: string
-                  cpfMascarado:
+                  cpfCnpjMascarado:
                     type: string
                   status:
                     type: string
@@ -436,9 +436,9 @@ Tech Challenge Mecânica
 │   ├── POST /auth/login (Cliente não encontrado)
 │   └── POST /auth/login (Status não permitido)
 └── Rotas Protegidas
-    ├── GET /clientes/me (Com token válido)
-    ├── GET /clientes/me (Sem token)
-    └── GET /clientes/me (Token inválido)
+    ├── GET /api/clientes/me (Com token válido)
+    ├── GET /api/clientes/me (Sem token)
+    └── GET /api/clientes/me (Token inválido)
 ```
 
 ### Importar Coleção
@@ -474,7 +474,7 @@ async function testAuth() {
         
         // Test 2: Rota protegida com token
         console.log('\nTest 2: Rota protegida com token');
-        const protectedResponse = await axios.get(`${BASE_URL}/clientes/me`, {
+        const protectedResponse = await axios.get(`${BASE_URL}/api/clientes/me`, {
             headers: { Authorization: `Bearer ${token}` }
         });
         console.log('✅ Status:', protectedResponse.status);

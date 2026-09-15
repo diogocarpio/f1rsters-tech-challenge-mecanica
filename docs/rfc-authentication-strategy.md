@@ -32,7 +32,7 @@ A autenticação seguirá o fluxo **CPF → Lambda → JWT → APIs Protegidas**
 | Banco de Dados | PostgreSQL RDS | Conformidade com arquitetura existente |
 | Token JWT | JJWT (Java JWT) | Biblioteca madura e bem mantida |
 | API Gateway | AWS API Gateway HTTP | Integração nativa com Lambda |
-| Authorizer | JWT Authorizer | Validação automática de tokens |
+| Validação do JWT | Spring Security + JJWT | Validação do token da Lambda na aplicação principal |
 | Serverless | AWS Lambda | Escalabilidade e custo otimizado |
 
 ### Estrutura do Token JWT
@@ -65,6 +65,8 @@ A autenticação seguirá o fluxo **CPF → Lambda → JWT → APIs Protegidas**
 - **Claims**: clientId, cpf, nome, status
 
 ### Status de Cliente Permitidos
+
+O status é persistido na entidade `Cliente`, com valor inicial `ATIVO` para clientes novos e para adequação dos registros existentes.
 
 Os seguintes status permitem autenticação:
 - **ATIVO**: Cliente regular e ativo
@@ -122,14 +124,14 @@ Response (403 Forbidden):
 
 #### Endpoint Protegido (Exemplo)
 ```
-GET /clientes/me
+GET /api/clientes/me
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...
 
 Response (200 OK):
 {
   "id": 1,
   "nome": "Cliente Exemplo",
-  "cpfMascarado": "***.982.***-25",
+  "cpfCnpjMascarado": "***.98.***-25",
   "status": "ATIVO"
 }
 
@@ -219,7 +221,7 @@ Permissões mínimas necessárias:
 - [x] Configurar API Gateway básico
 
 ### Fase 2: Security & Protection (✅ Concluído)
-- [x] Configurar JWT Authorizer
+- [x] Configurar validação do JWT da Lambda na aplicação principal
 - [x] Proteger rotas sensíveis
 - [x] Implementar mascaramento de dados
 - [x] Configurar variáveis de ambiente

@@ -1,6 +1,7 @@
 package com.f1rsters.tech_challenge_mecanica.service;
 
 import com.f1rsters.tech_challenge_mecanica.domain.Cliente;
+import com.f1rsters.tech_challenge_mecanica.domain.StatusCliente;
 import com.f1rsters.tech_challenge_mecanica.dto.ClienteDTO;
 import com.f1rsters.tech_challenge_mecanica.repository.ClienteRepository;
 import org.junit.jupiter.api.Test;
@@ -43,6 +44,7 @@ class ClienteServiceTest {
 
         assertEquals("Joao", salvo.getNome());
         assertEquals("52998224725", salvo.getCpfCnpj());
+        assertEquals(StatusCliente.ATIVO, salvo.getStatus());
         verify(repo, times(1)).save(any(Cliente.class));
     }
 
@@ -62,6 +64,7 @@ class ClienteServiceTest {
     void deveAtualizarClienteComSucesso() {
         Cliente existente = new Cliente();
         existente.setId(10L);
+        existente.setStatus(StatusCliente.BLOQUEADO);
 
         ClienteDTO dto = new ClienteDTO();
         dto.nome = "Maria";
@@ -75,6 +78,7 @@ class ClienteServiceTest {
         assertSame(existente, atualizado);
         assertEquals("Maria", atualizado.getNome());
         assertEquals("04252011000110", atualizado.getCpfCnpj());
+        assertEquals(StatusCliente.BLOQUEADO, atualizado.getStatus());
     }
 
     @Test
@@ -107,6 +111,18 @@ class ClienteServiceTest {
         when(repo.findById(70L)).thenReturn(Optional.empty());
 
         assertThrows(NoSuchElementException.class, () -> service.get(70L));
+    }
+
+    @Test
+    void deveObterClientePorCpfCnpjNormalizado() {
+        Cliente cliente = new Cliente();
+        cliente.setId(8L);
+        when(repo.findByCpfCnpj("52998224725")).thenReturn(Optional.of(cliente));
+
+        Cliente resultado = service.getByCpfCnpj("529.982.247-25");
+
+        assertSame(cliente, resultado);
+        verify(repo).findByCpfCnpj("52998224725");
     }
 
     @Test

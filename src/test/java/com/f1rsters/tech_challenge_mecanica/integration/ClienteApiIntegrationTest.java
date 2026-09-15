@@ -69,7 +69,8 @@ class ClienteApiIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").isNumber())
                 .andExpect(jsonPath("$.nome").value("Maria Silva"))
-                .andExpect(jsonPath("$.cpfCnpjMascarado").value("***.98.***-25"));
+                .andExpect(jsonPath("$.cpfCnpjMascarado").value("***.98.***-25"))
+                .andExpect(jsonPath("$.status").value("ATIVO"));
     }
 
     @Test
