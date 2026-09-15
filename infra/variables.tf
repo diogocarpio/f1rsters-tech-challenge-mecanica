@@ -84,9 +84,9 @@ variable "new_relic_enabled" {
 }
 
 variable "new_relic_app_name" {
-  description = "Nome da aplicacao no New Relic"
+  description = "Nome da aplicacao no New Relic (será concatenado com o environment)"
   type        = string
-  default     = "tech-challenge-mecanica-k8s-local"
+  default     = "oficina-app"
 }
 
 variable "new_relic_distributed_tracing_enabled" {
@@ -163,7 +163,7 @@ variable "postgres_storage_size" {
 }
 
 variable "postgres_storage_class_name" {
-  description = "StorageClass usada pelo PVC do PostgreSQL"
+  description = "StorageClass usada pelo PVC do PostgreSQL. Use 'hostpath' para Docker Desktop, 'standard' para cloud providers"
   type        = string
   default     = "standard"
 }
@@ -193,14 +193,27 @@ variable "hpa_memory_target" {
   default     = 75
 }
 
-variable "enable_newrelic_k8s_integration" {
-  description = "Habilita a instalacao do nri-bundle no cluster Kubernetes local"
-  type        = bool
-  default     = false
+
+variable "app_service_type" {
+  description = "Tipo do service da aplicação. Use 'NodePort' para Docker Desktop, 'LoadBalancer' para cloud providers"
+  type        = string
+  default     = "LoadBalancer"
+}
+
+variable "app_service_node_port" {
+  description = "Porta NodePort para o service (usada apenas quando app_service_type = 'NodePort')"
+  type        = number
+  default     = 30001
 }
 
 variable "new_relic_cluster_name" {
-  description = "Nome do cluster no New Relic"
+  description = "Nome do cluster no New Relic (para integração Kubernetes)"
   type        = string
-  default     = "oficina-local-k8s"
+  default     = "oficina-cluster"
+}
+
+variable "enable_newrelic_k8s_integration" {
+  description = "Habilita integração New Relic Kubernetes (nri-bundle)"
+  type        = bool
+  default     = false
 }
