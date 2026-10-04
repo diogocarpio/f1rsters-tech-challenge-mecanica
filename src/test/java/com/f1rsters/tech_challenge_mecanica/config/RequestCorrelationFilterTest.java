@@ -75,4 +75,49 @@ class RequestCorrelationFilterTest {
         assertNull(MDC.get("request_id"));
         assertNull(MDC.get("correlation_id"));
     }
+
+    @Test
+    void deveAdicionarTraceIdQuandoHeaderTraceparentPresente() throws Exception {
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+        FilterChain chain = mock(FilterChain.class);
+
+        when(request.getHeader("traceparent")).thenReturn("00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01");
+        when(request.getMethod()).thenReturn("GET");
+        when(request.getRequestURI()).thenReturn("/api/clientes/me");
+        doAnswer(invocation -> {
+            assertEquals("00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01", MDC.get("trace_id"));
+            return null;
+        }).when(chain).doFilter(request, response);
+
+        filter.doFilterInternal(request, response, chain);
+
+        assertNull(MDC.get("trace_id"));
+    }
+
+    @Test
+    void deveGerarNovosIdsQuandoHeadersEmBranco() throws Exception {
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+        FilterChain chain = mock(FilterChain.class);
+
+        when(request.getHeader(RequestCorrelationFilter.REQUEST_ID_HEADER)).thenReturn("");
+        when(request.getHeader(RequestCorrelationFilter.CORRELATION_ID_HEADER)).thenReturn("   ");
+        when(request.getMethod()).thenReturn("GET");
+        when(request.getRequestURI()).thenReturn("/api/clientes/me");
+        doAnswer(invocation -> {
+            assertNotNull(MDC.get("request_id"));
+            assertNotNull(MDC.get("correlation_id"));
+            return null;
+        }).when(chain).doFilter(request, response);
+
+        filter.doFilterInternal(request, response, chain);
+
+        ArgumentCaptor<String> requestIdCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<String> correlationIdCaptor = ArgumentCaptor.forClass(String.class);
+        verify(response).setHeader(eq(RequestCorrelationFilter.REQUEST_ID_HEADER), requestIdCaptor.capture());
+        verify(response).setHeader(eq(RequestCorrelationFilter.CORRELATION_ID_HEADER), correlationIdCaptor.capture());
+        assertNotNull(requestIdCaptor.getValue());
+        assertNotNull(correlationIdCaptor.getValue());
+    }
 }

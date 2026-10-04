@@ -45,4 +45,24 @@ class CustomUserDetailsServiceTest {
             userDetailsService.loadUserByUsername("notfound@example.com");
         });
     }
+
+    @Test
+    void shouldLoadDisabledUser() {
+        UsuarioRepository usuarioRepository = mock(UsuarioRepository.class);
+        CustomUserDetailsService userDetailsService = new CustomUserDetailsService(usuarioRepository);
+        
+        Usuario usuario = new Usuario();
+        usuario.setEmail("disabled@example.com");
+        usuario.setSenhaHash("hashedPassword");
+        usuario.setAtivo(false);
+        usuario.setRoles(Set.of(com.f1rsters.tech_challenge_mecanica.domain.Role.ADMIN));
+        
+        when(usuarioRepository.findByEmail("disabled@example.com")).thenReturn(java.util.Optional.of(usuario));
+        
+        UserDetails userDetails = userDetailsService.loadUserByUsername("disabled@example.com");
+        
+        assertNotNull(userDetails);
+        assertEquals("disabled@example.com", userDetails.getUsername());
+        assertFalse(userDetails.isEnabled());
+    }
 }

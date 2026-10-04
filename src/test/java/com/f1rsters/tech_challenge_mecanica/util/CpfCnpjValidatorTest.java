@@ -47,4 +47,34 @@ class CpfCnpjValidatorTest {
     void shouldInvalidateEmptyString() {
         assertFalse(CpfCnpjValidator.isValid(""));
     }
+
+    @Test
+    void shouldInvalidateCPFWithAllSameDigits() {
+        assertFalse(CpfCnpjValidator.isValid("111.111.111-11"));
+        assertFalse(CpfCnpjValidator.isValid("22222222222"));
+    }
+
+    @Test
+    void shouldInvalidateCNPJWithAllSameDigits() {
+        assertFalse(CpfCnpjValidator.isValid("11.111.111/1111-11"));
+        assertFalse(CpfCnpjValidator.isValid("00000000000000"));
+    }
+
+    @Test
+    void shouldInvalidateCPFWithWrongCheckDigits() {
+        assertFalse(CpfCnpjValidator.isValid("529.982.247-00"));
+        assertFalse(CpfCnpjValidator.isValid("52998224700"));
+    }
+
+    @Test
+    void shouldInvalidateCNPJWithWrongCheckDigits() {
+        assertFalse(CpfCnpjValidator.isValid("11.444.777/0001-00"));
+        assertFalse(CpfCnpjValidator.isValid("11444777000100"));
+    }
+
+    @Test
+    void shouldInvalidateStringWithSpecialCharacters() {
+        assertFalse(CpfCnpjValidator.isValid("abc.def.ghi-jkl"));
+        assertFalse(CpfCnpjValidator.isValid("@#$%&*()"));
+    }
 }

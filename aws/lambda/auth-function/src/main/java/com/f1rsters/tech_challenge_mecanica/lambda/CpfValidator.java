@@ -8,7 +8,7 @@ public class CpfValidator {
         }
         
         // Remove non-numeric characters
-        cpf = cpf.replaceAll("[^0-9]", "");
+        cpf = cpf.replaceAll("\\D", "");
         
         // Check length
         if (cpf.length() != 11) {
