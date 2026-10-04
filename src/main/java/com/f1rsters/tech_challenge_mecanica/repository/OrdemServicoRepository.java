@@ -1,7 +1,6 @@
 package com.f1rsters.tech_challenge_mecanica.repository;
 
 import com.f1rsters.tech_challenge_mecanica.domain.OrdemServico;
-import com.f1rsters.tech_challenge_mecanica.domain.StatusOrdemServico;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
