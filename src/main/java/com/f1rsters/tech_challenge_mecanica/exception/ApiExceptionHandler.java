@@ -22,6 +22,9 @@ public class ApiExceptionHandler {
     private static final String ERROR_HANDLER = "error_handler";
     private static final String ERROR_MESSAGE = "error_message";
     private static final String HANDLER_NAME = "ApiExceptionHandler";
+    private static final String STATUS = "status";
+    private static final String ERROR = "error";
+    private static final String MESSAGE = "message";
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex) {
@@ -38,8 +41,8 @@ public class ApiExceptionHandler {
             log.error("Erro de validação: {} campos inválidos", errors.size());
 
             Map<String, Object> body = new LinkedHashMap<>();
-            body.put("status", HttpStatus.BAD_REQUEST.value());
-            body.put("error", "VALIDATION_ERROR");
+            body.put(STATUS, HttpStatus.BAD_REQUEST.value());
+            body.put(ERROR, "VALIDATION_ERROR");
             body.put("fields", errors);
             return ResponseEntity.badRequest().body(body);
         } finally {
@@ -66,8 +69,8 @@ public class ApiExceptionHandler {
             log.error("Violação de constraint: {} violações", errors.size());
 
             Map<String, Object> body = new LinkedHashMap<>();
-            body.put("status", HttpStatus.BAD_REQUEST.value());
-            body.put("error", "VALIDATION_ERROR");
+            body.put(STATUS, HttpStatus.BAD_REQUEST.value());
+            body.put(ERROR, "VALIDATION_ERROR");
             body.put("fields", errors);
             return ResponseEntity.badRequest().body(body);
         } finally {
@@ -85,9 +88,9 @@ public class ApiExceptionHandler {
             log.error("Erro de negócio capturado: {}", ex.getMessage());
 
             Map<String, Object> body = new LinkedHashMap<>();
-            body.put("status", HttpStatus.BAD_REQUEST.value());
-            body.put("error", "BUSINESS_ERROR");
-            body.put("message", ex.getMessage());
+            body.put(STATUS, HttpStatus.BAD_REQUEST.value());
+            body.put(ERROR, "BUSINESS_ERROR");
+            body.put(MESSAGE, ex.getMessage());
             return ResponseEntity.badRequest().body(body);
         } finally {
             MDC.clear();
@@ -104,9 +107,9 @@ public class ApiExceptionHandler {
             log.error("Erro não tratado capturado pelo handler global", ex);
 
             Map<String, Object> body = new LinkedHashMap<>();
-            body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-            body.put("error", "INTERNAL_ERROR");
-            body.put("message", "Erro interno no processamento da requisição");
+            body.put(STATUS, HttpStatus.INTERNAL_SERVER_ERROR.value());
+            body.put(ERROR, "INTERNAL_ERROR");
+            body.put(MESSAGE, "Erro interno no processamento da requisição");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
         } finally {
             MDC.clear();
