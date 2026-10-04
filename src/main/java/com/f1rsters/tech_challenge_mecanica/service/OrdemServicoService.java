@@ -165,7 +165,7 @@ public class OrdemServicoService {
                     MDC.put(ERROR_REASON, "estoque_insuficiente");
                     MDC.put("peca_descricao", pecaEmUso.getDescricao());
                     log.error("Sem estoque suficiente da peça: {}", pecaEmUso.getDescricao());
-                    throw businessException("Sem estoque suficiente da peça: " + pecaEmUso.getDescricao(), "estoque_insuficiente", null, "criar_ordem");
+                    throw businessException("Sem estoque suficiente da peça: " + pecaEmUso.getDescricao(), "estoque_insuficiente", null, CRIAR_ORDEM);
                 }
                 // Desconta 1 unidade
                 pecaEmUso.setQuantidadeEstoque(pecaEmUso.getQuantidadeEstoque() - 1);
@@ -212,7 +212,7 @@ public class OrdemServicoService {
             recordFailure(CRIAR_ORDEM, e.getClass().getSimpleName(), null);
             criarOrdemErrorCounter.increment();
             
-            throw e;
+            throw new RuntimeException("Erro ao criar ordem de serviço", e);
             
         } finally {
             MDC.clear();
@@ -261,7 +261,7 @@ public class OrdemServicoService {
             recordFailure(ATUALIZAR_STATUS, e.getClass().getSimpleName(), id);
             atualizarStatusErrorCounter.increment();
             
-            throw e;
+            throw new RuntimeException("Erro ao atualizar status da OS", e);
             
         } finally {
             MDC.clear();
@@ -302,7 +302,7 @@ public class OrdemServicoService {
             log.info("Consultando status da OS: id={}", id);
             
             OrdemServico os = repo.findById(id).orElseThrow(() -> {
-                MDC.put(ERROR_REASON, "os_nao_encontrada");
+                MDC.put(ERROR_REASON, OS_NAO_ENCONTRADA_REASON);
                 log.error("OS não encontrada: id={}", id);
                 return businessException(OS_NAO_ENCONTRADA, OS_NAO_ENCONTRADA_REASON, id, CONSULTAR_STATUS);
             });
@@ -369,7 +369,7 @@ public class OrdemServicoService {
             recordFailure(PROCESSAR_ORCAMENTO, e.getClass().getSimpleName(), id);
             processarOrcamentoErrorCounter.increment();
             
-            throw e;
+            throw new RuntimeException("Erro ao processar resposta de orçamento", e);
             
         } finally {
             MDC.clear();
@@ -421,7 +421,7 @@ public class OrdemServicoService {
             recordFailure(PROCESSAR_NOTIFICACAO_STATUS, e.getClass().getSimpleName(), id);
             processarNotificacaoStatusErrorCounter.increment();
             
-            throw e;
+            throw new RuntimeException("Erro ao processar notificação de status", e);
             
         } finally {
             MDC.clear();

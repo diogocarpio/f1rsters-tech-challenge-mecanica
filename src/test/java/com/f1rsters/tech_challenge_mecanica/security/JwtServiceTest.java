@@ -98,6 +98,46 @@ class JwtServiceTest {
     }
 
     @Test
+    void shouldRejectClientTokenWithInvalidStatus() {
+        String token = generateClientToken(CLIENT_ISSUER, CLIENT_AUDIENCE, "INVALID_STATUS");
+
+        assertThrows(JwtException.class, () -> jwtService.isClientToken(token));
+    }
+
+    @Test
+    void shouldRejectClientTokenWithMissingCpf() {
+        Instant now = Instant.now();
+        String token = Jwts.builder()
+                .subject(CPF)
+                .issuer(CLIENT_ISSUER)
+                .audience().add(CLIENT_AUDIENCE).and()
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(now.plus(15, ChronoUnit.MINUTES)))
+                .claim("status", "ATIVO")
+                .signWith(key)
+                .compact();
+
+        assertThrows(JwtException.class, () -> jwtService.isClientToken(token));
+    }
+
+    @Test
+    void shouldRejectClientTokenWithCpfMismatch() {
+        Instant now = Instant.now();
+        String token = Jwts.builder()
+                .subject("99999999999")
+                .issuer(CLIENT_ISSUER)
+                .audience().add(CLIENT_AUDIENCE).and()
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(now.plus(15, ChronoUnit.MINUTES)))
+                .claim("cpf", CPF)
+                .claim("status", "ATIVO")
+                .signWith(key)
+                .compact();
+
+        assertThrows(JwtException.class, () -> jwtService.isClientToken(token));
+    }
+
+    @Test
     void shouldReturnExpirationInSeconds() {
         long expiration = jwtService.getExpirationInSeconds();
 

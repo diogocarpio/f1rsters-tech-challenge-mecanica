@@ -5,7 +5,6 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
 import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
@@ -13,7 +12,7 @@ import java.util.Map;
 
 public class JwtService {
 
-    private static final long EXPIRATION_TIME = 15 * 60 * 1000;
+    private static final long EXPIRATION_TIME = 15L * 60 * 1000;
 
     private final SecretKey secretKey;
 
